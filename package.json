@@ -1,7 +1,7 @@
 {
-  "name": "@ashiba-ts/transfer-dogfood",
+  "name": "@mk3008/velvet",
   "version": "0.0.0",
-  "description": "Ashiba dogfooding package for SQL-first PostgreSQL transfer workflows.",
+  "description": "SQL-first PostgreSQL transfer control.",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -33,11 +33,15 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "typecheck": "pnpm --filter @ashiba-ts/named-parameters build && tsc --noEmit -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "format": "prettier . --write",
     "lint": "node ./scripts/check-sql-leading-commas.mjs && eslint src tests --ext .ts",
     "lint:sql": "node ./scripts/check-sql-leading-commas.mjs",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "docs:transfer": "pnpm --filter @mk3008/velvet-ddl-docs build && node scripts/generate-transfer-docs.mjs",
+    "verify:transfer-ddl-metadata": "pnpm --filter @mk3008/velvet-ddl-docs build && node packages/ddl-docs-cli/dist/src/index.js check --ddl-dir db/ddl --table-docs db/ddl/table-docs.json --relationship db/ddl/relationship.json --order db/ddl/order.json --concept-relationship docs/concepts/concept-relationship.json --dfd-relationship docs/dfd/relationship.json --scope-rules docs/scope/scope-rules.json --test-rules docs/testing/test-rules.json --authority-rules docs/review/authority-rules.json --technology-rules docs/technology/tech-rules.json --process-dir docs/processes --default-schema rawsql_transfer",
+    "verify:transfer-docs": "pnpm verify:transfer-ddl-metadata && pnpm docs:transfer && pnpm verify:transfer-ddl-metadata && node scripts/verify-transfer-docs-drift.mjs",
+    "verify": "pnpm --filter @mk3008/velvet-ddl-docs typecheck && pnpm --filter @mk3008/velvet-ddl-docs lint && pnpm --filter @mk3008/velvet-ddl-docs test && pnpm typecheck && pnpm build && pnpm test && pnpm verify:transfer-docs"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,md,sql}": [
@@ -48,7 +52,7 @@
     "pre-commit": "pnpm lint-staged"
   },
   "dependencies": {
-    "@ashiba-ts/named-parameters": "workspace:*",
+    "@ashiba-ts/named-parameters": "https://github.com/mk3008/ashiba.git#af90dc5db236d5894f264bc67a6c6c8d7bb24ec2&path:/packages/named-parameters",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -63,6 +67,15 @@
     "typescript": "^5.8.2",
     "@types/node": "22.18.7",
     "@testcontainers/postgresql": "^11.14.0",
-    "pg": "^8.11.1"
+    "pg": "^8.11.1",
+    "typescript-eslint": "^8.0.0"
+  },
+  "packageManager": "pnpm@10.19.0",
+  "engines": {
+    "node": "^22.0.0 || ^24.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mk3008/velvet.git"
   }
 }

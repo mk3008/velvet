@@ -51,7 +51,7 @@ function renderGlobalIndex(
   metadata: { getSchemaSummary?: (schema: string) => string }
 ): string {
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push('# Schema Index');
   lines.push('');
@@ -79,7 +79,7 @@ function renderGlobalIndex(
 
 function renderReviewReport(warnings: WarningItem[], findings: FindingItem[]): string {
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push('# Review Report');
   lines.push('');
@@ -137,7 +137,7 @@ function renderReviewReport(warnings: WarningItem[], findings: FindingItem[]): s
 
 function renderInstanceIndex(groupedByInstance: Map<string, TableDocModel[]>): string {
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push('# Instance Index');
   lines.push('');
@@ -170,7 +170,7 @@ function renderSchemaIndex(
   tableSuggestSet: Set<string>
 ): string {
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push(`# ${schema} Tables`);
   lines.push('');

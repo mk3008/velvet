@@ -2,7 +2,7 @@
 
 ## Purpose
 
-この文書は、`@ashiba-ts/transfer-dogfood` の外部境界で Dirty Key がどのように流入し、Transfer Execution がそれをどの成果物へつなげるかを整理する Data Flow Diagram である。
+この文書は、`@mk3008/velvet` の外部境界で Dirty Key がどのように流入し、Transfer Execution がそれをどの成果物へつなげるかを整理する Data Flow Diagram である。
 
 Dirty Key の登録方法は transfer package の責務ではない。
 ただし、Transfer Execution は Dirty Key を入力として利用するため、Dirty Key がどこから来るかを DFD 上で明示する。
@@ -29,7 +29,7 @@ flowchart TD
 
 ## Boundary
 
-`@ashiba-ts/transfer-dogfood` は、変更検知方式を定義しない。
+`@mk3008/velvet` は、変更検知方式を定義しない。
 
 Dirty Key は、CDC、DB trigger、差分batch、手動登録、application event publishing など、任意の external producer から登録されてよい。
 

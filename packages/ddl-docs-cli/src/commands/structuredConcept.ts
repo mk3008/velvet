@@ -264,12 +264,12 @@ function buildMissingStructuredConceptIssues(
       severity: 'error',
       conceptId: concept.id,
       path: `concepts.${concept.id}`,
-      message: `Concept "${concept.id}" is registered but has no concept.json. Ask AI to migrate this Concept into dogfood/transfer/docs/concepts/${concept.id}/concept.json before generating the structured review page.`,
+      message: `Concept "${concept.id}" is registered but has no concept.json. Ask AI to migrate this Concept into docs/concepts/${concept.id}/concept.json before generating the structured review page.`,
     }));
 }
 
 function collectConceptJsonPaths(conceptDirectories: string[]): string[] {
-  const roots = conceptDirectories.length > 0 ? conceptDirectories : ['dogfood/transfer/docs/concepts'];
+  const roots = conceptDirectories.length > 0 ? conceptDirectories : ['docs/concepts'];
   const result: string[] = [];
   for (const root of roots) {
     collectConceptJsonPathsRecursive(path.resolve(process.cwd(), root), result);
@@ -707,7 +707,7 @@ function renderConceptPageV1(concept: StructuredConceptV1, result: StructuredCon
   const conceptIssues = result.issues.filter((issue) => issue.conceptId === concept.id);
   const openIssues = concept.sections.openIssues.items;
   const lines = [
-    '<!-- generated-by: @ashiba-ts/ddl-docs-cli structured-concept -->',
+    '<!-- generated-by: @mk3008/velvet-ddl-docs structured-concept -->',
     '',
     `# ${concept.displayName}`,
     '',
@@ -738,7 +738,7 @@ function renderConceptPageV1(concept: StructuredConceptV1, result: StructuredCon
 function renderConceptPageV2(concept: StructuredConceptV2, result: StructuredConceptLoadResult): string {
   const conceptIssues = result.issues.filter((issue) => issue.conceptId === concept.id);
   const lines = [
-    '<!-- generated-by: @ashiba-ts/ddl-docs-cli structured-concept -->',
+    '<!-- generated-by: @mk3008/velvet-ddl-docs structured-concept -->',
     '',
     '[<- Concepts](./)',
     '',
@@ -1343,7 +1343,7 @@ function writeConceptIndex(indexPath: string, result: { concepts: StructuredConc
   const section = renderConceptIndex(result, pageSlugByConceptId).trimEnd();
   if (!existsSync(indexPath)) {
     writeText(indexPath, [
-      '<!-- generated-by: @ashiba-ts/ddl-docs-cli structured-concept -->',
+      '<!-- generated-by: @mk3008/velvet-ddl-docs structured-concept -->',
       '',
       '# Concepts',
       '',

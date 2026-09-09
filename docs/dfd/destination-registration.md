@@ -2,7 +2,7 @@
 
 ## Purpose
 
-この文書は、`@ashiba-ts/transfer-dogfood` における転送マスタ登録業務を整理する Data Flow Diagram である。
+この文書は、`@mk3008/velvet` における転送マスタ登録業務を整理する Data Flow Diagram である。
 
 Destination 登録は、ユーザが転送先テーブルへ書き込むための転送先マスタを登録する業務である。
 
@@ -32,7 +32,7 @@ flowchart TD
 
 ## Boundary
 
-`@ashiba-ts/transfer-dogfood` は、Destination 登録時にデータベースDDLを必須入力として要求しない。
+`@mk3008/velvet` は、Destination 登録時にデータベースDDLを必須入力として要求しない。
 
 データベースDDLは、転送先テーブル名、列定義、主キー制約、シーケンス定義などを確認するための補助情報である。
 ユーザはDDLを参照してもよいし、必要な情報を手入力してもよい。

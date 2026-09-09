@@ -1,6 +1,6 @@
 # Transfer Package Scope Spec
 
-この文書は `@ashiba-ts/transfer-dogfood` の Package Scope Spec である。
+この文書は `@mk3008/velvet` の Package Scope Spec である。
 
 これは Concept Spec ではない。個別概念の意味、責務、非責務、不変条件は `docs/concepts/` 配下の Concept Spec に置く。
 
@@ -8,7 +8,7 @@
 
 ## Purpose
 
-`@ashiba-ts/transfer-dogfood` は、DB中心かつSQL-firstの転送制御 package である。
+`@mk3008/velvet` は、DB中心かつSQL-firstの転送制御 package である。
 
 この package は、転送元データソースをSQLで定義し、Destination / Destination Link に基づいて転送SQLと転送実行に必要な状態を管理する。
 

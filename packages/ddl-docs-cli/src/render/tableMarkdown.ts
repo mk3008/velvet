@@ -58,7 +58,7 @@ export interface RenderTableOptions {
 export function renderTableMarkdown(table: TableDocModel, suggestedSql: TableSuggestionSql, renderOptions?: RenderTableOptions): string {
   const labelSeparator = renderOptions?.labelSeparator;
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push(`# ${table.schema}.${table.table}`);
   lines.push('');

@@ -1,6 +1,6 @@
 # Transfer Data Flow Diagrams
 
-This directory contains Data Flow Diagrams for `@ashiba-ts/transfer-dogfood`.
+This directory contains Data Flow Diagrams for `@mk3008/velvet`.
 
 DFDs describe where data comes from, which process receives or produces it, and which concept or store is affected.
 They complement Concept Specs and Process Maps:

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "metadataLanguagePolicy": "Human-facing summary, designNotes, decision, tradeoff, alternativesRejected, and review notes may use the language of the product documentation. For @ashiba-ts/transfer-dogfood table review metadata, Japanese is allowed so generated review pages can be read by the product reviewers.",
+  "metadataLanguagePolicy": "Human-facing summary, designNotes, decision, tradeoff, alternativesRejected, and review notes may use the language of the product documentation. For @mk3008/velvet table review metadata, Japanese is allowed so generated review pages can be read by the product reviewers.",
   "schemas": {
     "rawsql_transfer": {
       "language": "ja",

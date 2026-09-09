@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { checkDocs, runCheckDocs } from '../src/commands/check';
 import { updateConceptDisplayName } from '../src/commands/conceptDisplayName';
 import { buildReviewPlan } from '../src/commands/reviewPlan';
@@ -2031,4 +2031,31 @@ test('review-plan reports unmapped DDL and classifies generated docs as review v
 
   expect(plan.unmappedArtifacts.map((entry) => entry.path)).toContain(unmappedDdlPath.replace(/\\/g, '/'));
   expect(plan.changedFiles.find((entry) => entry.path === 'docs/concepts/account.md')?.reviewClass).toBe('generated-review-view');
+});
+
+
+test('review-plan preserves technology signals at the Velvet repository root', () => {
+  const work = createTempDir('velvet-root-technology');
+  const ddlDir = path.join(work, 'db', 'ddl');
+  const rulesPath = path.join(work, 'tech-rules.json');
+  const changedFilesPath = path.join(work, 'changed-files.txt');
+  writeText(path.join(ddlDir, 'example.sql'), 'CREATE TABLE public.example (id int);');
+  writeText(rulesPath, JSON.stringify({ schemaVersion: 1, technologyRules: [
+    { id: 'no-standard-orm-path', kind: 'data-access-boundary', statement: 'No ORM.' },
+    { id: 'postgres-primary-db', kind: 'database-platform', statement: 'PostgreSQL.' },
+    { id: 'cli-front-facing-surface', kind: 'front-facing-surface', statement: 'CLI.' },
+  ] }));
+  writeText(path.join(work, 'package.json'), JSON.stringify({ dependencies: { mysql2: '1' } }));
+  writeText(path.join(work, 'src', 'query.ts'), "import x from 'drizzle-orm';");
+  writeText(path.join(work, 'src', 'view.tsx'), "import React from 'react';");
+  writeText(path.join(work, 'packages', 'tool', 'src', 'fixture.ts'), "import x from 'drizzle-orm';");
+  writeText(changedFilesPath, 'package.json\nsrc/query.ts\nsrc/view.tsx\npackages/tool/src/fixture.ts\n');
+  const cwd = vi.spyOn(process, 'cwd').mockReturnValue(work);
+  try {
+    const plan = buildReviewPlan({ changedFilesPath, ddlDirectories: [{ path: ddlDir, instance: '' }], technologyRulesPath: rulesPath });
+    expect(plan.changedFiles[0]?.requiredReads.technologyRules).toContain('postgres-primary-db');
+    expect(plan.changedFiles[1]?.requiredReads.technologyRules).toContain('no-standard-orm-path');
+    expect(plan.changedFiles[2]?.requiredReads.technologyRules).toContain('cli-front-facing-surface');
+    expect(plan.changedFiles[3]?.reviewRisks).not.toContain('technology-policy-exception');
+  } finally { cwd.mockRestore(); }
 });

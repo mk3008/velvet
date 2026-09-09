@@ -2,7 +2,7 @@
 
 ## Purpose
 
-この文書は、`@ashiba-ts/transfer-dogfood` の監査、デバッグ、由来追跡のための `Lineage` 照会プロセスを整理する。
+この文書は、`@mk3008/velvet` の監査、デバッグ、由来追跡のための `Lineage` 照会プロセスを整理する。
 
 Concept Spec は概念の意味、責務、非責務、不変条件を定義する。
 この文書は、`destination table` の行から `Lineage` を通じて元ネタ、実行文脈、宛先別文脈、関連履歴を確認する process map である。

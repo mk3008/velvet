@@ -82,7 +82,7 @@ test('prune-orphans only removes files with generated header', () => {
 
   const orphanGenerated = path.join(outDir, 'public', 'orphan.md');
   const orphanManual = path.join(outDir, 'public', 'manual.md');
-  writeFileSync(orphanGenerated, '<!-- generated-by: @ashiba-ts/ddl-docs-cli -->\n\n# orphan\n', 'utf8');
+  writeFileSync(orphanGenerated, '<!-- generated-by: @mk3008/velvet-ddl-docs -->\n\n# orphan\n', 'utf8');
   writeFileSync(orphanManual, '# manual orphan\n', 'utf8');
 
   runPruneDocs({ outDir, dryRun: false, pruneOrphans: true });

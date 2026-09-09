@@ -6,7 +6,7 @@ import { ensureDirectory } from '../utils/fs';
 import { normalizeLf } from '../utils/io';
 
 const MANIFEST_FILE = 'manifest.json';
-const GENERATED_HEADER = '<!-- generated-by: @ashiba-ts/ddl-docs-cli -->';
+const GENERATED_HEADER = '<!-- generated-by: @mk3008/velvet-ddl-docs -->';
 
 export interface ManifestWriteOptions {
   outDir: string;

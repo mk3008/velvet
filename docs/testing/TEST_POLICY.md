@@ -1,6 +1,6 @@
 # Transfer Package Test Policy
 
-この文書は `@ashiba-ts/transfer-dogfood` の package-level verification harness である。
+この文書は `@mk3008/velvet` の package-level verification harness である。
 
 これは Concept Spec ではない。個別概念の意味、責務、非責務、不変条件は `docs/concepts/` 配下の Concept Spec に置く。
 
@@ -8,7 +8,7 @@
 
 ## Purpose
 
-`@ashiba-ts/transfer-dogfood` は、SQL、DDL、queryspec、application-owned DB tests を組み合わせて検証する。
+`@mk3008/velvet` は、SQL、DDL、queryspec、application-owned DB tests を組み合わせて検証する。
 
 hot mapper path に runtime validation を追加することではなく、DB制約、queryspec contract、generated mapper drift check、DB-backed tests へ検証責務を左シフトする。
 

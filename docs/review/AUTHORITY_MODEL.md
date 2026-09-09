@@ -1,6 +1,6 @@
 # Transfer Review Authority Model
 
-この文書は `@ashiba-ts/transfer-dogfood` の review authority model である。
+この文書は `@mk3008/velvet` の review authority model である。
 
 これは Concept Spec ではない。Concept Spec、DFD、Process Map、Technology Policy、Test Policy、generated review report を、誰が主体で扱うかを定義する。
 

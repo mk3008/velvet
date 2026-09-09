@@ -34,7 +34,7 @@ export function renderConceptPages(outDir: string, conceptRegistry: ConceptRegis
     }
     const source = normalizeMermaidFences(readFileSync(sourcePath, 'utf8'));
     const lines: string[] = [];
-    lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+    lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
     lines.push('');
     lines.push(source.trimEnd());
     lines.push('');
@@ -75,7 +75,7 @@ export function renderProcessPages(
     }
     const source = normalizeMermaidFences(readFileSync(processPath, 'utf8'));
     const lines: string[] = [];
-    lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+    lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
     lines.push('');
     lines.push(source.trimEnd());
     lines.push('');
@@ -99,7 +99,7 @@ export function renderConceptIndex(outDir: string, conceptRegistry: ConceptRegis
   const definedConcepts = concepts.filter((concept) => concept.status === 'defined' && concept.path);
   const nonAuthoritativeConcepts = concepts.filter((concept) => concept.status !== 'defined' || !concept.path);
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push('# Concepts');
   lines.push('');
@@ -254,7 +254,7 @@ export function renderProcessIndex(
   }
   const processPaths = collectProcessPaths(relationshipMetadata, conceptRegistry);
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push('# Processes');
   lines.push('');
@@ -302,7 +302,7 @@ export function renderDfdPages(
     }
     const source = normalizeMermaidFences(readFileSync(sourcePath, 'utf8'));
     const lines: string[] = [];
-    lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+    lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
     lines.push('');
     lines.push(source.trimEnd());
     lines.push('');
@@ -505,7 +505,7 @@ export function renderDfdBusinessPages(
         extractOperationSectionBody(source, operationName).trim()
       );
       const lines: string[] = [];
-      lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+      lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
       lines.push('');
       if (operationSection) {
         lines.push(operationSection);
@@ -548,7 +548,7 @@ export function renderDfdBusinessProcessPages(outDir: string, dfdRegistry: DfdRe
         continue;
       }
       const indexLines: string[] = [];
-      indexLines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+      indexLines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
       indexLines.push('');
       indexLines.push(`# ${operation.displayName ?? operation.id} Processes`);
       indexLines.push('');
@@ -565,7 +565,7 @@ export function renderDfdBusinessProcessPages(outDir: string, dfdRegistry: DfdRe
         }
         const source = normalizeMermaidFences(readFileSync(processSourcePath, 'utf8'));
         const lines: string[] = [];
-        lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+        lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
         lines.push('');
         lines.push(source.trimEnd());
         lines.push('');
@@ -602,7 +602,7 @@ export function renderDfdIndex(outDir: string, dfdRegistry: DfdRegistry | undefi
   const operations = collectDfdBusinessOperations(dfdRegistry);
   const subsystems = collectDfdSubsystems(dfdRegistry);
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push('# DFDs');
   lines.push('');
@@ -658,7 +658,7 @@ export function renderDfdSubsystemPages(outDir: string, dfdRegistry: DfdRegistry
     const subsystemDfds = dfdRegistry.dfds.filter((dfd) => resolveDfdSubsystem(dfdRegistry, dfd).id === subsystem.id);
     const subsystemOperations = operations.filter(({ dfd }) => resolveDfdSubsystem(dfdRegistry, dfd).id === subsystem.id);
     const lines: string[] = [];
-    lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+    lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
     lines.push('');
     lines.push(`# ${subsystem.displayName ?? subsystem.id}`);
     lines.push('');
@@ -1047,7 +1047,7 @@ export function renderDfdRoleIndex(outDir: string, dfdRegistry: DfdRegistry | un
     rolesByName.set(role.role, entries);
   }
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push('# Roles');
   lines.push('');

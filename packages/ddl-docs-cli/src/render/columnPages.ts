@@ -56,7 +56,7 @@ export function renderColumnPages(
 
 function renderGlobalColumnsIndex(concepts: ObservedColumnConcept[]): string {
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push('# Column Index');
   lines.push('');
@@ -79,7 +79,7 @@ function renderGlobalColumnsIndex(concepts: ObservedColumnConcept[]): string {
 
 function renderColumnsIndex(schemaSlug: string, concepts: ObservedColumnConcept[], alertConceptSet: Set<string>): string {
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push('# Column Index');
   lines.push('');
@@ -110,7 +110,7 @@ function renderConceptPage(
 ): string {
   const { view, schemaSlug, conceptSchemas } = options;
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   const schemaName = schemaSlug ? concept.usages.find((usage) => usage.schemaSlug === schemaSlug)?.schema ?? schemaSlug : null;
   lines.push(view === 'global' ? `# Global Column Concept (Alerts): ${concept.concept}` : `# ${schemaName} Column Concept: ${concept.concept}`);

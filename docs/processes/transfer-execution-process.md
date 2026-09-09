@@ -2,7 +2,7 @@
 
 ## Purpose
 
-この文書は、`@ashiba-ts/transfer-dogfood` の転送プロセスを整理する。
+この文書は、`@mk3008/velvet` の転送プロセスを整理する。
 
 Concept Spec は概念の意味、責務、非責務、不変条件を定義する。
 この文書は、それらの Concept を使って `Transfer Execution` がどの順序で処理を進めるかを示す process map である。

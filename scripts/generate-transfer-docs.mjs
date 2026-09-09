@@ -7,10 +7,10 @@ const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 const cliPath = path.join(workspaceRoot, "packages", "ddl-docs-cli", "dist", "src", "index.js");
 const tempConceptSiteDir = path.join(workspaceRoot, "tmp", "transfer-concept-site");
 const generatedTransferDocsRoot = path.join(workspaceRoot, "docs", "generated", "transfer");
-const transferDdlDir = path.join(workspaceRoot, "dogfood", "transfer", "db", "ddl");
+const transferDdlDir = path.join(workspaceRoot, "db", "ddl");
 const transferReviewChangedFilesPath = path.join(workspaceRoot, "tmp", "transfer-review-report-changed-files.txt");
 const transferReviewPlanPath = path.join(workspaceRoot, "tmp", "transfer-review-plan.json");
-const defaultAiReviewPath = path.join(workspaceRoot, "dogfood", "transfer", "docs", "review", "ai-review.json");
+const defaultAiReviewPath = path.join(workspaceRoot, "docs", "review", "ai-review.json");
 const structuredConceptRelationshipPath = path.join(workspaceRoot, "tmp", "concept-relationship.json");
 const structuredConceptReverseRelationshipPath = path.join(workspaceRoot, "tmp", "concept-reverse-relationships.json");
 const structuredConceptAiContextPath = path.join(workspaceRoot, "tmp", "ai-context", "concepts.json");
@@ -95,7 +95,7 @@ function copyDir(sourcePath, targetPath) {
 }
 
 function copyScopeDoc() {
-  const sourcePath = path.join(workspaceRoot, "dogfood", "transfer", "docs", "scope", "SYSTEM_SCOPE.md");
+  const sourcePath = path.join(workspaceRoot, "docs", "scope", "SYSTEM_SCOPE.md");
   const targetDir = path.join(generatedTransferDocsRoot, "scope");
   const targetPath = path.join(targetDir, "index.md");
   removeDir(targetDir);
@@ -110,8 +110,8 @@ function copyScopeDoc() {
       "",
       "## Source",
       "",
-      "- `dogfood/transfer/docs/scope/SYSTEM_SCOPE.md`",
-      "- `dogfood/transfer/docs/scope/scope-rules.json`",
+      "- `docs/scope/SYSTEM_SCOPE.md`",
+      "- `docs/scope/scope-rules.json`",
       "",
     ].join("\n"),
     "utf8"
@@ -119,7 +119,7 @@ function copyScopeDoc() {
 }
 
 function copyTestingDoc() {
-  const sourcePath = path.join(workspaceRoot, "dogfood", "transfer", "docs", "testing", "TEST_POLICY.md");
+  const sourcePath = path.join(workspaceRoot, "docs", "testing", "TEST_POLICY.md");
   const targetDir = path.join(generatedTransferDocsRoot, "testing");
   const targetPath = path.join(targetDir, "index.md");
   removeDir(targetDir);
@@ -134,8 +134,8 @@ function copyTestingDoc() {
       "",
       "## Source",
       "",
-      "- `dogfood/transfer/docs/testing/TEST_POLICY.md`",
-      "- `dogfood/transfer/docs/testing/test-rules.json`",
+      "- `docs/testing/TEST_POLICY.md`",
+      "- `docs/testing/test-rules.json`",
       "",
     ].join("\n"),
     "utf8"
@@ -143,7 +143,7 @@ function copyTestingDoc() {
 }
 
 function copyAuthorityDoc() {
-  const sourcePath = path.join(workspaceRoot, "dogfood", "transfer", "docs", "review", "AUTHORITY_MODEL.md");
+  const sourcePath = path.join(workspaceRoot, "docs", "review", "AUTHORITY_MODEL.md");
   const targetDir = path.join(generatedTransferDocsRoot, "authority");
   const targetPath = path.join(targetDir, "index.md");
   removeDir(targetDir);
@@ -158,8 +158,8 @@ function copyAuthorityDoc() {
       "",
       "## Source",
       "",
-      "- `dogfood/transfer/docs/review/AUTHORITY_MODEL.md`",
-      "- `dogfood/transfer/docs/review/authority-rules.json`",
+      "- `docs/review/AUTHORITY_MODEL.md`",
+      "- `docs/review/authority-rules.json`",
       "",
     ].join("\n"),
     "utf8"
@@ -167,7 +167,7 @@ function copyAuthorityDoc() {
 }
 
 function copyTechnologyDoc() {
-  const sourcePath = path.join(workspaceRoot, "dogfood", "transfer", "docs", "technology", "TECHNOLOGY_POLICY.md");
+  const sourcePath = path.join(workspaceRoot, "docs", "technology", "TECHNOLOGY_POLICY.md");
   const targetDir = path.join(generatedTransferDocsRoot, "technology");
   const targetPath = path.join(targetDir, "index.md");
   removeDir(targetDir);
@@ -182,8 +182,8 @@ function copyTechnologyDoc() {
       "",
       "## Source",
       "",
-      "- `dogfood/transfer/docs/technology/TECHNOLOGY_POLICY.md`",
-      "- `dogfood/transfer/docs/technology/tech-rules.json`",
+      "- `docs/technology/TECHNOLOGY_POLICY.md`",
+      "- `docs/technology/tech-rules.json`",
       "",
     ].join("\n"),
     "utf8"
@@ -195,9 +195,9 @@ function buildStructuredConceptPoc() {
     "structured-concept",
     "build",
     "--concept-dir",
-    "dogfood/transfer/docs/concepts",
+    "docs/concepts",
     "--concept-relationship",
-    "dogfood/transfer/docs/concepts/concept-relationship.json",
+    "docs/concepts/concept-relationship.json",
     "--out-dir",
     path.relative(workspaceRoot, path.join(generatedTransferDocsRoot, "concepts")),
     "--relationship-out",
@@ -256,26 +256,26 @@ function getTransferReviewSourcePaths() {
   const orderPath = path.join(transferDdlDir, "order.json");
   const order = JSON.parse(fs.readFileSync(orderPath, "utf8"));
   const ddlFiles = Array.isArray(order.order)
-    ? order.order.map((fileName) => path.join("dogfood", "transfer", "db", "ddl", fileName).replace(/\\/g, "/"))
+    ? order.order.map((fileName) => path.join("db", "ddl", fileName).replace(/\\/g, "/"))
     : [];
   return Array.from(new Set([
     ...ddlFiles,
-    "dogfood/transfer/db/ddl/order.json",
-    "dogfood/transfer/db/ddl/relationship.json",
-    "dogfood/transfer/db/ddl/table-docs.json",
-    "dogfood/transfer/docs/scope/SYSTEM_SCOPE.md",
-    "dogfood/transfer/docs/scope/scope-rules.json",
-    "dogfood/transfer/docs/testing/TEST_POLICY.md",
-    "dogfood/transfer/docs/testing/test-rules.json",
-    "dogfood/transfer/docs/review/AUTHORITY_MODEL.md",
-    "dogfood/transfer/docs/review/authority-rules.json",
-    "dogfood/transfer/docs/technology/TECHNOLOGY_POLICY.md",
-    "dogfood/transfer/docs/technology/tech-rules.json",
-    "dogfood/transfer/docs/concepts/concept-relationship.json",
-    ...collectFilesRecursive(path.join(workspaceRoot, "dogfood", "transfer", "docs", "concepts"), [".md"]),
-    "dogfood/transfer/docs/dfd/relationship.json",
-    ...collectFilesRecursive(path.join(workspaceRoot, "dogfood", "transfer", "docs", "dfd"), [".md"]),
-    ...collectFilesRecursive(path.join(workspaceRoot, "dogfood", "transfer", "docs", "processes"), [".md", ".json"]),
+    "db/ddl/order.json",
+    "db/ddl/relationship.json",
+    "db/ddl/table-docs.json",
+    "docs/scope/SYSTEM_SCOPE.md",
+    "docs/scope/scope-rules.json",
+    "docs/testing/TEST_POLICY.md",
+    "docs/testing/test-rules.json",
+    "docs/review/AUTHORITY_MODEL.md",
+    "docs/review/authority-rules.json",
+    "docs/technology/TECHNOLOGY_POLICY.md",
+    "docs/technology/tech-rules.json",
+    "docs/concepts/concept-relationship.json",
+    ...collectFilesRecursive(path.join(workspaceRoot, "docs", "concepts"), [".md"]),
+    "docs/dfd/relationship.json",
+    ...collectFilesRecursive(path.join(workspaceRoot, "docs", "dfd"), [".md"]),
+    ...collectFilesRecursive(path.join(workspaceRoot, "docs", "processes"), [".md", ".json"]),
   ])).sort();
 }
 
@@ -283,27 +283,27 @@ function runTransferMetadataCheck() {
   const output = runCapture([
     "check",
     "--ddl-dir",
-    "dogfood/transfer/db/ddl",
+    "db/ddl",
     "--table-docs",
-    "dogfood/transfer/db/ddl/table-docs.json",
+    "db/ddl/table-docs.json",
     "--relationship",
-    "dogfood/transfer/db/ddl/relationship.json",
+    "db/ddl/relationship.json",
     "--order",
-    "dogfood/transfer/db/ddl/order.json",
+    "db/ddl/order.json",
     "--concept-relationship",
-    "dogfood/transfer/docs/concepts/concept-relationship.json",
+    "docs/concepts/concept-relationship.json",
     "--dfd-relationship",
-    "dogfood/transfer/docs/dfd/relationship.json",
+    "docs/dfd/relationship.json",
     "--scope-rules",
-    "dogfood/transfer/docs/scope/scope-rules.json",
+    "docs/scope/scope-rules.json",
     "--test-rules",
-    "dogfood/transfer/docs/testing/test-rules.json",
+    "docs/testing/test-rules.json",
     "--authority-rules",
-    "dogfood/transfer/docs/review/authority-rules.json",
+    "docs/review/authority-rules.json",
     "--technology-rules",
-    "dogfood/transfer/docs/technology/tech-rules.json",
+    "docs/technology/tech-rules.json",
     "--process-dir",
-    "dogfood/transfer/docs/processes",
+    "docs/processes",
     "--default-schema",
     "rawsql_transfer",
   ]);
@@ -328,35 +328,35 @@ function runTransferReviewPlan() {
     "--changed-files",
     path.relative(workspaceRoot, transferReviewChangedFilesPath),
     "--ddl-dir",
-    "dogfood/transfer/db/ddl",
+    "db/ddl",
     "--relationship",
-    "dogfood/transfer/db/ddl/relationship.json",
+    "db/ddl/relationship.json",
     "--table-docs",
-    "dogfood/transfer/db/ddl/table-docs.json",
+    "db/ddl/table-docs.json",
     "--concept-relationship",
-    "dogfood/transfer/docs/concepts/concept-relationship.json",
+    "docs/concepts/concept-relationship.json",
     "--dfd-relationship",
-    "dogfood/transfer/docs/dfd/relationship.json",
+    "docs/dfd/relationship.json",
     "--process-dir",
-    "dogfood/transfer/docs/processes",
+    "docs/processes",
     "--scope-rules",
-    "dogfood/transfer/docs/scope/scope-rules.json",
+    "docs/scope/scope-rules.json",
     "--scope-doc",
-    "dogfood/transfer/docs/scope/SYSTEM_SCOPE.md",
+    "docs/scope/SYSTEM_SCOPE.md",
     "--test-rules",
-    "dogfood/transfer/docs/testing/test-rules.json",
+    "docs/testing/test-rules.json",
     "--test-policy",
-    "dogfood/transfer/docs/testing/TEST_POLICY.md",
+    "docs/testing/TEST_POLICY.md",
     "--authority-rules",
-    "dogfood/transfer/docs/review/authority-rules.json",
+    "docs/review/authority-rules.json",
     "--authority-model",
-    "dogfood/transfer/docs/review/AUTHORITY_MODEL.md",
+    "docs/review/AUTHORITY_MODEL.md",
     "--technology-rules",
-    "dogfood/transfer/docs/technology/tech-rules.json",
+    "docs/technology/tech-rules.json",
     "--technology-policy",
-    "dogfood/transfer/docs/technology/TECHNOLOGY_POLICY.md",
+    "docs/technology/TECHNOLOGY_POLICY.md",
     "--package",
-    "@ashiba-ts/transfer-dogfood",
+    "@mk3008/velvet",
     "--out",
     path.relative(workspaceRoot, transferReviewPlanPath),
   ]);
@@ -545,14 +545,14 @@ function renderReviewHarnessSummary(metadataCheck, reviewPlan) {
     "",
     "### Source Inputs",
     "",
-    "- Package scope: `dogfood/transfer/docs/scope/SYSTEM_SCOPE.md`",
-    "- Scope rules: `dogfood/transfer/docs/scope/scope-rules.json`",
-    "- Test policy: `dogfood/transfer/docs/testing/TEST_POLICY.md`",
-    "- Test rules: `dogfood/transfer/docs/testing/test-rules.json`",
-    "- Authority model: `dogfood/transfer/docs/review/AUTHORITY_MODEL.md`",
-    "- Authority rules: `dogfood/transfer/docs/review/authority-rules.json`",
-    "- Technology policy: `dogfood/transfer/docs/technology/TECHNOLOGY_POLICY.md`",
-    "- Technology rules: `dogfood/transfer/docs/technology/tech-rules.json`",
+    "- Package scope: `docs/scope/SYSTEM_SCOPE.md`",
+    "- Scope rules: `docs/scope/scope-rules.json`",
+    "- Test policy: `docs/testing/TEST_POLICY.md`",
+    "- Test rules: `docs/testing/test-rules.json`",
+    "- Authority model: `docs/review/AUTHORITY_MODEL.md`",
+    "- Authority rules: `docs/review/authority-rules.json`",
+    "- Technology policy: `docs/technology/TECHNOLOGY_POLICY.md`",
+    "- Technology rules: `docs/technology/tech-rules.json`",
     "- Review plan snapshot: `tmp/transfer-review-plan.json`",
     "",
   ].join("\n");
@@ -575,7 +575,7 @@ function writeProductReviewReport(metadataCheck, reviewPlan, aiReviewArtifact) {
     "",
     "# Transfer Review Report",
     "",
-    "This page is the product-level review report for `@ashiba-ts/transfer-dogfood`.",
+    "This page is the product-level review report for `@mk3008/velvet`.",
     "It collects machine-check review signals first, then leaves semantic Concept / Process / DDL review to human and AI review workflows.",
     "",
     "## Transfer Review Entrypoints",
@@ -638,11 +638,11 @@ function getOrderedTransferDdlArgs() {
   const orderPath = path.join(transferDdlDir, "order.json");
   const order = JSON.parse(fs.readFileSync(orderPath, "utf8"));
   if (!Array.isArray(order.order)) {
-    throw new Error("dogfood/transfer/db/ddl/order.json must contain an order array.");
+    throw new Error("db/ddl/order.json must contain an order array.");
   }
   return order.order.flatMap((fileName) => [
     "--ddl-file",
-    path.join("dogfood", "transfer", "db", "ddl", fileName),
+    path.join("db", "ddl", fileName),
   ]);
 }
 
@@ -650,9 +650,9 @@ removeDir(tempConceptSiteDir);
 run([
   "concept-site",
   "--concept-relationship",
-  "dogfood/transfer/docs/concepts/concept-relationship.json",
+  "docs/concepts/concept-relationship.json",
   "--dfd-relationship",
-  "dogfood/transfer/docs/dfd/relationship.json",
+  "docs/dfd/relationship.json",
   "--out-dir",
   path.relative(workspaceRoot, tempConceptSiteDir),
 ]);
@@ -679,13 +679,13 @@ run([
   "--out-dir",
   path.relative(workspaceRoot, path.join(generatedTransferDocsRoot, "rawsql-transfer")),
   "--table-docs",
-  "dogfood/transfer/db/ddl/table-docs.json",
+  "db/ddl/table-docs.json",
   "--relationship",
-  "dogfood/transfer/db/ddl/relationship.json",
+  "db/ddl/relationship.json",
   "--concept-relationship",
-  "dogfood/transfer/docs/concepts/concept-relationship.json",
+  "docs/concepts/concept-relationship.json",
   "--dfd-relationship",
-  "dogfood/transfer/docs/dfd/relationship.json",
+  "docs/dfd/relationship.json",
   "--default-schema",
   "rawsql_transfer",
 ]);

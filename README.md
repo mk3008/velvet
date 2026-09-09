@@ -1,10 +1,23 @@
-# @ashiba-ts/transfer-dogfood
+# Velvet
 
-`@ashiba-ts/transfer-dogfood` contains transfer-definition features for Ashiba dogfooding workflows.
+Velvet is an experimental SQL-first PostgreSQL transfer-control product.
 
 The initial features register transfer destination definitions and transfer settings for PostgreSQL transfer workflows.
 
 Transfer package tables live under the `rawsql_transfer` schema to avoid collisions with user tables or generic schemas such as `transfer`.
+
+## Development
+
+Use Node.js 22 or 24 and pnpm 10.19.0.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm verify
+```
+
+The full gate includes the documentation CLI checks, type checking, build, tests, DDL metadata checks, and documentation generation. Tests use PostgreSQL 18 via Docker/Testcontainers by default. To use a dedicated existing test database, set `ASHIBA_DB_URL`. CI provisions its own PostgreSQL service and does not skip database tests.
+
+Generated review pages are written to `docs/generated/transfer/` and remain untracked. Start design work at [Package Scope](docs/scope/SYSTEM_SCOPE.md), [Concepts](docs/concepts/README.md), [Processes](docs/processes/README.md), and [DFD](docs/dfd/README.md). Read the [Technology Policy](docs/technology/TECHNOLOGY_POLICY.md) and [Test Policy](docs/testing/TEST_POLICY.md) before implementation.
 
 ## Migration Source
 
@@ -13,7 +26,7 @@ This package was migrated from the former rawsql-ts transfer dogfood package:
 - Source: https://github.com/mk3008/rawsql-ts/tree/main/packages/transfer
 - Local source commit used for the initial migration: `4698a87e9a73f8d6b87b0545cb0a740246f7d457`
 
-The package now lives under Ashiba as a dogfooding product. It should use Ashiba public package boundaries instead of importing Ashiba repository internals.
+The product now lives in `mk3008/velvet`. See [repository migration](docs/migration/README.md) for the Ashiba source commit and preserved history.
 
 ## Ashiba Runtime Boundary
 

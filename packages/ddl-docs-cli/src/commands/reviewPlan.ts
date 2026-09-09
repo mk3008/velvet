@@ -292,7 +292,7 @@ export function buildReviewPlan(options: ReviewPlanOptions): ReviewPlan {
 
   return {
     schemaVersion: 1,
-    package: options.packageName ?? '@ashiba-ts/transfer-dogfood',
+    package: options.packageName ?? '@mk3008/velvet',
     mandatoryScope: {
       files: [options.scopeDocPath, options.scopeRulesPath].filter((entry): entry is string => Boolean(entry)),
       rules: MANDATORY_SCOPE_RULES.filter((rule) => scopeRules.has(rule.id)),
@@ -468,8 +468,8 @@ function detectTechnologyExceptionSignals(normalizedPath: string, body: string |
   }
   const signals: TechnologyExceptionSignal[] = [];
   const lowerPath = normalizedPath.toLowerCase();
-  const isPackageManifest = lowerPath.endsWith('/package.json');
-  const isImplementationFile = /\/(?:src|scripts|tests|db)\//u.test(lowerPath)
+  const isPackageManifest = lowerPath === 'package.json' || lowerPath.endsWith('/package.json');
+  const isImplementationFile = /(?:^|\/)(?:src|scripts|tests|db)\//u.test(lowerPath)
     && /\.(?:[cm]?[jt]sx?|json|sql)$/u.test(lowerPath);
 
   if (!isPackageManifest && !isImplementationFile) {
@@ -516,7 +516,8 @@ function readChangedFileBody(normalizedPath: string): string | undefined {
 
 function isTransferPackagePath(normalizedPath: string): boolean {
   const normalized = normalizeRelativePath(normalizedPath);
-  return normalized.startsWith('dogfood/transfer/') || normalized.includes('/dogfood/transfer/');
+  return normalized === 'package.json' || /^(?:src|scripts|tests|db)\//u.test(normalized)
+    || normalized.includes('/dogfood/transfer/');
 }
 
 function applyDdlRelationship(

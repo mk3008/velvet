@@ -3,7 +3,7 @@
 Run from repository root:
 
 ```bash
-pnpm --filter @ashiba-ts/ddl-docs-cli build
+pnpm --filter @mk3008/velvet-ddl-docs build
 node packages/ddl-docs-cli/dist/index.js generate --ddl-dir packages/ddl-docs-cli/examples/minimal-e2e/ddl --out-dir packages/ddl-docs-cli/examples/minimal-e2e/generated
 ```
 

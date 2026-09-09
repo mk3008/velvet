@@ -1,4 +1,4 @@
-<!-- generated-by: @ashiba-ts/ddl-docs-cli -->
+<!-- generated-by: @mk3008/velvet-ddl-docs -->
 
 # public Tables
 

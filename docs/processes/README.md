@@ -1,6 +1,6 @@
 # Transfer Process Maps
 
-This directory contains process maps for `@ashiba-ts/transfer-dogfood`.
+This directory contains process maps for `@mk3008/velvet`.
 
 Process maps describe use-case flow, process order, and input/output relationships derived from the Concept Specs.
 They are not Concept Specs and do not redefine concept meanings, responsibilities, non-responsibilities, or invariants.

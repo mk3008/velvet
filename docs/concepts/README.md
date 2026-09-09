@@ -1,6 +1,6 @@
 # Transfer Concept Specs
 
-This directory contains Concept Specs for `@ashiba-ts/transfer-dogfood`.
+This directory contains Concept Specs for `@mk3008/velvet`.
 
 Concept Specs define stable meanings, responsibility boundaries, and invariants for concepts that span multiple features. They are not implementation plans, SQL, DDL, queryspecs, or test cases.
 

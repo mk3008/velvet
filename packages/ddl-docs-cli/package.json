@@ -1,7 +1,7 @@
 {
-  "name": "@ashiba-ts/ddl-docs-cli",
+  "name": "@mk3008/velvet-ddl-docs",
   "version": "0.3.1",
-  "description": "Internal Ashiba dogfooding CLI for generating DDL and Concept Spec review pages.",
+  "description": "Velvet development CLI for DDL and concept review pages.",
   "private": true,
   "main": "dist/src/index.js",
   "bin": {
@@ -24,7 +24,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mk3008/ashiba",
+    "url": "https://github.com/mk3008/velvet",
     "directory": "packages/ddl-docs-cli"
   },
   "engines": {

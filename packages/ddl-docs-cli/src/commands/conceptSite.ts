@@ -64,7 +64,7 @@ function renderConceptSiteRootIndex(options: { hasDfd: boolean }): string {
   }
   links.push('- [Processes](./processes/)');
   return [
-    '<!-- generated-by: @ashiba-ts/ddl-docs-cli -->',
+    '<!-- generated-by: @mk3008/velvet-ddl-docs -->',
     '',
     '# Concept Spec Review',
     '',

@@ -16,9 +16,9 @@
 
 # Mandatory Workflow
 - Before committing changes under `packages/ddl-docs-cli`, run:
-  - `pnpm --filter @ashiba-ts/ddl-docs-cli lint`
-  - `pnpm --filter @ashiba-ts/ddl-docs-cli test`
-  - `pnpm --filter @ashiba-ts/ddl-docs-cli build`
+  - `pnpm --filter @mk3008/velvet-ddl-docs lint`
+  - `pnpm --filter @mk3008/velvet-ddl-docs test`
+  - `pnpm --filter @mk3008/velvet-ddl-docs build`
 
 # Hygiene
 - Temporary debug output MUST be removed before commit.

@@ -1,8 +1,8 @@
-# @ashiba-ts/ddl-docs-cli
+# @mk3008/velvet-ddl-docs
 
 Generate Markdown table definition documents and Concept Spec review pages from DDL and review metadata.
 
-This package is currently an internal Ashiba dogfooding tool. It is migrated from the former rawsql-ts transfer documentation workflow so `dogfood/transfer` can keep its Concept Spec, DFD, Process Map, DDL, and review harness visible through VitePress-generated review pages.
+This package is Velvet-owned experimental development tooling. It is migrated from the former rawsql-ts transfer documentation workflow so Velvet can keep its Concept Spec, DFD, Process Map, DDL, and review harness visible through VitePress-generated review pages.
 
 - DDL is treated as SSOT.
 - SQL parsing uses `rawsql-ts`.
@@ -12,13 +12,13 @@ This package is currently an internal Ashiba dogfooding tool. It is migrated fro
 ## Install
 
 ```bash
-pnpm --filter @ashiba-ts/ddl-docs-cli build
+pnpm --filter @mk3008/velvet-ddl-docs build
 ```
 
 ## Usage
 
 ```bash
-ddl-docs generate --ddl-dir dogfood/transfer/db/ddl --out-dir docs/generated/transfer/rawsql-transfer
+ddl-docs generate --ddl-dir db/ddl --out-dir docs/generated/transfer/rawsql-transfer
 ```
 
 Show help:
@@ -129,11 +129,11 @@ This command checks structure and references only; it does not judge whether the
 
 ```bash
 ddl-docs check \
-  --ddl-dir dogfood/transfer/db/ddl \
-  --table-docs dogfood/transfer/db/ddl/table-docs.json \
-  --relationship dogfood/transfer/db/ddl/relationship.json \
-  --order dogfood/transfer/db/ddl/order.json \
-  --concept-relationship dogfood/transfer/docs/concepts/concept-relationship.json \
+  --ddl-dir db/ddl \
+  --table-docs db/ddl/table-docs.json \
+  --relationship db/ddl/relationship.json \
+  --order db/ddl/order.json \
+  --concept-relationship docs/concepts/concept-relationship.json \
   --default-schema rawsql_transfer
 ```
 
@@ -145,13 +145,13 @@ Warnings are review aids, such as important constraints without review notes or 
 This tool emits plain Markdown files and index pages.
 If you prefer VitePress-side navigation generation, run with `--no-index` and let your site config build navigation from the generated table pages.
 
-For the transfer dogfooding package, run:
+For Velvet, run:
 
 ```bash
 pnpm docs:transfer
 ```
 
-This generates Concept / DFD / Process / DDL review pages under `docs/generated/transfer/`. Those pages are source derivatives and must remain untracked; the source of truth stays under `dogfood/transfer/docs` and `dogfood/transfer/db/ddl`.
+This generates Concept / DFD / Process / DDL review pages under `docs/generated/transfer/`. Those pages are source derivatives and must remain untracked; the source of truth stays under `docs` and `db/ddl`.
 
 ## Warnings
 

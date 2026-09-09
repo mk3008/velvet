@@ -8,7 +8,7 @@ import type { RenderedPage } from './types';
  */
 export function renderReferencesPage(outDir: string, tables: TableDocModel[]): RenderedPage {
   const lines: string[] = [];
-  lines.push('<!-- generated-by: @ashiba-ts/ddl-docs-cli -->');
+  lines.push('<!-- generated-by: @mk3008/velvet-ddl-docs -->');
   lines.push('');
   lines.push('# References');
   lines.push('');

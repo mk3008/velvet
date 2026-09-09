@@ -1,6 +1,6 @@
 # Transfer Package Technology Policy
 
-この文書は `@ashiba-ts/transfer-dogfood` の package-level technology policy である。
+この文書は `@mk3008/velvet` の package-level technology policy である。
 
 これは Concept Spec ではない。個別概念の意味、責務、非責務、不変条件は `docs/concepts/` 配下の Concept Spec に置く。
 
@@ -8,7 +8,7 @@
 
 ## Purpose
 
-`@ashiba-ts/transfer-dogfood` は、PostgreSQL、SQL-first、Ashiba CLI、thin SQL execution adapter を標準経路にした転送制御 package である。
+`@mk3008/velvet` は、PostgreSQL、SQL-first、Ashiba CLI、thin SQL execution adapter を標準経路にした転送制御 package である。
 
 コードから現在の実装技術を観測することはできるが、コードだけでは「その技術が意図した制約なのか、偶然の現状なのか」を判定しにくい。
 
@@ -21,7 +21,7 @@
 - Standard generation / verification path: Ashiba CLI, generated query snapshots, generated query metadata, and DB-backed tests
 - Standard transfer implementation path: reviewed SQL, DDL metadata, generated query contracts, mapper checks, and DB-backed tests
 - Standard front-facing surface: CLI
-- Web UI is not a standard surface for this package. If a Web surface is needed, treat it as an owning application boundary outside `@ashiba-ts/transfer-dogfood`.
+- Web UI is not a standard surface for this package. If a Web surface is needed, treat it as an owning application boundary outside `@mk3008/velvet`.
 
 ## Non-Standard Paths
 
