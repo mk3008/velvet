@@ -1,0 +1,36 @@
+name: Import Ashiba history
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/import-ashiba.yml]
+permissions:
+  contents: write
+jobs:
+  import:
+    if: github.repository == 'mk3008/velvet'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Extract pinned Transfer history and fast-forward main
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install git-filter-repo==2.47.0
+          source_dir="$RUNNER_TEMP/ashiba-history"
+          git clone --single-branch --branch main https://github.com/mk3008/ashiba.git "$source_dir"
+          git -C "$source_dir" checkout -B main af90dc5db236d5894f264bc67a6c6c8d7bb24ec2
+          (
+            cd "$source_dir"
+            git filter-repo --force --path dogfood/transfer/ --path packages/ddl-docs-cli/ --path scripts/generate-transfer-docs.mjs --path scripts/verify-transfer-docs-drift.mjs --path LICENSE --path tsconfig.base.json --path-rename dogfood/transfer/:
+          )
+          test "$(git -C "$source_dir" rev-parse main)" = 8c54c0c28715cd7b775abbeec5ee46cfe7a8ab15
+          git fetch "$source_dir" main
+          imported=$(git rev-parse FETCH_HEAD)
+          tree=$(git rev-parse "$imported^{tree}")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          merged=$(git commit-tree "$tree" -p "$imported" -p "$GITHUB_SHA" -m "Import Transfer history from Ashiba af90dc5")
+          git push origin "$merged:refs/heads/main"
