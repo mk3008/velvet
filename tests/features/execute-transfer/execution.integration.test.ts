@@ -174,7 +174,7 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
       "insert into rawsql_transfer.destination_definition(destination_definition_id, destination_definition_name, destination_table_name, destination_columns, destination_key_columns, transfer_model, sign_inversion_columns) select 2, 'other', 'public.phase1_other', destination_columns, destination_key_columns, transfer_model, sign_inversion_columns from rawsql_transfer.destination_definition where destination_definition_id=1",
     );
     await db.query(
-      "insert into rawsql_transfer.setting(setting_id, setting_name, source_sql_body, source_sql_hash, source_key_definition) select 2,'other',source_sql_body,source_sql_hash,source_key_definition from rawsql_transfer.setting where setting_id=1",
+      "insert into rawsql_transfer.setting(setting_id, setting_name, source_sql_body, source_sql_hash, source_key_definition, source_sql_analysis_status) select 2,'other',source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status from rawsql_transfer.setting where setting_id=1",
     );
     await db.query(
       `insert into rawsql_transfer.destination_link(destination_link_id, setting_id, destination_definition_id, destination_link_name, execution_order, destination_key_mapping, mapping_definition, generated_insert_transfer_sql_body)
