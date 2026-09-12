@@ -105,6 +105,36 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
       source_kind: 'transfer_source',
       destination_table_name: 'public.phase1_destination',
     });
+    test('serializes concurrent executions of the same Setting', async () => {
+      const url = new URL(process.env.ASHIBA_DB_URL!);
+      url.pathname = '/' + database;
+      const other = new Client({ connectionString: url.toString() });
+      await other.connect();
+      try {
+        const results = await Promise.all([
+          run(),
+          executeTransfer(other, [definition], { settingId: '1', arguments: { branch: 'north' } }),
+        ]);
+        expect(results.map((result) => result.inserted).sort()).toEqual([0, 1]);
+        expect((await db.query('select count(*) from rawsql_transfer.lineage')).rows[0].count).toBe(
+          '1',
+        );
+      } finally {
+        await other.end();
+      }
+    });
+    test('executes the current stored source SQL without a code-side copy or approval status', async () => {
+      await db.query(
+        'update rawsql_transfer.setting set source_sql_body = $1 where setting_id = 1',
+        [
+          'select id as logical_id, id as row_id, amount * 2 as amount from public.phase1_source where branch = :branch',
+        ],
+      );
+      await run();
+      expect((await db.query('select amount from public.phase1_destination')).rows).toEqual([
+        { amount: 200 },
+      ]);
+    });
     expect(await run()).toMatchObject({ inserted: 0, skipped: 0 });
     expect((await db.query('select count(*) from rawsql_transfer.lineage')).rows[0].count).toBe(
       '1',
@@ -144,10 +174,10 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
       "insert into rawsql_transfer.dirty_key(source_schema_name, source_table_name, source_key_json) values ('other','phase1_source','{\"id\":\"a\"}'), ('public','other','{\"id\":\"a\"}')",
     );
     await db.query(
-      "insert into rawsql_transfer.destination_definition select 2, 'other', null, 'public.phase1_other', destination_columns, destination_key_columns, null, transfer_model, sign_inversion_columns, null, '', 'not_generated', null, now(), now(), null from rawsql_transfer.destination_definition where destination_definition_id=1",
+      "insert into rawsql_transfer.destination_definition(destination_definition_id, destination_definition_name, destination_table_name, destination_columns, destination_key_columns, transfer_model, sign_inversion_columns) select 2, 'other', 'public.phase1_other', destination_columns, destination_key_columns, transfer_model, sign_inversion_columns from rawsql_transfer.destination_definition where destination_definition_id=1",
     );
     await db.query(
-      "insert into rawsql_transfer.setting select 2,'other',source_sql_body,source_sql_hash,source_key_definition,null,null,'not_analyzed',null,true,now(),now(),null from rawsql_transfer.setting where setting_id=1",
+      "insert into rawsql_transfer.setting(setting_id, setting_name, source_sql_body, source_sql_hash, source_key_definition) select 2,'other',source_sql_body,source_sql_hash,source_key_definition from rawsql_transfer.setting where setting_id=1",
     );
     await db.query(
       `insert into rawsql_transfer.destination_link(destination_link_id, setting_id, destination_definition_id, destination_link_name, execution_order, destination_key_mapping, mapping_definition, generated_insert_transfer_sql_body)
@@ -181,6 +211,33 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
     );
     await expect(run()).rejects.toThrow(/mapping/);
     expect((await db.query('select count(*) from rawsql_transfer.run')).rows[0].count).toBe('0');
+  });
+  test.each([new Date('2026-01-01T00:00:00Z'), NaN, Infinity, { nested: undefined }])(
+    'rejects non-JSON logical identity from the resolver: %s',
+    async (key) => {
+      await expect(
+        executeTransfer(db, [{ ...definition, resolveLogicalKey: () => ({ logical_id: key }) }], {
+          settingId: '1',
+          arguments: { branch: 'north' },
+        }),
+      ).rejects.toThrow(/JSON-compatible/);
+      expect((await db.query('select count(*) from rawsql_transfer.run')).rows[0].count).toBe('0');
+    },
+  );
+  test('rejects a PostgreSQL Date key without successful work or false lineage', async () => {
+    await db.query('update rawsql_transfer.setting set source_sql_body = $1', [
+      "select timestamp '2026-01-01' as logical_id, id as row_id, amount from public.phase1_source",
+    ]);
+    await expect(run()).rejects.toThrow(/JSON-compatible/);
+    expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
+      { run_status: 'failed' },
+    ]);
+    expect((await db.query('select count(*) from rawsql_transfer.lineage')).rows[0].count).toBe(
+      '0',
+    );
+    expect((await db.query('select count(*) from public.phase1_destination')).rows[0].count).toBe(
+      '0',
+    );
   });
   test('failure after an earlier insertion rolls back destination and processing but retains failed Run', async () => {
     await db.query(

@@ -36,6 +36,26 @@ Each `queries/<query>/query.ts` owns one fixed Serene SQL literal. Names are bou
 
 Run `pnpm audit:sql` for construction review. Keep imported or unresolved paths visible and review SQL meaning and business behavior separately.
 
+## Transfer Execution Phase 1
+
+`executeTransfer(client, definitions, { settingId, arguments })` owns a transaction on an idle, dedicated node-postgres client. It accepts run arguments, not source rows. The application registers exactly one definition for the selected Setting:
+
+```ts
+const result = await executeTransfer(client, [{
+  settingId: '1',
+  sourceSchema: 'public',
+  sourceTable: 'orders',
+  sourceKeyDefinition: { keys: [{ column: 'order_id', type: 'text' }] },
+  resolveLogicalKey: key => ({ order_id: key.id }),
+}], { settingId: '1', arguments: { branch: 'north' } });
+```
+
+The expected key definition must match the stored Setting exactly. Logical and destination keys must have matching JSON-compatible types; unsupported values such as Date and nonfinite numbers are rejected. The source SQL must project those logical key columns and the columns used by each link's mapping.
+
+Developers prepare the enabled Setting and immutable Destination Links, including each link's stored `generated_insert_transfer_sql_body`. That statement binds destination-column names from `mapping_definition.columns`, inserts one row, and returns its destination key columns. The saved source SQL remains the only source SQL definition. SQL uses named value parameters; analysis/generation statuses are not execution approval. See [the trusted execution decision](docs/decisions/0002-phase1-trusted-execution.md) for prerequisites and the explicit stored-SQL exception.
+
+Successful execution returns `{ runId, inserted, skipped }`. A work failure rolls back destination and processing changes, retains a failed Run, and throws `TransferExecutionError` with its `runId`. Configuration rejection before Run creation throws without a Run. Existing Active Black, absent source rows, red/update/delete and retransfer routes are outside Phase 1.
+
 ## Transfer Destination Definition
 
 The `rawsql_transfer.destination_definition` table stores:

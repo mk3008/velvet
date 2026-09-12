@@ -29,7 +29,17 @@ function object(value: unknown): value is Row {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 function keyText(value: unknown): string {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (value === null || typeof value === 'string' || typeof value === 'boolean')
+    return JSON.stringify(value);
+  if (typeof value === 'number' && Number.isFinite(value)) return JSON.stringify(value);
+  if (
+    typeof value !== 'object' ||
+    (!Array.isArray(value) &&
+      Object.getPrototypeOf(value) !== Object.prototype &&
+      Object.getPrototypeOf(value) !== null)
+  ) {
+    throw new Error('Keys must contain only JSON-compatible values');
+  }
   if (Array.isArray(value)) return '[' + value.map(keyText).join(',') + ']';
   return (
     '{' +
