@@ -38,3 +38,7 @@ export const processingSql = sql`insert into rawsql_transfer.dirty_key_processin
   values (:dirty, :run, :work, :setting, :link, cast(:key as jsonb), :hash, :status, :result)`;
 export const finishSql = sql`update rawsql_transfer.run set run_status = :status,
   finished_at = current_timestamp, updated_at = current_timestamp, error_message = :error where run_id = :run`;
+// A rejected COMMIT response does not prove that the server rolled back.
+export const failSql = sql`update rawsql_transfer.run set run_status = 'failed',
+  finished_at = current_timestamp, updated_at = current_timestamp, error_message = :error
+  where run_id = :run and run_status = 'running'`;

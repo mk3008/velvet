@@ -314,7 +314,7 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
     const client = {
       async query(text: string, values?: unknown[]) {
         if (text.startsWith('select id as logical_id')) throw original;
-        if (text.startsWith('update rawsql_transfer.run') && values?.includes('failed'))
+        if (text.startsWith('update rawsql_transfer.run') && text.includes("run_status = 'failed'"))
           throw recovery;
         return db.query(text, values);
       },
@@ -370,5 +370,32 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
     expect(
       (await db.query('select count(*) from rawsql_transfer.dirty_key_processing')).rows[0].count,
     ).toBe('1');
+  });
+  test('a lost work COMMIT response cannot relabel committed success as failed', async () => {
+    let commits = 0;
+    const original = new Error('COMMIT response unavailable');
+    const client = {
+      async query(text: string, values?: unknown[]) {
+        const result = await db.query(text, values);
+        if (text === 'commit' && ++commits === 2) throw original;
+        return result;
+      },
+    };
+    const error = await executeTransfer(client, [definition], {
+      settingId: '1',
+      arguments: { branch: 'north' },
+    }).catch((error) => error);
+    expect(error).toBeInstanceOf(TransferExecutionError);
+    expect(error.cause).toBe(original);
+    expect(error.recoveryErrors).toEqual([]);
+    expect(
+      (await db.query('select run_id, run_status, error_message from rawsql_transfer.run')).rows,
+    ).toEqual([{ run_id: error.runId, run_status: 'succeeded', error_message: null }]);
+    expect((await db.query('select row_id from public.phase1_destination')).rows).toEqual([
+      { row_id: 'a' },
+    ]);
+    expect(
+      (await db.query('select processing_status from rawsql_transfer.dirty_key_processing')).rows,
+    ).toEqual([{ processing_status: 'succeeded' }]);
   });
 });

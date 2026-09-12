@@ -258,9 +258,8 @@ export async function executeTransfer(
     if (runPersisted && discarded) {
       try {
         await client.query('begin');
-        await query(queries.finishSql, {
+        await query(queries.failSql, {
           run: runId,
-          status: 'failed',
           error: error instanceof Error ? error.message : String(error),
         });
         await client.query('commit');
