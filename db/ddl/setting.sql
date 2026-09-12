@@ -30,7 +30,7 @@ create table rawsql_transfer.setting (
   , constraint chk_setting_source_key_definition_object
     check (
       jsonb_typeof(source_key_definition) = 'object'
-      and jsonb_object_length(source_key_definition) > 0
+      and source_key_definition <> '{}'::jsonb
     )
 
   , constraint chk_setting_source_sql_analysis_status

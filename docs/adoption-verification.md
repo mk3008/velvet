@@ -1,4 +1,4 @@
-# 導入検証と既存DDLのブロッカー
+# 導入検証と既存DDL不具合の修正
 
 対象: PR #2 の実装コミット `db5442697b050c1cdb48ee1cb5762604ad26460c`。
 比較元: `e1a25ec9b871c10204c5f45b8fff3eb007204806`。
@@ -20,7 +20,7 @@
 
 Destination登録の`SQL_SELECT_WITHOUT_WHERE`は、テーブルを読むSELECTではなく、名前付き値から1行を作る既存のINSERT SELECTに対する助言である。判定やシグナルは抑制していない。
 
-## 未完了: PostgreSQL結合検証
+## 初回のPostgreSQL結合検証で検出した既存不具合
 
 [GitHub Actions実行](https://github.com/mk3008/velvet/actions/runs/34672835411)で、追加した結合テストが既存DDLの作成時に失敗した。
 
@@ -35,3 +35,11 @@ function jsonb_object_length(jsonb) does not exist
 合計91テスト成功・1テスト失敗。DB結合テストは削除・スキップ・弱体化せず残す。既存障害の修正は導入作業に混ぜず、製造開始前のブロッカーとして報告する。これまでのテスト成功は、Velvetの正本DDL全体を実DBへ適用できることの証明ではなかった。
 
 DDL修正後に、4クエリのDB実行を含む完全な`pnpm verify`を再実行する必要がある。
+
+## 同一PR内での修正
+
+ユーザー承認により、この既存不具合を移行完了に必要な修正としてPR #2内で扱う。DDLの変更は1行のみで、`jsonb_object_length(source_key_definition) > 0`を`source_key_definition <> '{}'::jsonb`へ置き換えた。既存のオブジェクト型判定とNOT NULLは維持する。
+
+既存結合テストを維持し、同じ実DB経路で空オブジェクト・空/非空配列・文字列・数値・真偽値・JSON nullの拒否と、null値を持つ非空オブジェクトの受理を確認する。拒否は対象CHECK制約名とSQLSTATE `23514`で照合し、別の原因での失敗を成功扱いしない。
+
+修正後の完全な`pnpm verify`をPR CIで実行する。

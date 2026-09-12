@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { Client } from 'pg';
+import { sql } from '@mk3008/serene';
 import { expect, test } from 'vitest';
 import { fromPg } from '../../../src/adapters/pg/sql-client.js';
 import { executeCreateTransferDestinationDefinitionEntrySpec } from '../../../src/features/create-transfer-destination-definition/boundary.js';
@@ -57,6 +58,27 @@ test.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       expect(result.destinations[0]?.destinationKeyMapping).toEqual(input.destinations[0]?.destinationKeyMapping);
       expect(result.destinations[0]?.generatedSqlStatus).toBe('not_generated');
       expect(result.destinations[0]?.diffCompareExcludedColumns).toBeNull();
+      // Exercise the DDL directly: application validation must not mask CHECK behavior.
+      const updateDefinition = {
+        id: 'verify-source-key-definition', path: 'tests/adapters/pg/features.integration.test.ts',
+        sql: sql`update rawsql_transfer.setting
+          set source_key_definition = cast(:definition as jsonb)
+          where setting_id = :id returning source_key_definition`,
+      };
+      for (const invalid of [{}, [], ['key'], 'key', 1, true, null]) {
+        await client.query('savepoint invalid_definition');
+        await expect(executor.query(updateDefinition, {
+          definition: JSON.stringify(invalid), id: result.transferSetting.transferSettingId,
+        })).rejects.toMatchObject({
+          code: '23514', constraint: 'chk_setting_source_key_definition_object',
+        });
+        await client.query('rollback to savepoint invalid_definition');
+        await client.query('release savepoint invalid_definition');
+      }
+      const accepted = await executor.query(updateDefinition, {
+        definition: JSON.stringify({ key: null }), id: result.transferSetting.transferSettingId,
+      });
+      expect(accepted).toEqual([{ source_key_definition: { key: null } }]);
       await expect(execute(executor, input)).rejects.toThrow();
       await expect(execute(executor, {
         ...input, name: 'unknown_destination',
