@@ -602,9 +602,13 @@ describe.skipIf(!enabled)('immutable snapshot reevaluation on PostgreSQL', () =>
         finish: 'update rawsql_transfer.run set run_status =',
       }[stage]!;
       const cause = new Error('injected cancellation ' + stage);
+      let injected = false;
       const client = {
         query: async (text: string, values?: unknown[]) => {
-          if (text.includes(marker)) throw cause;
+          if (!injected && text.includes(marker)) {
+            injected = true;
+            throw cause;
+          }
           return db.query(text, values);
         },
       };
