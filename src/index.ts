@@ -1,11 +1,18 @@
 export {
   executeCreateTransferDestinationDefinitionEntrySpec,
   type CreateTransferDestinationDefinitionInput,
-  type CreateTransferDestinationDefinitionResult
+  type CreateTransferDestinationDefinitionResult,
 } from './features/create-transfer-destination-definition/boundary.js';
 
 export {
   execute as executeCreateTransferSetting,
   type CreateTransferSettingInput,
-  type CreateTransferSettingResult
+  type CreateTransferSettingResult,
 } from './features/create-transfer-setting/boundary.js';
+
+export {
+  executeTransfer,
+  TransferExecutionError,
+  type TransferExecutionDefinition,
+  type TransferExecutionClient,
+} from './features/execute-transfer/boundary.js';

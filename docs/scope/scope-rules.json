@@ -68,7 +68,7 @@
       "kind": "out-of-scope",
       "statement": "transfer は runtime hosting environment または scheduler を提供しない。",
       "reviewRisk": "scope-creep",
-      "reviewAction": "runtime execution は CLI、Lambda adapter、または別host boundaryの責務として扱う。"
+      "reviewAction": "runtime hosting は利用側の責務として扱い、その形態は規定しない。"
     }
   ]
 }

@@ -59,24 +59,6 @@ interface ScopeRulesMetadata {
   scopeRules: ScopeRuleEntry[];
 }
 
-interface TestRulesMetadata {
-  schemaVersion: 1;
-  metadataLanguagePolicy?: MetadataLanguagePolicy;
-  testPolicies: TestPolicyEntry[];
-}
-
-interface AuthorityRulesMetadata {
-  schemaVersion: 1;
-  metadataLanguagePolicy?: MetadataLanguagePolicy;
-  authorityRules: AuthorityRuleEntry[];
-}
-
-interface TechnologyRulesMetadata {
-  schemaVersion: 1;
-  metadataLanguagePolicy?: MetadataLanguagePolicy;
-  technologyRules: TechnologyRuleEntry[];
-}
-
 interface ScopeRuleEntry {
   id: string;
   kind: ScopeRuleKind;
@@ -89,31 +71,6 @@ interface ScopeRuleEntry {
   externalDomains?: string[];
 }
 
-interface TestPolicyEntry {
-  id: string;
-  kind: TestPolicyKind;
-  statement: string;
-  appliesTo?: string[];
-  reviewRisk?: string;
-  probes?: string[];
-}
-
-interface AuthorityRuleEntry {
-  id: string;
-  kind: AuthorityRuleKind;
-  statement: string;
-  reviewRisk?: string;
-  probes?: string[];
-}
-
-interface TechnologyRuleEntry {
-  id: string;
-  kind: TechnologyRuleKind;
-  statement: string;
-  reviewRisk?: string;
-  probes?: string[];
-}
-
 type ScopeRuleKind =
   | 'purpose'
   | 'in-scope'
@@ -122,28 +79,6 @@ type ScopeRuleKind =
   | 'ownership-boundary'
   | 'extension-policy'
   | 'assumption'
-  | 'review-policy';
-
-type TestPolicyKind =
-  | 'verification-policy'
-  | 'mapping-policy'
-  | 'boundary-case'
-  | 'identity-policy'
-  | 'state-transition-policy'
-  | 'generated-sql-policy'
-  | 'review-policy';
-
-type AuthorityRuleKind =
-  | 'requirements-authority'
-  | 'review-workflow-authority'
-  | 'generated-review-authority'
-  | 'review-policy';
-
-type TechnologyRuleKind =
-  | 'database-platform'
-  | 'data-access'
-  | 'data-access-boundary'
-  | 'front-facing-surface'
   | 'review-policy';
 
 interface OrderMetadata {
@@ -287,54 +222,6 @@ const SCOPE_RULE_KINDS = new Set<ScopeRuleKind>([
   'review-policy',
 ]);
 
-const TEST_POLICY_KINDS = new Set<TestPolicyKind>([
-  'verification-policy',
-  'mapping-policy',
-  'boundary-case',
-  'identity-policy',
-  'state-transition-policy',
-  'generated-sql-policy',
-  'review-policy',
-]);
-
-const AUTHORITY_RULE_KINDS = new Set<AuthorityRuleKind>([
-  'requirements-authority',
-  'review-workflow-authority',
-  'generated-review-authority',
-  'review-policy',
-]);
-
-const TECHNOLOGY_RULE_KINDS = new Set<TechnologyRuleKind>([
-  'database-platform',
-  'data-access',
-  'data-access-boundary',
-  'front-facing-surface',
-  'review-policy',
-]);
-
-const REVIEW_PLAN_ARTIFACT_KINDS = new Set([
-  'ddl',
-  'table-docs-metadata',
-  'ddl-relationship-metadata',
-  'concept-spec',
-  'concept-relationship-metadata',
-  'dfd',
-  'dfd-relationship-metadata',
-  'process-map',
-  'scope-spec',
-  'scope-rules',
-  'test-policy',
-  'test-rules',
-  'authority-model',
-  'authority-rules',
-  'technology-policy',
-  'technology-rules',
-  'generated-doc',
-  'script',
-  'workflow',
-  'unknown',
-]);
-
 /**
  * Checks DDL review metadata for structural drift.
  *
@@ -376,15 +263,6 @@ export function checkDocs(options: CheckDocsOptions): CheckDocsResult {
   const scopeRuleRegistry = options.scopeRulesPath
     ? readScopeRuleRegistry(options.scopeRulesPath, issues)
     : undefined;
-  if (options.testRulesPath) {
-    readTestPolicyRegistry(options.testRulesPath, issues);
-  }
-  if (options.authorityRulesPath) {
-    readAuthorityRuleRegistry(options.authorityRulesPath, issues);
-  }
-  if (options.technologyRulesPath) {
-    readTechnologyRuleRegistry(options.technologyRulesPath, issues);
-  }
 
   if (options.tableDocsPath) {
     checkTableDocsMetadata(options.tableDocsPath, tableIndex, { conceptIds, processIds }, issues);
@@ -1597,141 +1475,6 @@ function readScopeRuleRegistry(scopeRulesPath: string, issues: CheckIssue[]): Se
   return ids;
 }
 
-function readTestPolicyRegistry(testRulesPath: string, issues: CheckIssue[]): Set<string> {
-  const resolvedPath = path.resolve(process.cwd(), testRulesPath);
-  const value = readJsonFile(resolvedPath, 'test-rules.json', issues);
-  if (!value) {
-    return new Set();
-  }
-  if (!isTestRulesMetadata(value)) {
-    issues.push({
-      severity: 'error',
-      code: 'TEST_RULES_SCHEMA_ERROR',
-      message: `test-rules.json must be an object with schemaVersion: 1 and testPolicies[]: ${resolvedPath}`,
-    });
-    return new Set();
-  }
-  const ids = new Set<string>();
-  for (const policy of value.testPolicies) {
-    if (ids.has(policy.id)) {
-      issues.push({
-        severity: 'error',
-        code: 'TEST_POLICY_DUPLICATE_ID',
-        message: `test-rules.json has duplicate test policy id: ${policy.id}`,
-      });
-    }
-    ids.add(policy.id);
-    if (!TEST_POLICY_KINDS.has(policy.kind)) {
-      issues.push({
-        severity: 'error',
-        code: 'TEST_POLICY_UNKNOWN_KIND',
-        message: `test-rules.json has unknown test policy kind: ${policy.kind}`,
-      });
-    }
-    if (policy.statement.trim().length === 0) {
-      issues.push({
-        severity: 'error',
-        code: 'TEST_POLICY_EMPTY_STATEMENT',
-        message: `test-rules.json has empty statement for test policy: ${policy.id}`,
-      });
-    }
-    for (const artifactKind of policy.appliesTo ?? []) {
-      if (!REVIEW_PLAN_ARTIFACT_KINDS.has(artifactKind)) {
-        issues.push({
-          severity: 'error',
-          code: 'TEST_POLICY_UNKNOWN_ARTIFACT_KIND',
-          message: `test-rules.json references unknown review-plan artifact kind "${artifactKind}" in test policy: ${policy.id}`,
-        });
-      }
-    }
-  }
-  return ids;
-}
-
-function readAuthorityRuleRegistry(authorityRulesPath: string, issues: CheckIssue[]): Set<string> {
-  const resolvedPath = path.resolve(process.cwd(), authorityRulesPath);
-  const value = readJsonFile(resolvedPath, 'authority-rules.json', issues);
-  if (!value) {
-    return new Set();
-  }
-  if (!isAuthorityRulesMetadata(value)) {
-    issues.push({
-      severity: 'error',
-      code: 'AUTHORITY_RULES_SCHEMA_ERROR',
-      message: `authority-rules.json must be an object with schemaVersion: 1 and authorityRules[]: ${resolvedPath}`,
-    });
-    return new Set();
-  }
-  const ids = new Set<string>();
-  for (const rule of value.authorityRules) {
-    if (ids.has(rule.id)) {
-      issues.push({
-        severity: 'error',
-        code: 'AUTHORITY_RULE_DUPLICATE_ID',
-        message: `authority-rules.json has duplicate authority rule id: ${rule.id}`,
-      });
-    }
-    ids.add(rule.id);
-    if (!AUTHORITY_RULE_KINDS.has(rule.kind)) {
-      issues.push({
-        severity: 'error',
-        code: 'AUTHORITY_RULE_UNKNOWN_KIND',
-        message: `authority-rules.json has unknown authority rule kind for ${rule.id}: ${rule.kind}`,
-      });
-    }
-    if (rule.statement.trim().length === 0) {
-      issues.push({
-        severity: 'error',
-        code: 'AUTHORITY_RULE_EMPTY_STATEMENT',
-        message: `authority-rules.json has empty statement for authority rule: ${rule.id}`,
-      });
-    }
-  }
-  return ids;
-}
-
-function readTechnologyRuleRegistry(technologyRulesPath: string, issues: CheckIssue[]): Set<string> {
-  const resolvedPath = path.resolve(process.cwd(), technologyRulesPath);
-  const value = readJsonFile(resolvedPath, 'tech-rules.json', issues);
-  if (!value) {
-    return new Set();
-  }
-  if (!isTechnologyRulesMetadata(value)) {
-    issues.push({
-      severity: 'error',
-      code: 'TECHNOLOGY_RULES_SCHEMA_ERROR',
-      message: `tech-rules.json must be an object with schemaVersion: 1 and technologyRules[]: ${resolvedPath}`,
-    });
-    return new Set();
-  }
-  const ids = new Set<string>();
-  for (const rule of value.technologyRules) {
-    if (ids.has(rule.id)) {
-      issues.push({
-        severity: 'error',
-        code: 'TECHNOLOGY_RULE_DUPLICATE_ID',
-        message: `tech-rules.json has duplicate technology rule id: ${rule.id}`,
-      });
-    }
-    ids.add(rule.id);
-    if (!TECHNOLOGY_RULE_KINDS.has(rule.kind)) {
-      issues.push({
-        severity: 'error',
-        code: 'TECHNOLOGY_RULE_UNKNOWN_KIND',
-        message: `tech-rules.json has unknown technology rule kind for ${rule.id}: ${rule.kind}`,
-      });
-    }
-    if (rule.statement.trim().length === 0) {
-      issues.push({
-        severity: 'error',
-        code: 'TECHNOLOGY_RULE_EMPTY_STATEMENT',
-        message: `tech-rules.json has empty statement for technology rule: ${rule.id}`,
-      });
-    }
-  }
-  return ids;
-}
-
 function readProcessIdsFromProcessMapMetadata(processDirectories: string[], issues: CheckIssue[]): Set<string> {
   const ids = new Set<string>();
   for (const processMapPath of collectProcessMapMetadataPaths(processDirectories)) {
@@ -1892,58 +1635,6 @@ function isScopeRulesMetadata(value: unknown): value is ScopeRulesMetadata {
       && isOptionalStringArray(entry.ownedDomains)
       && isOptionalStringArray(entry.externalDomains)
       && (entry.reviewAction === undefined || typeof entry.reviewAction === 'string')
-  );
-}
-
-function isTestRulesMetadata(value: unknown): value is TestRulesMetadata {
-  if (!isRecord(value) || value.schemaVersion !== 1 || !Array.isArray(value.testPolicies)) {
-    return false;
-  }
-  if (value.metadataLanguagePolicy !== undefined && !isMetadataLanguagePolicy(value.metadataLanguagePolicy)) {
-    return false;
-  }
-  return value.testPolicies.every((entry) =>
-    isRecord(entry)
-      && typeof entry.id === 'string'
-      && typeof entry.kind === 'string'
-      && typeof entry.statement === 'string'
-      && isOptionalStringArray(entry.appliesTo)
-      && (entry.reviewRisk === undefined || typeof entry.reviewRisk === 'string')
-      && isOptionalStringArray(entry.probes)
-  );
-}
-
-function isAuthorityRulesMetadata(value: unknown): value is AuthorityRulesMetadata {
-  if (!isRecord(value) || value.schemaVersion !== 1 || !Array.isArray(value.authorityRules)) {
-    return false;
-  }
-  if (value.metadataLanguagePolicy !== undefined && !isMetadataLanguagePolicy(value.metadataLanguagePolicy)) {
-    return false;
-  }
-  return value.authorityRules.every((entry) =>
-    isRecord(entry)
-      && typeof entry.id === 'string'
-      && typeof entry.kind === 'string'
-      && typeof entry.statement === 'string'
-      && (entry.reviewRisk === undefined || typeof entry.reviewRisk === 'string')
-      && isOptionalStringArray(entry.probes)
-  );
-}
-
-function isTechnologyRulesMetadata(value: unknown): value is TechnologyRulesMetadata {
-  if (!isRecord(value) || value.schemaVersion !== 1 || !Array.isArray(value.technologyRules)) {
-    return false;
-  }
-  if (value.metadataLanguagePolicy !== undefined && !isMetadataLanguagePolicy(value.metadataLanguagePolicy)) {
-    return false;
-  }
-  return value.technologyRules.every((entry) =>
-    isRecord(entry)
-      && typeof entry.id === 'string'
-      && typeof entry.kind === 'string'
-      && typeof entry.statement === 'string'
-      && (entry.reviewRisk === undefined || typeof entry.reviewRisk === 'string')
-      && isOptionalStringArray(entry.probes)
   );
 }
 
