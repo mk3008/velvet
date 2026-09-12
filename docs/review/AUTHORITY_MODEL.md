@@ -2,7 +2,7 @@
 
 この文書は `@mk3008/velvet` の review authority model である。
 
-これは Concept Spec ではない。Concept Spec、DFD、Process Map、Technology Policy、Test Policy、generated review report を、誰が主体で扱うかを定義する。
+これは Concept Spec ではない。Concept Spec、DFD、Process Map、Test Policy、generated review report を、誰が主体で扱うかを定義する。
 
 ## Purpose
 
@@ -33,7 +33,7 @@ AIが主体で、手順管理、比較、指摘、レビュー観点の適用を
 主な対象:
 
 - review skill の実行
-- Concept / DFD / Process / DDL / Technology / Test Policy の横断レビュー
+- Concept / DFD / Process / DDL / Test Policy の横断レビュー
 - review-plan の required reads に基づく確認
 - 機械化できない矛盾、曖昧さ、責務境界の指摘
 

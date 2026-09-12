@@ -8,14 +8,14 @@
 
 ## Purpose
 
-`@mk3008/velvet` は、SQL、DDL、queryspec、application-owned DB tests を組み合わせて検証する。
+`@mk3008/velvet` は、SQL、DDL、SQL parameter/result、application-owned DB tests を組み合わせて検証する。
 
-hot mapper path に runtime validation を追加することではなく、DB制約、queryspec contract、mapper contract check、DB-backed tests へ検証責務を左シフトする。
+検証は現在の受入条件と具体的なリスクに対応させる。runtime validationの採否や配置、テストの分割は実装判断とする。
 
 ## In Scope
 
 - DDL制約、型、CHECK、unique、index設計の検証
-- queryspec contract と application-owned mapper の整合確認
+- SQL parameter/result contract と application-owned mapper の整合確認
 - application-owned physical/integration tests によるDBバインディング検証
 - NULL、blank、空配列、空object、JSON shape、enum境界の検証
 - source key / destination key の identity 境界検証
@@ -26,7 +26,6 @@ hot mapper path に runtime validation を追加することではなく、DB制
 
 - 実装コードからAIが推論した decision table を正本として扱うこと
 - E2EだけでSQL / mapper contract の検証を代替すること
-- hot mapper path にruntime validationを入れることを標準戦略にすること
 - external producer、CDC runtime、scheduler、host runtime の検証責務を transfer core に含めること
 
 ## Required Review Posture
@@ -36,19 +35,6 @@ hot mapper path に runtime validation を追加することではなく、DB制
 分岐表や状態遷移テストが必要な場合は、Issue、Concept Spec、DFD、Process Map、または明示されたdecision metadataを正本として扱う。
 
 実装からAIが生成したテスト表は、実装をなぞるだけになりやすいため、要求検証の正本にはしない。
-
-## Mapping Strategy
-
-DB rows は任意のWeb入力とは異なる trust boundary にある。
-
-mapperの安全性は、以下で担保する。
-
-- DDL constraints
-- queryspec contracts
-- mapper contract checks
-- application-owned DB tests
-
-feature側でDB resultをZodなどで再validationする場合は、なぜ上記では不足するのかをレビューで説明する。
 
 ## Boundary Cases
 

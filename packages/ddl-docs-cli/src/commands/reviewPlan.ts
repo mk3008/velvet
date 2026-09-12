@@ -27,8 +27,6 @@ type ArtifactKind =
   | 'test-rules'
   | 'authority-model'
   | 'authority-rules'
-  | 'technology-policy'
-  | 'technology-rules'
   | 'generated-doc'
   | 'script'
   | 'workflow'
@@ -49,8 +47,6 @@ const ARTIFACT_KINDS = new Set<ArtifactKind>([
   'test-rules',
   'authority-model',
   'authority-rules',
-  'technology-policy',
-  'technology-rules',
   'generated-doc',
   'script',
   'workflow',
@@ -75,12 +71,6 @@ interface TestRulesMetadata {
   schemaVersion: 1;
   metadataLanguagePolicy?: MetadataLanguagePolicy;
   testPolicies: TestPolicyEntry[];
-}
-
-interface TechnologyRulesMetadata {
-  schemaVersion: 1;
-  metadataLanguagePolicy?: MetadataLanguagePolicy;
-  technologyRules: TechnologyRuleEntry[];
 }
 
 interface AuthorityRulesMetadata {
@@ -112,13 +102,6 @@ interface TestPolicyEntry {
   reviewRisk?: string;
 }
 
-interface TechnologyRuleEntry {
-  id: string;
-  kind: string;
-  statement: string;
-  reviewRisk?: string;
-}
-
 interface AuthorityRuleEntry {
   id: string;
   kind: string;
@@ -140,12 +123,6 @@ interface ReviewPlanDiagnostic {
   message: string;
 }
 
-interface TechnologyExceptionSignal {
-  ruleId: string;
-  reviewRisk: string;
-  message: string;
-}
-
 interface RequiredReads {
   scopeRules: string[];
   concepts: string[];
@@ -154,7 +131,6 @@ interface RequiredReads {
   ddlRelationships: string[];
   testPolicies: string[];
   authorityRules: string[];
-  technologyRules: string[];
 }
 
 interface ChangedFileReviewPlan {
@@ -179,10 +155,6 @@ interface ReviewPlan {
     policies: Array<{ id: string; reason: string }>;
   };
   mandatoryAuthority?: {
-    files: string[];
-    rules: Array<{ id: string; reason: string }>;
-  };
-  mandatoryTechnology?: {
     files: string[];
     rules: Array<{ id: string; reason: string }>;
   };
@@ -214,10 +186,6 @@ const MANDATORY_TEST_POLICIES = [
     id: 'db-backed-contract-verification',
     reason: 'Business-bearing transfer changes should be reviewed against the DB-backed contract verification strategy.',
   },
-  {
-    id: 'no-hot-path-runtime-validation',
-    reason: 'Mapping safety is shifted left to query contracts, PostgreSQL-derived checks, and selective DB-backed behavior tests.',
-  },
 ] as const;
 
 const MANDATORY_AUTHORITY_RULES = [
@@ -232,25 +200,6 @@ const MANDATORY_AUTHORITY_RULES = [
   {
     id: 'cli-owned-review-views',
     reason: 'Review reports and generated VitePress views are CLI-owned review artifacts; AI may add bounded interpretation and humans approve the outcome.',
-  },
-] as const;
-
-const MANDATORY_TECHNOLOGY_RULES = [
-  {
-    id: 'postgres-primary-db',
-    reason: 'Transfer implementation assumes PostgreSQL-compatible DDL, SQL, and database behavior.',
-  },
-  {
-    id: 'sql-first-ashiba',
-    reason: 'Transfer changes should preserve the SQL-first, Ashiba standard implementation path.',
-  },
-  {
-    id: 'no-standard-orm-path',
-    reason: 'Introducing an ORM as the standard path is a technology policy exception and must be reviewed explicitly.',
-  },
-  {
-    id: 'cli-front-facing-surface',
-    reason: 'Transfer package front-facing surfaces should remain CLI-first; Web UI belongs to a separate owning application boundary.',
   },
 ] as const;
 
@@ -274,7 +223,6 @@ export function buildReviewPlan(options: ReviewPlanOptions): ReviewPlan {
   const scopeRules = loadScopeRules(options.scopeRulesPath);
   const testPolicies = loadTestPolicies(options.testRulesPath);
   const authorityRules = loadAuthorityRules(options.authorityRulesPath);
-  const technologyRules = loadTechnologyRules(options.technologyRulesPath);
 
   const changedFilePlans = changedFiles.map((changedFile) =>
     buildChangedFilePlan(changedFile, {
@@ -286,7 +234,6 @@ export function buildReviewPlan(options: ReviewPlanOptions): ReviewPlan {
       scopeRules,
       testPolicies,
       authorityRules,
-      technologyRules,
     })
   );
 
@@ -309,12 +256,6 @@ export function buildReviewPlan(options: ReviewPlanOptions): ReviewPlan {
         rules: MANDATORY_AUTHORITY_RULES.filter((rule) => authorityRules.has(rule.id)),
       },
     } : {}),
-    ...(options.technologyPolicyPath || options.technologyRulesPath ? {
-      mandatoryTechnology: {
-        files: [options.technologyPolicyPath, options.technologyRulesPath].filter((entry): entry is string => Boolean(entry)),
-        rules: MANDATORY_TECHNOLOGY_RULES.filter((rule) => technologyRules.has(rule.id)),
-      },
-    } : {}),
     changedFiles: changedFilePlans,
     unmappedArtifacts: changedFilePlans.filter((entry) =>
       entry.reviewRisks.includes('unmapped-business-artifact')
@@ -329,8 +270,6 @@ export function buildReviewPlan(options: ReviewPlanOptions): ReviewPlan {
       ...(options.testRulesPath ? [{ artifact: options.testRulesPath, status: 'unknown' as const }] : []),
       ...(options.authorityModelPath ? [{ artifact: options.authorityModelPath, status: 'unknown' as const }] : []),
       ...(options.authorityRulesPath ? [{ artifact: options.authorityRulesPath, status: 'unknown' as const }] : []),
-      ...(options.technologyPolicyPath ? [{ artifact: options.technologyPolicyPath, status: 'unknown' as const }] : []),
-      ...(options.technologyRulesPath ? [{ artifact: options.technologyRulesPath, status: 'unknown' as const }] : []),
     ],
   };
 }
@@ -346,7 +285,6 @@ function buildChangedFilePlan(
     scopeRules: Map<string, ScopeRuleEntry>;
     testPolicies: Map<string, TestPolicyEntry>;
     authorityRules: Map<string, AuthorityRuleEntry>;
-    technologyRules: Map<string, TechnologyRuleEntry>;
   }
 ): ChangedFileReviewPlan {
   const normalizedPath = normalizeRelativePath(changedFile);
@@ -360,7 +298,6 @@ function buildChangedFilePlan(
     reviewRisks: [],
     diagnostics: [],
   };
-  applyTechnologyExceptionSignals(basePlan, normalizedPath, context.technologyRules);
 
   if (artifactKind === 'scope-spec' || artifactKind === 'scope-rules') {
     basePlan.packageWideImpact = true;
@@ -389,14 +326,6 @@ function buildChangedFilePlan(
     return basePlan;
   }
 
-  if (artifactKind === 'technology-policy' || artifactKind === 'technology-rules') {
-    basePlan.packageWideImpact = true;
-    basePlan.requiredReads.technologyRules = MANDATORY_TECHNOLOGY_RULES
-      .filter((rule) => context.technologyRules.has(rule.id))
-      .map((rule) => rule.id);
-    basePlan.reviewRisks.push('package-technology-policy-impact');
-    return basePlan;
-  }
 
   basePlan.requiredReads.testPolicies = resolveTestPoliciesForArtifact(artifactKind, context.testPolicies);
 
@@ -433,91 +362,6 @@ function buildChangedFilePlan(
   }
 
   return basePlan;
-}
-
-function applyTechnologyExceptionSignals(
-  plan: ChangedFileReviewPlan,
-  normalizedPath: string,
-  technologyRules: Map<string, TechnologyRuleEntry>
-): void {
-  if (technologyRules.size === 0 || !isTransferPackagePath(normalizedPath)) {
-    return;
-  }
-
-  const body = readChangedFileBody(normalizedPath);
-  const signals = detectTechnologyExceptionSignals(normalizedPath, body);
-  for (const signal of signals) {
-    if (technologyRules.has(signal.ruleId) && !plan.requiredReads.technologyRules.includes(signal.ruleId)) {
-      plan.requiredReads.technologyRules.push(signal.ruleId);
-    }
-    if (!plan.reviewRisks.includes(signal.reviewRisk)) {
-      plan.reviewRisks.push(signal.reviewRisk);
-    }
-    if (!plan.diagnostics.some((diagnostic) => diagnostic.message === signal.message)) {
-      plan.diagnostics.push({
-        severity: 'warning',
-        message: signal.message,
-      });
-    }
-  }
-}
-
-function detectTechnologyExceptionSignals(normalizedPath: string, body: string | undefined): TechnologyExceptionSignal[] {
-  if (!body) {
-    return [];
-  }
-  const signals: TechnologyExceptionSignal[] = [];
-  const lowerPath = normalizedPath.toLowerCase();
-  const isPackageManifest = lowerPath === 'package.json' || lowerPath.endsWith('/package.json');
-  const isImplementationFile = /(?:^|\/)(?:src|scripts|tests|db)\//u.test(lowerPath)
-    && /\.(?:[cm]?[jt]sx?|json|sql)$/u.test(lowerPath);
-
-  if (!isPackageManifest && !isImplementationFile) {
-    return signals;
-  }
-
-  if (/(?:\bdrizzle-orm\b|@prisma\/client\b|\bprisma\b|\btypeorm\b|\bsequelize\b|\bknex\b|\bmikro-orm\b)/iu.test(body)) {
-    signals.push({
-      ruleId: 'no-standard-orm-path',
-      reviewRisk: 'technology-policy-exception',
-      message: 'Technology policy review required: transfer change references an ORM or ORM-like data access dependency.',
-    });
-  }
-
-  if (/\b(?:mysql2?|mariadb|sqlite3?|better-sqlite3|mssql)\b/iu.test(body)) {
-    signals.push({
-      ruleId: 'postgres-primary-db',
-      reviewRisk: 'technology-policy-exception',
-      message: 'Technology policy review required: transfer change references a non-PostgreSQL database dependency or adapter.',
-    });
-  }
-
-  if (
-    /\.(?:tsx|jsx)$/iu.test(lowerPath)
-    || /\b(?:honox|htmx\.org|@hono\/|hono\/jsx|react|vue|svelte|solid-js|next|vite)\b/iu.test(body)
-  ) {
-    signals.push({
-      ruleId: 'cli-front-facing-surface',
-      reviewRisk: 'technology-policy-exception',
-      message: 'Technology policy review required: transfer change appears to introduce a Web/UI surface; transfer package front-facing surface is CLI.',
-    });
-  }
-
-  return signals;
-}
-
-function readChangedFileBody(normalizedPath: string): string | undefined {
-  const resolvedPath = path.resolve(process.cwd(), normalizedPath);
-  if (!existsSync(resolvedPath)) {
-    return undefined;
-  }
-  return readFileSync(resolvedPath, 'utf8');
-}
-
-function isTransferPackagePath(normalizedPath: string): boolean {
-  const normalized = normalizeRelativePath(normalizedPath);
-  return normalized === 'package.json' || /^(?:src|scripts|tests|db)\//u.test(normalized)
-    || normalized.includes('/dogfood/transfer/');
 }
 
 function applyDdlRelationship(
@@ -713,18 +557,6 @@ function loadTestPolicies(testRulesPath: string | undefined): Map<string, TestPo
   return new Map(raw.testPolicies.map((entry) => [entry.id, entry]));
 }
 
-function loadTechnologyRules(technologyRulesPath: string | undefined): Map<string, TechnologyRuleEntry> {
-  if (!technologyRulesPath) {
-    return new Map();
-  }
-  const resolvedPath = path.resolve(process.cwd(), technologyRulesPath);
-  const raw = JSON.parse(readFileSync(resolvedPath, 'utf8')) as unknown;
-  if (!isTechnologyRulesMetadata(raw)) {
-    throw new Error(`technology-rules metadata must have schemaVersion: 1 and technologyRules[]: ${resolvedPath}`);
-  }
-  return new Map(raw.technologyRules.map((entry) => [entry.id, entry]));
-}
-
 function loadAuthorityRules(authorityRulesPath: string | undefined): Map<string, AuthorityRuleEntry> {
   if (!authorityRulesPath) {
     return new Map();
@@ -791,12 +623,6 @@ function classifyArtifactKind(changedFile: string, options: ReviewPlanOptions): 
   if (options.authorityRulesPath && samePath(changedFile, options.authorityRulesPath)) {
     return 'authority-rules';
   }
-  if (options.technologyPolicyPath && samePath(changedFile, options.technologyPolicyPath)) {
-    return 'technology-policy';
-  }
-  if (options.technologyRulesPath && samePath(changedFile, options.technologyRulesPath)) {
-    return 'technology-rules';
-  }
   if (options.relationshipPath && samePath(changedFile, options.relationshipPath)) {
     return 'ddl-relationship-metadata';
   }
@@ -840,7 +666,7 @@ function classifyReviewClass(kind: ArtifactKind): ReviewClass {
   if (kind === 'generated-doc') {
     return 'generated-review-view';
   }
-  if (kind.endsWith('-metadata') || kind === 'scope-rules' || kind === 'test-rules' || kind === 'authority-rules' || kind === 'technology-rules') {
+  if (kind.endsWith('-metadata') || kind === 'scope-rules' || kind === 'test-rules' || kind === 'authority-rules') {
     return 'metadata';
   }
   if (kind === 'script') {
@@ -849,7 +675,7 @@ function classifyReviewClass(kind: ArtifactKind): ReviewClass {
   if (kind === 'workflow') {
     return 'workflow-support';
   }
-  if (kind === 'ddl' || kind === 'concept-spec' || kind === 'dfd' || kind === 'process-map' || kind === 'scope-spec' || kind === 'test-policy' || kind === 'authority-model' || kind === 'technology-policy') {
+  if (kind === 'ddl' || kind === 'concept-spec' || kind === 'dfd' || kind === 'process-map' || kind === 'scope-spec' || kind === 'test-policy' || kind === 'authority-model') {
     return 'business-bearing';
   }
   return 'unknown';
@@ -932,7 +758,6 @@ function emptyRequiredReads(): RequiredReads {
     ddlRelationships: [],
     testPolicies: [],
     authorityRules: [],
-    technologyRules: [],
   };
 }
 
@@ -976,20 +801,6 @@ function isTestRulesMetadata(value: unknown): value is TestRulesMetadata {
           Array.isArray(entry.appliesTo)
           && entry.appliesTo.every(isArtifactKind)
         ))
-        && (entry.reviewRisk === undefined || typeof entry.reviewRisk === 'string')
-    );
-}
-
-function isTechnologyRulesMetadata(value: unknown): value is TechnologyRulesMetadata {
-  return isRecord(value)
-    && value.schemaVersion === 1
-    && (value.metadataLanguagePolicy === undefined || isMetadataLanguagePolicy(value.metadataLanguagePolicy))
-    && Array.isArray(value.technologyRules)
-    && value.technologyRules.every((entry) =>
-      isRecord(entry)
-        && typeof entry.id === 'string'
-        && typeof entry.kind === 'string'
-        && typeof entry.statement === 'string'
         && (entry.reviewRisk === undefined || typeof entry.reviewRisk === 'string')
     );
 }

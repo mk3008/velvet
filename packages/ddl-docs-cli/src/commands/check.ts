@@ -71,12 +71,6 @@ interface AuthorityRulesMetadata {
   authorityRules: AuthorityRuleEntry[];
 }
 
-interface TechnologyRulesMetadata {
-  schemaVersion: 1;
-  metadataLanguagePolicy?: MetadataLanguagePolicy;
-  technologyRules: TechnologyRuleEntry[];
-}
-
 interface ScopeRuleEntry {
   id: string;
   kind: ScopeRuleKind;
@@ -106,14 +100,6 @@ interface AuthorityRuleEntry {
   probes?: string[];
 }
 
-interface TechnologyRuleEntry {
-  id: string;
-  kind: TechnologyRuleKind;
-  statement: string;
-  reviewRisk?: string;
-  probes?: string[];
-}
-
 type ScopeRuleKind =
   | 'purpose'
   | 'in-scope'
@@ -137,13 +123,6 @@ type AuthorityRuleKind =
   | 'requirements-authority'
   | 'review-workflow-authority'
   | 'generated-review-authority'
-  | 'review-policy';
-
-type TechnologyRuleKind =
-  | 'database-platform'
-  | 'data-access'
-  | 'data-access-boundary'
-  | 'front-facing-surface'
   | 'review-policy';
 
 interface OrderMetadata {
@@ -304,14 +283,6 @@ const AUTHORITY_RULE_KINDS = new Set<AuthorityRuleKind>([
   'review-policy',
 ]);
 
-const TECHNOLOGY_RULE_KINDS = new Set<TechnologyRuleKind>([
-  'database-platform',
-  'data-access',
-  'data-access-boundary',
-  'front-facing-surface',
-  'review-policy',
-]);
-
 const REVIEW_PLAN_ARTIFACT_KINDS = new Set([
   'ddl',
   'table-docs-metadata',
@@ -327,8 +298,6 @@ const REVIEW_PLAN_ARTIFACT_KINDS = new Set([
   'test-rules',
   'authority-model',
   'authority-rules',
-  'technology-policy',
-  'technology-rules',
   'generated-doc',
   'script',
   'workflow',
@@ -381,9 +350,6 @@ export function checkDocs(options: CheckDocsOptions): CheckDocsResult {
   }
   if (options.authorityRulesPath) {
     readAuthorityRuleRegistry(options.authorityRulesPath, issues);
-  }
-  if (options.technologyRulesPath) {
-    readTechnologyRuleRegistry(options.technologyRulesPath, issues);
   }
 
   if (options.tableDocsPath) {
@@ -1690,48 +1656,6 @@ function readAuthorityRuleRegistry(authorityRulesPath: string, issues: CheckIssu
   return ids;
 }
 
-function readTechnologyRuleRegistry(technologyRulesPath: string, issues: CheckIssue[]): Set<string> {
-  const resolvedPath = path.resolve(process.cwd(), technologyRulesPath);
-  const value = readJsonFile(resolvedPath, 'tech-rules.json', issues);
-  if (!value) {
-    return new Set();
-  }
-  if (!isTechnologyRulesMetadata(value)) {
-    issues.push({
-      severity: 'error',
-      code: 'TECHNOLOGY_RULES_SCHEMA_ERROR',
-      message: `tech-rules.json must be an object with schemaVersion: 1 and technologyRules[]: ${resolvedPath}`,
-    });
-    return new Set();
-  }
-  const ids = new Set<string>();
-  for (const rule of value.technologyRules) {
-    if (ids.has(rule.id)) {
-      issues.push({
-        severity: 'error',
-        code: 'TECHNOLOGY_RULE_DUPLICATE_ID',
-        message: `tech-rules.json has duplicate technology rule id: ${rule.id}`,
-      });
-    }
-    ids.add(rule.id);
-    if (!TECHNOLOGY_RULE_KINDS.has(rule.kind)) {
-      issues.push({
-        severity: 'error',
-        code: 'TECHNOLOGY_RULE_UNKNOWN_KIND',
-        message: `tech-rules.json has unknown technology rule kind for ${rule.id}: ${rule.kind}`,
-      });
-    }
-    if (rule.statement.trim().length === 0) {
-      issues.push({
-        severity: 'error',
-        code: 'TECHNOLOGY_RULE_EMPTY_STATEMENT',
-        message: `tech-rules.json has empty statement for technology rule: ${rule.id}`,
-      });
-    }
-  }
-  return ids;
-}
-
 function readProcessIdsFromProcessMapMetadata(processDirectories: string[], issues: CheckIssue[]): Set<string> {
   const ids = new Set<string>();
   for (const processMapPath of collectProcessMapMetadataPaths(processDirectories)) {
@@ -1921,23 +1845,6 @@ function isAuthorityRulesMetadata(value: unknown): value is AuthorityRulesMetada
     return false;
   }
   return value.authorityRules.every((entry) =>
-    isRecord(entry)
-      && typeof entry.id === 'string'
-      && typeof entry.kind === 'string'
-      && typeof entry.statement === 'string'
-      && (entry.reviewRisk === undefined || typeof entry.reviewRisk === 'string')
-      && isOptionalStringArray(entry.probes)
-  );
-}
-
-function isTechnologyRulesMetadata(value: unknown): value is TechnologyRulesMetadata {
-  if (!isRecord(value) || value.schemaVersion !== 1 || !Array.isArray(value.technologyRules)) {
-    return false;
-  }
-  if (value.metadataLanguagePolicy !== undefined && !isMetadataLanguagePolicy(value.metadataLanguagePolicy)) {
-    return false;
-  }
-  return value.technologyRules.every((entry) =>
     isRecord(entry)
       && typeof entry.id === 'string'
       && typeof entry.kind === 'string'

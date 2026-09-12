@@ -17,7 +17,7 @@ pnpm verify
 
 The full gate includes the documentation CLI checks, type checking, build, tests, DDL metadata checks, and documentation generation. Tests use PostgreSQL 18 via Docker/Testcontainers by default. To use a dedicated existing test database, set `ASHIBA_DB_URL`. CI provisions its own PostgreSQL service and does not skip database tests.
 
-Generated review pages are written to `docs/generated/transfer/` and remain untracked. Start design work at [Package Scope](docs/scope/SYSTEM_SCOPE.md), [Concepts](docs/concepts/README.md), [Processes](docs/processes/README.md), and [DFD](docs/dfd/README.md). Read the [Technology Policy](docs/technology/TECHNOLOGY_POLICY.md) and [Test Policy](docs/testing/TEST_POLICY.md) before implementation.
+Generated review pages are written to `docs/generated/transfer/` and remain untracked. Start design work at [Package Scope](docs/scope/SYSTEM_SCOPE.md), [Concepts](docs/concepts/README.md), [Processes](docs/processes/README.md), and [DFD](docs/dfd/README.md). Read the [Test Policy](docs/testing/TEST_POLICY.md) before implementation.
 
 ## Migration Source
 

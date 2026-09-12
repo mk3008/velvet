@@ -45,7 +45,6 @@ export interface CheckDocsOptions {
   scopeRulesPath?: string;
   testRulesPath?: string;
   authorityRulesPath?: string;
-  technologyRulesPath?: string;
   processDirectories?: string[];
   configPath?: string;
   defaultSchema?: string;
@@ -67,8 +66,6 @@ export interface ReviewPlanOptions {
   testPolicyPath?: string;
   authorityRulesPath?: string;
   authorityModelPath?: string;
-  technologyRulesPath?: string;
-  technologyPolicyPath?: string;
   outPath?: string;
   packageName?: string;
 }

@@ -406,7 +406,6 @@ function parseCheckOptions(args: string[]): CheckDocsOptions | null {
     scopeRulesPath: undefined,
     testRulesPath: undefined,
     authorityRulesPath: undefined,
-    technologyRulesPath: undefined,
     processDirectories: [],
     configPath: undefined,
     defaultSchema: undefined,
@@ -488,10 +487,6 @@ function parseCheckOptions(args: string[]): CheckDocsOptions | null {
       continue;
     }
 
-    if (arg === '--technology-rules') {
-      options.technologyRulesPath = readRequiredValue(args, ++index, '--technology-rules');
-      continue;
-    }
 
     if (arg === '--process-dir') {
       options.processDirectories?.push(readRequiredValue(args, ++index, '--process-dir'));
@@ -547,8 +542,6 @@ function parseReviewPlanOptions(args: string[]): ReviewPlanOptions | null {
     testPolicyPath: undefined,
     authorityRulesPath: undefined,
     authorityModelPath: undefined,
-    technologyRulesPath: undefined,
-    technologyPolicyPath: undefined,
     outPath: undefined,
     packageName: undefined,
   };
@@ -612,14 +605,6 @@ function parseReviewPlanOptions(args: string[]): ReviewPlanOptions | null {
     }
     if (arg === '--authority-model') {
       options.authorityModelPath = readRequiredValue(args, ++index, '--authority-model');
-      continue;
-    }
-    if (arg === '--technology-rules') {
-      options.technologyRulesPath = readRequiredValue(args, ++index, '--technology-rules');
-      continue;
-    }
-    if (arg === '--technology-policy') {
-      options.technologyPolicyPath = readRequiredValue(args, ++index, '--technology-policy');
       continue;
     }
     if (arg === '--package') {
@@ -763,7 +748,6 @@ function printHelp(target: 'all' | 'generate' | 'prune' | 'check' | 'concept-sit
   --scope-rules <path>           Optional package scope rules metadata json
   --test-rules <path>            Optional package verification/test rules metadata json
   --authority-rules <path>       Optional package review authority rules metadata json
-  --technology-rules <path>      Optional package technology rules metadata json
   --process-dir <directory>      Optional Process Map directory for logical-model checks (repeatable)
   --default-schema <name>        Override default schema for unqualified tables
   --search-path <list>           Comma-separated schema search path
@@ -807,8 +791,6 @@ function printHelp(target: 'all' | 'generate' | 'prune' | 'check' | 'concept-sit
   --test-policy <path>           Optional package verification/test policy markdown source
   --authority-rules <path>       Optional package review authority rules metadata json
   --authority-model <path>       Optional package review authority model markdown source
-  --technology-rules <path>      Optional package technology rules metadata json
-  --technology-policy <path>     Optional package technology policy markdown source
   --package <name>               Package name for the review plan
   --out <path>                   Write JSON output to file instead of stdout
 `;

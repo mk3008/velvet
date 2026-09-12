@@ -15,7 +15,7 @@ destination、dirty key、transfer setting の意味をIssueやfeature内で再�
 
 ## Repository verification
 
-Read `docs/scope/SYSTEM_SCOPE.md`, `docs/technology/TECHNOLOGY_POLICY.md`, `docs/testing/TEST_POLICY.md`, and `docs/review/AUTHORITY_MODEL.md` before implementation. Follow the concept index into the relevant Process Map and DFD. Human-owned meanings must not be inferred from implementation or changed to make tests pass.
+Read `docs/scope/SYSTEM_SCOPE.md`, `docs/testing/TEST_POLICY.md`, and `docs/review/AUTHORITY_MODEL.md` before implementation. Follow the concept index into the relevant Process Map and DFD. Human-owned meanings must not be inferred from implementation or changed to make tests pass.
 
 Run `pnpm verify` for changes affecting repository wiring or runtime behavior. A PostgreSQL connection via `ASHIBA_DB_URL`, or Docker for Testcontainers, is required for the complete test suite. Existing `ASHIBA_*` environment names and `rawsql_transfer` schema names remain contracts during this repository-only migration.
 
@@ -36,3 +36,5 @@ Use `@mk3008/serene` as the default construction path for executable raw SQL; if
 ## Code structure ownership
 
 The owner does not prescribe a named architecture, recursive feature framework, mandatory `boundary.ts`, or fixed roles for `features` / `libraries` / `adapters`. Structure, splitting and naming are AI-owned implementation choices justified by current needs. Retain useful existing structure without treating it as a future requirement. Alder review, Raw SQL Rules and Serene remain the cross-cutting implementation contracts. This does not remove product Business Design, Concept/DFD/Process/DDL meaning, PostgreSQL assumptions, or verification requirements.
+
+The standing human implementation requirements are Alder review, Raw SQL Rules, Serene as the standard SQL construction/binding path, and PostgreSQL as the target runtime/database. Other cross-cutting choices (including ORM use, adapter shape, CLI/Web surface and coding style) are AI-owned, based on current requirements and concrete benefit; there is no separate technology exception policy.

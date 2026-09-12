@@ -30,3 +30,11 @@ The same PR's [code-structure decision](https://github.com/mk3008/velvet/pull/4#
 Additional verification covers independently visible Run creation, PostgreSQL deferred FK failure at COMMIT, secondary failure-recording errors, configuration changes between transactions, and the accepted prior-Active-Black limitation. Resolver/key validation during work now leaves a failed Run because Run creation has already committed; invalid configuration rejected before creation still leaves no Run.
 
 Failure recording only transitions a still-running Run. If the server committed work but its response was lost, the already committed succeeded Run and transfer records remain unchanged; the caller still receives the original error with runId for inspection. This guard preserves committed facts without adding general recovery. A real-COMMIT-then-error regression checks this boundary.
+
+## Standing implementation requirements narrowed
+
+The owner's [additional PR #4 decision](https://github.com/mk3008/velvet/pull/4#issuecomment-5646048628) limits standing implementation requirements to Alder, Raw SQL Rules, Serene and PostgreSQL. The separate technology policy/registry and its CLI flags, mandatory review fields and ORM/Web exception detectors are removed. References and stale generated pages are removed as well. The mapper runtime-validation placement rule and SQL leading-comma gate are removed; validation placement and formatting are implementation choices.
+
+Business meanings, owned/external responsibilities, DDL and transfer behavior are unchanged. Related DB/identity/state tests, source-derived documentation checks and human authority remain useful correctness checks. Existing formatter and syntax/type-check tools are retained to reduce formatting-only diffs and catch code errors, not as a human-mandated coding style or architecture. Existing metadata language hints help readers navigate the design documents; they do not constrain code structure.
+
+Tests specific to the retired policy feature are removed with it. A replacement review-plan regression verifies that the generated plan retains Business Design and correctness inputs without reintroducing technology exceptions for ORM/Web code.

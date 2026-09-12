@@ -9,21 +9,11 @@
     {
       "id": "db-backed-contract-verification",
       "kind": "verification-policy",
-      "statement": "transfer のSQL、DDL、queryspec、application-owned mapperはDB-backed testsで検証する。",
+      "statement": "変更するSQL、DDL、結果の対応と業務上の保証を、関連するPostgreSQLテストで検証する。",
       "reviewRisk": "test-coverage",
       "probes": [
-        "この変更はDB制約、queryspec、application-owned DB testsのどこで検証されるか。",
-        "E2EだけでSQLまたはmapper contractを代替していないか。"
-      ]
-    },
-    {
-      "id": "no-hot-path-runtime-validation",
-      "kind": "mapping-policy",
-      "statement": "transfer のhot mapper pathはruntime validationを標準戦略にせず、検証責務を左シフトする。",
-      "reviewRisk": "mapper-contract",
-      "probes": [
-        "DB resultをfeature側で再validationする場合、その理由は明示されているか。",
-        "queryspec contractやDB-backed testsで不足する点は説明されているか。"
+        "この変更の受入条件と異常系が関連するテストで検証されるか。",
+        "既存の業務上の保証を弱めていないか。"
       ]
     },
     {

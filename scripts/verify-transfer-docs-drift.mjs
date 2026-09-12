@@ -5,7 +5,6 @@ const generatedPaths = [
   'docs/generated/transfer/authority',
   'docs/generated/transfer/scope',
   'docs/generated/transfer/testing',
-  'docs/generated/transfer/technology',
   'docs/generated/transfer/review.md',
   'docs/generated/transfer/concepts',
   'docs/generated/transfer/dfd',
