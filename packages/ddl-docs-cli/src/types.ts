@@ -43,8 +43,6 @@ export interface CheckDocsOptions {
   conceptRelationshipPath?: string;
   dfdRelationshipPath?: string;
   scopeRulesPath?: string;
-  testRulesPath?: string;
-  authorityRulesPath?: string;
   processDirectories?: string[];
   configPath?: string;
   defaultSchema?: string;
@@ -62,10 +60,6 @@ export interface ReviewPlanOptions {
   processDirectories?: string[];
   scopeRulesPath?: string;
   scopeDocPath?: string;
-  testRulesPath?: string;
-  testPolicyPath?: string;
-  authorityRulesPath?: string;
-  authorityModelPath?: string;
   outPath?: string;
   packageName?: string;
 }

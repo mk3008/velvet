@@ -2,9 +2,7 @@ import { spawnSync } from 'node:child_process';
 
 const generatedPaths = [
   'docs/generated/transfer/transfer-docs.md',
-  'docs/generated/transfer/authority',
   'docs/generated/transfer/scope',
-  'docs/generated/transfer/testing',
   'docs/generated/transfer/review.md',
   'docs/generated/transfer/concepts',
   'docs/generated/transfer/dfd',

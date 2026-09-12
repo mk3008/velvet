@@ -38,3 +38,11 @@ The owner's [additional PR #4 decision](https://github.com/mk3008/velvet/pull/4#
 Business meanings, owned/external responsibilities, DDL and transfer behavior are unchanged. Related DB/identity/state tests, source-derived documentation checks and human authority remain useful correctness checks. Existing formatter and syntax/type-check tools are retained to reduce formatting-only diffs and catch code errors, not as a human-mandated coding style or architecture. Existing metadata language hints help readers navigate the design documents; they do not constrain code structure.
 
 Tests specific to the retired policy feature are removed with it. A replacement review-plan regression verifies that the generated plan retains Business Design and correctness inputs without reintroducing technology exceptions for ORM/Web code.
+
+## Retire the remaining package review policies
+
+The owner's [follow-up decision](https://github.com/mk3008/velvet/pull/4#issuecomment-5646112915) also retires Velvet's independent Test Policy and Authority Model, their registries, required reads, CLI inputs, generated review fields and policy-only tests. Earlier references in this record describe the adoption history; they are superseded by this decision. Alder owns the review responsibility contract and Raw SQL Rules owns SQL verification/reviewability guidance; Velvet does not duplicate them with independent cross-cutting policies.
+
+Product scope and its registry remain. Identity/state requirements remain in existing Concepts, DFD, Process, DDL and concrete acceptance tests. PostgreSQL integration tests, type checks and useful implementation tools are retained. The scope document loses only its pointer to the retired Test Policy; its ownership and business scope are unchanged. Historical AI findings are retained as review evidence, with the obsolete authority-derived language-policy field removed.
+
+The documentation CLI retains source relationships and product-scope review inputs without mandatory test/authority sections. Its existing review-plan regression now checks those sections are absent, while the DDL-to-concept/process/scope relationship tests remain. Previously generated policy pages are removed during regeneration.

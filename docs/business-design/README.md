@@ -13,7 +13,7 @@ For transfer execution, follow [Dirty Key intake and execution](../dfd/change-de
 
 The machine-readable relationship indexes determine coverage; this entrypoint is not a second inventory. Drafts and unresolved review findings do not become approved requirements through this index.
 
-After Business Design, read [Decision Records](../decisions/README.md), then the implementation, current [DDL](../../db/ddl/), and tests. [Test Policy](../testing/TEST_POLICY.md), and [Authority Model](../review/AUTHORITY_MODEL.md) constrain implementation and review. Generated pages and `docs/review/ai-review.json` are review evidence, not Business Design or human approval.
+After Business Design, read [Decision Records](../decisions/README.md), then the implementation, current [DDL](../../db/ddl/), and tests. Generated pages and `docs/review/ai-review.json` are review evidence, not Business Design or human approval.
 
 For an Alder review, use the pinned [review knowledge](../alder/review-knowledge.md) and record the compared product/design commit and working-tree scope. This index establishes access, not a finding that all design questions have been resolved.
 

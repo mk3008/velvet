@@ -1375,196 +1375,6 @@ test('check fails when relationship metadata references an unknown scope rule', 
   expect(result.errors.map((issue) => issue.code)).toContain('RELATIONSHIP_UNKNOWN_SCOPE_RULE');
 });
 
-test('check validates package test policy metadata', () => {
-  const work = createTempDir('ddl-docs-check-test-rules');
-  const ddlDir = path.join(work, 'ddl');
-  const testRulesPath = path.join(work, 'docs', 'testing', 'test-rules.json');
-
-  writeText(path.join(ddlDir, 'accounts.sql'), 'CREATE TABLE public.accounts (account_id bigint PRIMARY KEY);');
-  writeText(testRulesPath, JSON.stringify({
-    schemaVersion: 1,
-    metadataLanguagePolicy: {
-      humanFacingLanguage: 'ja',
-      generatedViewLanguage: 'en',
-      policy: 'Human-authored test review metadata follows the package documentation language.',
-    },
-    testPolicies: [
-      {
-        id: 'db-backed-contract-verification',
-        kind: 'verification-policy',
-        statement: 'Use DB-backed contract tests.',
-        appliesTo: ['ddl'],
-      },
-    ],
-  }, null, 2));
-
-  const result = checkDocs({
-    ddlDirectories: [{ path: ddlDir, instance: '' }],
-    ddlFiles: [],
-    ddlGlobs: [],
-    extensions: ['.sql'],
-    testRulesPath,
-  });
-
-  expect(result.errors).toHaveLength(0);
-});
-
-test('check reports invalid package test policy metadata', () => {
-  const work = createTempDir('ddl-docs-check-invalid-test-rules');
-  const ddlDir = path.join(work, 'ddl');
-  const testRulesPath = path.join(work, 'docs', 'testing', 'test-rules.json');
-
-  writeText(path.join(ddlDir, 'accounts.sql'), 'CREATE TABLE public.accounts (account_id bigint PRIMARY KEY);');
-  writeText(testRulesPath, JSON.stringify({
-    schemaVersion: 1,
-    testPolicies: [
-      { id: 'duplicate', kind: 'verification-policy', statement: 'A.' },
-      { id: 'duplicate', kind: 'verification-policy', statement: 'B.' },
-      { id: 'unknown-kind', kind: 'not-a-kind', statement: 'C.' },
-      { id: 'empty-statement', kind: 'verification-policy', statement: '' },
-      { id: 'unknown-artifact', kind: 'verification-policy', statement: 'D.', appliesTo: ['not-an-artifact'] },
-    ],
-  }, null, 2));
-
-  const result = checkDocs({
-    ddlDirectories: [{ path: ddlDir, instance: '' }],
-    ddlFiles: [],
-    ddlGlobs: [],
-    extensions: ['.sql'],
-    testRulesPath,
-  });
-
-  expect(result.errors.map((issue) => issue.code)).toContain('TEST_POLICY_DUPLICATE_ID');
-  expect(result.errors.map((issue) => issue.code)).toContain('TEST_POLICY_UNKNOWN_KIND');
-  expect(result.errors.map((issue) => issue.code)).toContain('TEST_POLICY_EMPTY_STATEMENT');
-  expect(result.errors.map((issue) => issue.code)).toContain('TEST_POLICY_UNKNOWN_ARTIFACT_KIND');
-});
-
-test('check rejects invalid package test metadata language policy', () => {
-  const work = createTempDir('ddl-docs-check-invalid-test-language-policy');
-  const ddlDir = path.join(work, 'ddl');
-  const testRulesPath = path.join(work, 'docs', 'testing', 'test-rules.json');
-
-  writeText(path.join(ddlDir, 'accounts.sql'), 'CREATE TABLE public.accounts (account_id bigint PRIMARY KEY);');
-  writeText(testRulesPath, JSON.stringify({
-    schemaVersion: 1,
-    metadataLanguagePolicy: {
-      humanFacingLanguage: 'ja',
-      generatedViewLanguage: '',
-      policy: 'Human-authored test review metadata follows the package documentation language.',
-    },
-    testPolicies: [
-      {
-        id: 'db-backed-contract-verification',
-        kind: 'verification-policy',
-        statement: 'Use DB-backed contract tests.',
-        appliesTo: ['ddl'],
-      },
-    ],
-  }, null, 2));
-
-  const result = checkDocs({
-    ddlDirectories: [{ path: ddlDir, instance: '' }],
-    ddlFiles: [],
-    ddlGlobs: [],
-    extensions: ['.sql'],
-    testRulesPath,
-  });
-
-  expect(result.errors.map((issue) => issue.code)).toContain('TEST_RULES_SCHEMA_ERROR');
-});
-
-test('check validates package authority rule metadata', () => {
-  const work = createTempDir('ddl-docs-check-authority-rules');
-  const ddlDir = path.join(work, 'ddl');
-  const authorityRulesPath = path.join(work, 'docs', 'review', 'authority-rules.json');
-
-  writeText(path.join(ddlDir, 'accounts.sql'), 'CREATE TABLE public.accounts (account_id bigint PRIMARY KEY);');
-  writeText(authorityRulesPath, JSON.stringify({
-    schemaVersion: 1,
-    metadataLanguagePolicy: {
-      humanFacingLanguage: 'ja',
-      generatedViewLanguage: 'en',
-      policy: 'Human-authored authority review metadata follows the package documentation language.',
-    },
-    authorityRules: [
-      {
-        id: 'human-owned-requirements',
-        kind: 'requirements-authority',
-        statement: 'Humans own requirement-like sources.',
-        probes: ['Is this AI proposal treated as pending approval?'],
-      },
-    ],
-  }, null, 2));
-
-  const result = checkDocs({
-    ddlDirectories: [{ path: ddlDir, instance: '' }],
-    ddlFiles: [],
-    ddlGlobs: [],
-    extensions: ['.sql'],
-    authorityRulesPath,
-  });
-
-  expect(result.errors).toHaveLength(0);
-});
-
-test('check reports invalid package authority rule metadata', () => {
-  const work = createTempDir('ddl-docs-check-invalid-authority-rules');
-  const ddlDir = path.join(work, 'ddl');
-  const authorityRulesPath = path.join(work, 'docs', 'review', 'authority-rules.json');
-
-  writeText(path.join(ddlDir, 'accounts.sql'), 'CREATE TABLE public.accounts (account_id bigint PRIMARY KEY);');
-  writeText(authorityRulesPath, JSON.stringify({
-    schemaVersion: 1,
-    authorityRules: [
-      { id: 'duplicate', kind: 'requirements-authority', statement: 'A.' },
-      { id: 'duplicate', kind: 'requirements-authority', statement: 'B.' },
-      { id: 'unknown-kind', kind: 'not-a-kind', statement: 'C.' },
-      { id: 'empty-statement', kind: 'requirements-authority', statement: '' },
-    ],
-  }, null, 2));
-
-  const result = checkDocs({
-    ddlDirectories: [{ path: ddlDir, instance: '' }],
-    ddlFiles: [],
-    ddlGlobs: [],
-    extensions: ['.sql'],
-    authorityRulesPath,
-  });
-
-  expect(result.errors.map((issue) => issue.code)).toContain('AUTHORITY_RULE_DUPLICATE_ID');
-  expect(result.errors.map((issue) => issue.code)).toContain('AUTHORITY_RULE_UNKNOWN_KIND');
-  expect(result.errors.map((issue) => issue.code)).toContain('AUTHORITY_RULE_EMPTY_STATEMENT');
-});
-
-test('check rejects invalid package authority metadata language policy', () => {
-  const work = createTempDir('ddl-docs-check-invalid-authority-language-policy');
-  const ddlDir = path.join(work, 'ddl');
-  const authorityRulesPath = path.join(work, 'docs', 'review', 'authority-rules.json');
-
-  writeText(path.join(ddlDir, 'accounts.sql'), 'CREATE TABLE public.accounts (account_id bigint PRIMARY KEY);');
-  writeText(authorityRulesPath, JSON.stringify({
-    schemaVersion: 1,
-    metadataLanguagePolicy: {
-      humanFacingLanguage: '',
-      policy: 'Human-authored authority review metadata follows the package documentation language.',
-    },
-    authorityRules: [
-      { id: 'human-owned-requirements', kind: 'requirements-authority', statement: 'Humans own requirements.' },
-    ],
-  }, null, 2));
-
-  const result = checkDocs({
-    ddlDirectories: [{ path: ddlDir, instance: '' }],
-    ddlFiles: [],
-    ddlGlobs: [],
-    extensions: ['.sql'],
-    authorityRulesPath,
-  });
-
-  expect(result.errors.map((issue) => issue.code)).toContain('AUTHORITY_RULES_SCHEMA_ERROR');
-});
-
 test('review-plan resolves DDL required reads from relationship metadata', () => {
   const work = createTempDir('ddl-docs-review-plan');
   const ddlDir = path.join(work, 'ddl');
@@ -1576,15 +1386,11 @@ test('review-plan resolves DDL required reads from relationship metadata', () =>
   const conceptRelationshipPath = path.join(conceptsDir, 'concept-relationship.json');
   const scopeRulesPath = path.join(scopeDir, 'scope-rules.json');
   const scopeDocPath = path.join(scopeDir, 'SYSTEM_SCOPE.md');
-  const testingDir = path.join(work, 'docs', 'testing');
-  const testRulesPath = path.join(testingDir, 'test-rules.json');
-  const testPolicyPath = path.join(testingDir, 'TEST_POLICY.md');
 
   writeText(path.join(ddlDir, 'accounts.sql'), 'CREATE TABLE public.accounts (account_id bigint PRIMARY KEY);');
   writeText(path.join(conceptsDir, 'account/concept.json'), '# Account Concept\n');
   writeText(path.join(processesDir, 'account-process.md'), '# Account Process\n');
   writeText(scopeDocPath, '# Scope\n');
-  writeText(testPolicyPath, '# Test Policy\n');
   writeText(changedFilesPath, `${path.join(ddlDir, 'accounts.sql')}\n`);
   writeText(scopeRulesPath, JSON.stringify({
     schemaVersion: 1,
@@ -1615,23 +1421,7 @@ test('review-plan resolves DDL required reads from relationship metadata', () =>
     schemaVersion: 1,
     processMaps: [{ id: 'account-process', path: 'account-process.md' }],
   }, null, 2));
-  writeText(testRulesPath, JSON.stringify({
-    schemaVersion: 1,
-    testPolicies: [
-      {
-        id: 'db-backed-contract-verification',
-        kind: 'verification-policy',
-        statement: 'Use DB-backed contract tests.',
-        appliesTo: ['ddl'],
-      },
-      {
-        id: 'identity-boundary-cases',
-        kind: 'identity-policy',
-        statement: 'Verify source and destination identity.',
-        appliesTo: ['ddl'],
-      },
-    ],
-  }, null, 2));
+
 
   const plan = buildReviewPlan({
     changedFilesPath,
@@ -1641,8 +1431,6 @@ test('review-plan resolves DDL required reads from relationship metadata', () =>
     processDirectories: [processesDir],
     scopeRulesPath,
     scopeDocPath,
-    testRulesPath,
-    testPolicyPath,
   });
 
   expect(plan.mandatoryScope.files).toContain(scopeDocPath);
@@ -1654,15 +1442,9 @@ test('review-plan resolves DDL required reads from relationship metadata', () =>
   expect(plan.changedFiles[0]?.requiredReads.scopeRules).toEqual(['account-scope']);
   expect(plan.changedFiles[0]?.requiredReads.concepts).toEqual(['account']);
   expect(plan.changedFiles[0]?.requiredReads.processes).toEqual(['account-process']);
-  expect(plan.changedFiles[0]?.requiredReads.testPolicies).toEqual([
-    'db-backed-contract-verification',
-    'identity-boundary-cases',
-  ]);
+
   expect(plan.changedFiles[0]?.reviewRisks).toEqual(['ownership-boundary']);
-  expect(plan.mandatoryVerification?.files).toEqual([testPolicyPath, testRulesPath]);
-  expect(plan.mandatoryVerification?.policies.map((policy) => policy.id)).toEqual([
-    'db-backed-contract-verification',
-  ]);
+
 });
 
 test('review-plan classifies concept.json edits as concept specs', () => {
@@ -1689,34 +1471,6 @@ test('review-plan classifies concept.json edits as concept specs', () => {
   expect(plan.changedFiles[0]?.artifactKind).toBe('concept-spec');
   expect(plan.changedFiles[0]?.reviewClass).toBe('business-bearing');
   expect(plan.changedFiles[0]?.requiredReads.concepts).toEqual(['account']);
-});
-
-test('review-plan rejects unknown test policy artifact kinds', () => {
-  const work = createTempDir('ddl-docs-review-plan-invalid-test-rules');
-  const ddlDir = path.join(work, 'ddl');
-  const testingDir = path.join(work, 'docs', 'testing');
-  const changedFilesPath = path.join(work, 'changed-files.txt');
-  const testRulesPath = path.join(testingDir, 'test-rules.json');
-
-  writeText(path.join(ddlDir, 'accounts.sql'), 'CREATE TABLE public.accounts (account_id bigint PRIMARY KEY);');
-  writeText(changedFilesPath, `${path.join(ddlDir, 'accounts.sql')}\n`);
-  writeText(testRulesPath, JSON.stringify({
-    schemaVersion: 1,
-    testPolicies: [
-      {
-        id: 'bad-applies-to',
-        kind: 'verification-policy',
-        statement: 'This policy should not load.',
-        appliesTo: ['not-an-artifact'],
-      },
-    ],
-  }, null, 2));
-
-  expect(() => buildReviewPlan({
-    changedFilesPath,
-    ddlDirectories: [{ path: ddlDir, instance: '' }],
-    testRulesPath,
-  })).toThrow(/test-rules metadata must have schemaVersion: 1 and testPolicies\[\]/u);
 });
 
 test('review-plan treats DDL control files as technical support when explicitly mapped', () => {
@@ -1751,54 +1505,6 @@ test('review-plan treats DDL control files as technical support when explicitly 
   expect(plan.changedFiles[0]?.requiredReads.concepts).toEqual([]);
   expect(plan.changedFiles[0]?.requiredReads.processes).toEqual([]);
   expect(plan.changedFiles[0]?.reviewRisks).toEqual([]);
-});
-
-test('review-plan includes package review authority model as mandatory review input', () => {
-  const work = createTempDir('ddl-docs-review-plan-authority-model');
-  const ddlDir = path.join(work, 'ddl');
-  const reviewDir = path.join(work, 'docs', 'review');
-  const changedFilesPath = path.join(work, 'changed-files.txt');
-  const authorityModelPath = path.join(reviewDir, 'AUTHORITY_MODEL.md');
-  const authorityRulesPath = path.join(reviewDir, 'authority-rules.json');
-
-  writeText(path.join(ddlDir, 'accounts.sql'), 'CREATE TABLE public.accounts (account_id bigint PRIMARY KEY);');
-  writeText(authorityModelPath, '# Authority Model\n');
-  writeText(authorityRulesPath, JSON.stringify({
-    schemaVersion: 1,
-    metadataLanguagePolicy: {
-      humanFacingLanguage: 'ja',
-      generatedViewLanguage: 'en',
-      policy: 'Human-authored authority metadata follows the package documentation language.',
-    },
-    authorityRules: [
-      { id: 'human-owned-requirements', kind: 'requirements-authority', statement: 'Humans own requirements.' },
-      { id: 'ai-owned-review-management', kind: 'review-workflow-authority', statement: 'AI manages review workflows.' },
-      { id: 'cli-owned-review-views', kind: 'generated-review-authority', statement: 'CLI owns generated review views.' },
-    ],
-  }, null, 2));
-  writeText(changedFilesPath, `${authorityModelPath}\n${authorityRulesPath}\n`);
-
-  const plan = buildReviewPlan({
-    changedFilesPath,
-    ddlDirectories: [{ path: ddlDir, instance: '' }],
-    authorityModelPath,
-    authorityRulesPath,
-  });
-
-  expect(plan.mandatoryAuthority?.files).toEqual([authorityModelPath, authorityRulesPath]);
-  expect(plan.mandatoryAuthority?.rules.map((entry) => entry.id)).toEqual([
-    'human-owned-requirements',
-    'ai-owned-review-management',
-    'cli-owned-review-views',
-  ]);
-  expect(plan.changedFiles.map((entry) => entry.artifactKind)).toEqual(['authority-model', 'authority-rules']);
-  expect(plan.changedFiles[0]?.packageWideImpact).toBe(true);
-  expect(plan.changedFiles[0]?.requiredReads.authorityRules).toEqual([
-    'human-owned-requirements',
-    'ai-owned-review-management',
-    'cli-owned-review-views',
-  ]);
-  expect(plan.changedFiles[0]?.reviewRisks).toEqual(['package-review-authority-impact']);
 });
 
 test('review-plan reports unmapped DDL and classifies generated docs as review views', () => {
@@ -1850,15 +1556,9 @@ test('review-plan retains business inputs without imposing implementation techno
     relationshipPath: path.join(repoRoot, 'db/ddl/relationship.json'),
     scopeDocPath: path.join(repoRoot, 'docs/scope/SYSTEM_SCOPE.md'),
     scopeRulesPath: path.join(repoRoot, 'docs/scope/scope-rules.json'),
-    testPolicyPath: path.join(repoRoot, 'docs/testing/TEST_POLICY.md'),
-    testRulesPath: path.join(repoRoot, 'docs/testing/test-rules.json'),
-    authorityModelPath: path.join(repoRoot, 'docs/review/AUTHORITY_MODEL.md'),
-    authorityRulesPath: path.join(repoRoot, 'docs/review/authority-rules.json'),
   });
   expect(plan.mandatoryScope?.rules.map(rule => rule.id)).toContain('human-owned-logical-model');
-  expect(plan.mandatoryVerification?.policies.map(rule => rule.id)).toContain('db-backed-contract-verification');
-  expect(plan.mandatoryAuthority?.rules.map(rule => rule.id)).toContain('human-owned-requirements');
   expect(plan.changedFiles.find(entry => entry.path.endsWith('db/ddl/setting.sql'))?.reviewClass).toBe('business-bearing');
-  expect(JSON.stringify(plan)).not.toMatch(/mandatoryTechnology|technologyRules|technology-policy-exception|no-hot-path-runtime-validation/);
+  expect(JSON.stringify(plan)).not.toMatch(/mandatoryTechnology|technologyRules|technology-policy-exception|no-hot-path-runtime-validation|mandatoryVerification|mandatoryAuthority|testPolicies|authorityRules/);
   } finally { cwd.mockRestore(); }
 });

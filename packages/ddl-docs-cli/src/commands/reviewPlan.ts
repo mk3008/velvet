@@ -23,10 +23,6 @@ type ArtifactKind =
   | 'process-map'
   | 'scope-spec'
   | 'scope-rules'
-  | 'test-policy'
-  | 'test-rules'
-  | 'authority-model'
-  | 'authority-rules'
   | 'generated-doc'
   | 'script'
   | 'workflow'
@@ -43,10 +39,6 @@ const ARTIFACT_KINDS = new Set<ArtifactKind>([
   'process-map',
   'scope-spec',
   'scope-rules',
-  'test-policy',
-  'test-rules',
-  'authority-model',
-  'authority-rules',
   'generated-doc',
   'script',
   'workflow',
@@ -67,18 +59,6 @@ interface ScopeRulesMetadata {
   scopeRules: ScopeRuleEntry[];
 }
 
-interface TestRulesMetadata {
-  schemaVersion: 1;
-  metadataLanguagePolicy?: MetadataLanguagePolicy;
-  testPolicies: TestPolicyEntry[];
-}
-
-interface AuthorityRulesMetadata {
-  schemaVersion: 1;
-  metadataLanguagePolicy?: MetadataLanguagePolicy;
-  authorityRules: AuthorityRuleEntry[];
-}
-
 type MetadataLanguagePolicy = string | StructuredMetadataLanguagePolicy;
 
 interface StructuredMetadataLanguagePolicy {
@@ -88,21 +68,6 @@ interface StructuredMetadataLanguagePolicy {
 }
 
 interface ScopeRuleEntry {
-  id: string;
-  kind: string;
-  statement: string;
-  reviewRisk?: string;
-}
-
-interface TestPolicyEntry {
-  id: string;
-  kind: string;
-  statement: string;
-  appliesTo?: ArtifactKind[];
-  reviewRisk?: string;
-}
-
-interface AuthorityRuleEntry {
   id: string;
   kind: string;
   statement: string;
@@ -129,8 +94,6 @@ interface RequiredReads {
   dfds: string[];
   processes: string[];
   ddlRelationships: string[];
-  testPolicies: string[];
-  authorityRules: string[];
 }
 
 interface ChangedFileReviewPlan {
@@ -147,14 +110,6 @@ interface ReviewPlan {
   schemaVersion: 1;
   package: string;
   mandatoryScope: {
-    files: string[];
-    rules: Array<{ id: string; reason: string }>;
-  };
-  mandatoryVerification?: {
-    files: string[];
-    policies: Array<{ id: string; reason: string }>;
-  };
-  mandatoryAuthority?: {
     files: string[];
     rules: Array<{ id: string; reason: string }>;
   };
@@ -181,28 +136,6 @@ const MANDATORY_SCOPE_RULES = [
   },
 ] as const;
 
-const MANDATORY_TEST_POLICIES = [
-  {
-    id: 'db-backed-contract-verification',
-    reason: 'Business-bearing transfer changes should be reviewed against the DB-backed contract verification strategy.',
-  },
-] as const;
-
-const MANDATORY_AUTHORITY_RULES = [
-  {
-    id: 'human-owned-requirements',
-    reason: 'Requirement-like Concept Spec sources are human-owned; AI may follow up, propose, and clarify but must not promote its proposal as authority.',
-  },
-  {
-    id: 'ai-owned-review-management',
-    reason: 'Review management and review-skill execution are AI-led workflows whose conclusions require human approval.',
-  },
-  {
-    id: 'cli-owned-review-views',
-    reason: 'Review reports and generated VitePress views are CLI-owned review artifacts; AI may add bounded interpretation and humans approve the outcome.',
-  },
-] as const;
-
 export function runReviewPlan(options: ReviewPlanOptions): ReviewPlan {
   const plan = buildReviewPlan(options);
   const json = `${JSON.stringify(plan, null, 2)}\n`;
@@ -221,8 +154,6 @@ export function buildReviewPlan(options: ReviewPlanOptions): ReviewPlan {
   const dfdRegistry = loadDfdRegistry(options.dfdRelationshipPath);
   const processRegistry = loadProcessRegistry(options.processDirectories ?? []);
   const scopeRules = loadScopeRules(options.scopeRulesPath);
-  const testPolicies = loadTestPolicies(options.testRulesPath);
-  const authorityRules = loadAuthorityRules(options.authorityRulesPath);
 
   const changedFilePlans = changedFiles.map((changedFile) =>
     buildChangedFilePlan(changedFile, {
@@ -232,8 +163,6 @@ export function buildReviewPlan(options: ReviewPlanOptions): ReviewPlan {
       dfdRegistry,
       processRegistry,
       scopeRules,
-      testPolicies,
-      authorityRules,
     })
   );
 
@@ -244,18 +173,6 @@ export function buildReviewPlan(options: ReviewPlanOptions): ReviewPlan {
       files: [options.scopeDocPath, options.scopeRulesPath].filter((entry): entry is string => Boolean(entry)),
       rules: MANDATORY_SCOPE_RULES.filter((rule) => scopeRules.has(rule.id)),
     },
-    ...(options.testPolicyPath || options.testRulesPath ? {
-      mandatoryVerification: {
-        files: [options.testPolicyPath, options.testRulesPath].filter((entry): entry is string => Boolean(entry)),
-        policies: MANDATORY_TEST_POLICIES.filter((policy) => testPolicies.has(policy.id)),
-      },
-    } : {}),
-    ...(options.authorityModelPath || options.authorityRulesPath ? {
-      mandatoryAuthority: {
-        files: [options.authorityModelPath, options.authorityRulesPath].filter((entry): entry is string => Boolean(entry)),
-        rules: MANDATORY_AUTHORITY_RULES.filter((rule) => authorityRules.has(rule.id)),
-      },
-    } : {}),
     changedFiles: changedFilePlans,
     unmappedArtifacts: changedFilePlans.filter((entry) =>
       entry.reviewRisks.includes('unmapped-business-artifact')
@@ -266,10 +183,6 @@ export function buildReviewPlan(options: ReviewPlanOptions): ReviewPlan {
     reviewCoverage: [
       ...(options.scopeDocPath ? [{ artifact: options.scopeDocPath, status: 'unknown' as const }] : []),
       ...(options.scopeRulesPath ? [{ artifact: options.scopeRulesPath, status: 'unknown' as const }] : []),
-      ...(options.testPolicyPath ? [{ artifact: options.testPolicyPath, status: 'unknown' as const }] : []),
-      ...(options.testRulesPath ? [{ artifact: options.testRulesPath, status: 'unknown' as const }] : []),
-      ...(options.authorityModelPath ? [{ artifact: options.authorityModelPath, status: 'unknown' as const }] : []),
-      ...(options.authorityRulesPath ? [{ artifact: options.authorityRulesPath, status: 'unknown' as const }] : []),
     ],
   };
 }
@@ -283,8 +196,6 @@ function buildChangedFilePlan(
     dfdRegistry: DfdRegistry | undefined;
     processRegistry: ProcessRegistry;
     scopeRules: Map<string, ScopeRuleEntry>;
-    testPolicies: Map<string, TestPolicyEntry>;
-    authorityRules: Map<string, AuthorityRuleEntry>;
   }
 ): ChangedFileReviewPlan {
   const normalizedPath = normalizeRelativePath(changedFile);
@@ -308,26 +219,9 @@ function buildChangedFilePlan(
     return basePlan;
   }
 
-  if (artifactKind === 'test-policy' || artifactKind === 'test-rules') {
-    basePlan.packageWideImpact = true;
-    basePlan.requiredReads.testPolicies = MANDATORY_TEST_POLICIES
-      .filter((policy) => context.testPolicies.has(policy.id))
-      .map((policy) => policy.id);
-    basePlan.reviewRisks.push('package-verification-policy-impact');
-    return basePlan;
-  }
-
-  if (artifactKind === 'authority-model' || artifactKind === 'authority-rules') {
-    basePlan.packageWideImpact = true;
-    basePlan.requiredReads.authorityRules = MANDATORY_AUTHORITY_RULES
-      .filter((rule) => context.authorityRules.has(rule.id))
-      .map((rule) => rule.id);
-    basePlan.reviewRisks.push('package-review-authority-impact');
-    return basePlan;
-  }
 
 
-  basePlan.requiredReads.testPolicies = resolveTestPoliciesForArtifact(artifactKind, context.testPolicies);
+
 
   if (artifactKind === 'ddl') {
     applyDdlRelationship(basePlan, context);
@@ -545,43 +439,6 @@ function loadScopeRules(scopeRulesPath: string | undefined): Map<string, ScopeRu
   return new Map(raw.scopeRules.map((entry) => [entry.id, entry]));
 }
 
-function loadTestPolicies(testRulesPath: string | undefined): Map<string, TestPolicyEntry> {
-  if (!testRulesPath) {
-    return new Map();
-  }
-  const resolvedPath = path.resolve(process.cwd(), testRulesPath);
-  const raw = JSON.parse(readFileSync(resolvedPath, 'utf8')) as unknown;
-  if (!isTestRulesMetadata(raw)) {
-    throw new Error(`test-rules metadata must have schemaVersion: 1 and testPolicies[]: ${resolvedPath}`);
-  }
-  return new Map(raw.testPolicies.map((entry) => [entry.id, entry]));
-}
-
-function loadAuthorityRules(authorityRulesPath: string | undefined): Map<string, AuthorityRuleEntry> {
-  if (!authorityRulesPath) {
-    return new Map();
-  }
-  const resolvedPath = path.resolve(process.cwd(), authorityRulesPath);
-  const raw = JSON.parse(readFileSync(resolvedPath, 'utf8')) as unknown;
-  if (!isAuthorityRulesMetadata(raw)) {
-    throw new Error(`authority-rules metadata must have schemaVersion: 1 and authorityRules[]: ${resolvedPath}`);
-  }
-  return new Map(raw.authorityRules.map((entry) => [entry.id, entry]));
-}
-
-function resolveTestPoliciesForArtifact(
-  artifactKind: ArtifactKind,
-  testPolicies: Map<string, TestPolicyEntry>
-): string[] {
-  const result: string[] = [];
-  for (const policy of testPolicies.values()) {
-    if (policy.appliesTo?.includes(artifactKind)) {
-      result.push(policy.id);
-    }
-  }
-  return result.sort();
-}
-
 function loadProcessRegistry(processDirectories: string[]): ProcessRegistry {
   const processes: ProcessRegistryEntry[] = [];
   for (const directory of processDirectories) {
@@ -610,18 +467,6 @@ function classifyArtifactKind(changedFile: string, options: ReviewPlanOptions): 
   }
   if (options.scopeRulesPath && samePath(changedFile, options.scopeRulesPath)) {
     return 'scope-rules';
-  }
-  if (options.testPolicyPath && samePath(changedFile, options.testPolicyPath)) {
-    return 'test-policy';
-  }
-  if (options.testRulesPath && samePath(changedFile, options.testRulesPath)) {
-    return 'test-rules';
-  }
-  if (options.authorityModelPath && samePath(changedFile, options.authorityModelPath)) {
-    return 'authority-model';
-  }
-  if (options.authorityRulesPath && samePath(changedFile, options.authorityRulesPath)) {
-    return 'authority-rules';
   }
   if (options.relationshipPath && samePath(changedFile, options.relationshipPath)) {
     return 'ddl-relationship-metadata';
@@ -666,7 +511,7 @@ function classifyReviewClass(kind: ArtifactKind): ReviewClass {
   if (kind === 'generated-doc') {
     return 'generated-review-view';
   }
-  if (kind.endsWith('-metadata') || kind === 'scope-rules' || kind === 'test-rules' || kind === 'authority-rules') {
+  if (kind.endsWith('-metadata') || kind === 'scope-rules') {
     return 'metadata';
   }
   if (kind === 'script') {
@@ -675,7 +520,7 @@ function classifyReviewClass(kind: ArtifactKind): ReviewClass {
   if (kind === 'workflow') {
     return 'workflow-support';
   }
-  if (kind === 'ddl' || kind === 'concept-spec' || kind === 'dfd' || kind === 'process-map' || kind === 'scope-spec' || kind === 'test-policy' || kind === 'authority-model') {
+  if (kind === 'ddl' || kind === 'concept-spec' || kind === 'dfd' || kind === 'process-map' || kind === 'scope-spec') {
     return 'business-bearing';
   }
   return 'unknown';
@@ -756,8 +601,6 @@ function emptyRequiredReads(): RequiredReads {
     dfds: [],
     processes: [],
     ddlRelationships: [],
-    testPolicies: [],
-    authorityRules: [],
   };
 }
 
@@ -784,38 +627,6 @@ function isScopeRulesMetadata(value: unknown): value is ScopeRulesMetadata {
         && typeof entry.kind === 'string'
         && typeof entry.statement === 'string'
         && (entry.reviewRisk === undefined || typeof entry.reviewRisk === 'string')
-    );
-}
-
-function isTestRulesMetadata(value: unknown): value is TestRulesMetadata {
-  return isRecord(value)
-    && value.schemaVersion === 1
-    && (value.metadataLanguagePolicy === undefined || isMetadataLanguagePolicy(value.metadataLanguagePolicy))
-    && Array.isArray(value.testPolicies)
-    && value.testPolicies.every((entry) =>
-      isRecord(entry)
-        && typeof entry.id === 'string'
-        && typeof entry.kind === 'string'
-        && typeof entry.statement === 'string'
-        && (entry.appliesTo === undefined || (
-          Array.isArray(entry.appliesTo)
-          && entry.appliesTo.every(isArtifactKind)
-        ))
-        && (entry.reviewRisk === undefined || typeof entry.reviewRisk === 'string')
-    );
-}
-
-function isAuthorityRulesMetadata(value: unknown): value is AuthorityRulesMetadata {
-  return isRecord(value)
-    && value.schemaVersion === 1
-    && (value.metadataLanguagePolicy === undefined || isMetadataLanguagePolicy(value.metadataLanguagePolicy))
-    && Array.isArray(value.authorityRules)
-    && value.authorityRules.every((entry) =>
-      isRecord(entry)
-      && typeof entry.id === 'string'
-      && typeof entry.kind === 'string'
-      && typeof entry.statement === 'string'
-      && (entry.reviewRisk === undefined || typeof entry.reviewRisk === 'string')
     );
 }
 

@@ -118,53 +118,7 @@ function copyScopeDoc() {
   );
 }
 
-function copyTestingDoc() {
-  const sourcePath = path.join(workspaceRoot, "docs", "testing", "TEST_POLICY.md");
-  const targetDir = path.join(generatedTransferDocsRoot, "testing");
-  const targetPath = path.join(targetDir, "index.md");
-  removeDir(targetDir);
-  fs.mkdirSync(assertInsideWorkspace(targetDir), { recursive: true });
-  const body = fs.readFileSync(assertInsideWorkspace(sourcePath), "utf8");
-  fs.writeFileSync(
-    assertInsideWorkspace(targetPath),
-    [
-      "<!-- generated-by: transfer-docs -->",
-      "",
-      body.trimEnd(),
-      "",
-      "## Source",
-      "",
-      "- `docs/testing/TEST_POLICY.md`",
-      "- `docs/testing/test-rules.json`",
-      "",
-    ].join("\n"),
-    "utf8"
-  );
-}
 
-function copyAuthorityDoc() {
-  const sourcePath = path.join(workspaceRoot, "docs", "review", "AUTHORITY_MODEL.md");
-  const targetDir = path.join(generatedTransferDocsRoot, "authority");
-  const targetPath = path.join(targetDir, "index.md");
-  removeDir(targetDir);
-  fs.mkdirSync(assertInsideWorkspace(targetDir), { recursive: true });
-  const body = fs.readFileSync(assertInsideWorkspace(sourcePath), "utf8");
-  fs.writeFileSync(
-    assertInsideWorkspace(targetPath),
-    [
-      "<!-- generated-by: transfer-docs -->",
-      "",
-      body.trimEnd(),
-      "",
-      "## Source",
-      "",
-      "- `docs/review/AUTHORITY_MODEL.md`",
-      "- `docs/review/authority-rules.json`",
-      "",
-    ].join("\n"),
-    "utf8"
-  );
-}
 
 
 function buildStructuredConceptPoc() {
@@ -242,10 +196,6 @@ function getTransferReviewSourcePaths() {
     "db/ddl/table-docs.json",
     "docs/scope/SYSTEM_SCOPE.md",
     "docs/scope/scope-rules.json",
-    "docs/testing/TEST_POLICY.md",
-    "docs/testing/test-rules.json",
-    "docs/review/AUTHORITY_MODEL.md",
-    "docs/review/authority-rules.json",
     "docs/concepts/concept-relationship.json",
     ...collectFilesRecursive(path.join(workspaceRoot, "docs", "concepts"), [".md"]),
     "docs/dfd/relationship.json",
@@ -271,10 +221,6 @@ function runTransferMetadataCheck() {
     "docs/dfd/relationship.json",
     "--scope-rules",
     "docs/scope/scope-rules.json",
-    "--test-rules",
-    "docs/testing/test-rules.json",
-    "--authority-rules",
-    "docs/review/authority-rules.json",
     "--process-dir",
     "docs/processes",
     "--default-schema",
@@ -316,14 +262,6 @@ function runTransferReviewPlan() {
     "docs/scope/scope-rules.json",
     "--scope-doc",
     "docs/scope/SYSTEM_SCOPE.md",
-    "--test-rules",
-    "docs/testing/test-rules.json",
-    "--test-policy",
-    "docs/testing/TEST_POLICY.md",
-    "--authority-rules",
-    "docs/review/authority-rules.json",
-    "--authority-model",
-    "docs/review/AUTHORITY_MODEL.md",
     "--package",
     "@mk3008/velvet",
     "--out",
@@ -496,8 +434,6 @@ function renderReviewHarnessSummary(metadataCheck, reviewPlan) {
     "- Unmapped business artifacts: " + reviewPlan.unmappedArtifacts.length,
     "- Review-plan diagnostics: " + diagnostics.length,
     "- Mandatory scope rules: " + formatIdList(reviewPlan.mandatoryScope?.rules),
-    "- Mandatory verification policies: " + formatIdList(reviewPlan.mandatoryVerification?.policies),
-    "- Mandatory authority rules: " + formatIdList(reviewPlan.mandatoryAuthority?.rules),
     "",
     "### Review-plan Diagnostics",
     "",
@@ -515,10 +451,6 @@ function renderReviewHarnessSummary(metadataCheck, reviewPlan) {
     "",
     "- Package scope: `docs/scope/SYSTEM_SCOPE.md`",
     "- Scope rules: `docs/scope/scope-rules.json`",
-    "- Test policy: `docs/testing/TEST_POLICY.md`",
-    "- Test rules: `docs/testing/test-rules.json`",
-    "- Authority model: `docs/review/AUTHORITY_MODEL.md`",
-    "- Authority rules: `docs/review/authority-rules.json`",
     "- Review plan snapshot: `tmp/transfer-review-plan.json`",
     "",
   ].join("\n");
@@ -550,7 +482,7 @@ function writeProductReviewReport(metadataCheck, reviewPlan, aiReviewArtifact) {
     "- [Table definitions](./rawsql-transfer/rawsql-transfer/) - generated table pages from transfer DDL and table review metadata.",
     "- [Process flows](./processes/) - process maps such as Transfer Execution and Lineage Trace.",
     "- [DFD views](./dfd/) - subsystem and business-flow views for transfer responsibilities.",
-    "- [Scope / Test / Authority policies](./scope/) - review harness rules used by this report.",
+    "- [Product scope](./scope/) - review harness rules used by this report.",
     "",
     "## Review Sections",
     "",
@@ -629,10 +561,10 @@ for (const dir of generatedSiteDirs) {
 removeDir(path.join(generatedTransferDocsRoot, "concepts"));
 buildStructuredConceptPoc();
 // Remove the retired generated policy page from previous local builds.
-removeDir(path.join(generatedTransferDocsRoot, "technology"));
+for (const retired of ["technology", "testing", "authority"]) {
+  removeDir(path.join(generatedTransferDocsRoot, retired));
+}
 copyScopeDoc();
-copyTestingDoc();
-copyAuthorityDoc();
 
 const metadataCheck = runTransferMetadataCheck();
 const reviewPlan = runTransferReviewPlan();

@@ -15,7 +15,7 @@ destination、dirty key、transfer setting の意味をIssueやfeature内で再�
 
 ## Repository verification
 
-Read `docs/scope/SYSTEM_SCOPE.md`, `docs/testing/TEST_POLICY.md`, and `docs/review/AUTHORITY_MODEL.md` before implementation. Follow the concept index into the relevant Process Map and DFD. Human-owned meanings must not be inferred from implementation or changed to make tests pass.
+Read `docs/scope/SYSTEM_SCOPE.md` before implementation. Follow the concept index into the relevant Process Map and DFD. Human-owned meanings must not be inferred from implementation or changed to make tests pass.
 
 Run `pnpm verify` for changes affecting repository wiring or runtime behavior. A PostgreSQL connection via `ASHIBA_DB_URL`, or Docker for Testcontainers, is required for the complete test suite. Existing `ASHIBA_*` environment names and `rawsql_transfer` schema names remain contracts during this repository-only migration.
 
