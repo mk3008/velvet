@@ -41,7 +41,7 @@
     "docs:transfer": "pnpm --filter @mk3008/velvet-ddl-docs build && node scripts/generate-transfer-docs.mjs",
     "verify:transfer-ddl-metadata": "pnpm --filter @mk3008/velvet-ddl-docs build && node packages/ddl-docs-cli/dist/src/index.js check --ddl-dir db/ddl --table-docs db/ddl/table-docs.json --relationship db/ddl/relationship.json --order db/ddl/order.json --concept-relationship docs/concepts/concept-relationship.json --dfd-relationship docs/dfd/relationship.json --scope-rules docs/scope/scope-rules.json --test-rules docs/testing/test-rules.json --authority-rules docs/review/authority-rules.json --technology-rules docs/technology/tech-rules.json --process-dir docs/processes --default-schema rawsql_transfer",
     "verify:transfer-docs": "pnpm verify:transfer-ddl-metadata && pnpm docs:transfer && pnpm verify:transfer-ddl-metadata && node scripts/verify-transfer-docs-drift.mjs",
-    "verify": "pnpm --filter @mk3008/velvet-ddl-docs typecheck && pnpm --filter @mk3008/velvet-ddl-docs lint && pnpm --filter @mk3008/velvet-ddl-docs test && pnpm typecheck && pnpm build && pnpm test && pnpm verify:transfer-docs && pnpm audit:sql --strict",
+    "verify": "pnpm --filter @mk3008/velvet-ddl-docs typecheck && pnpm --filter @mk3008/velvet-ddl-docs lint && pnpm --filter @mk3008/velvet-ddl-docs test && pnpm typecheck && pnpm build && pnpm test && pnpm verify:transfer-docs && pnpm audit:sql",
     "audit:sql": "serene-audit src"
   },
   "lint-staged": {

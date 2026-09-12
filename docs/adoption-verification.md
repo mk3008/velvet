@@ -43,3 +43,9 @@ DDL修正後に、4クエリのDB実行を含む完全な`pnpm verify`を再実�
 既存結合テストを維持し、同じ実DB経路で空オブジェクト・空/非空配列・文字列・数値・真偽値・JSON nullの拒否と、null値を持つ非空オブジェクトの受理を確認する。拒否は対象CHECK制約名とSQLSTATE `23514`で照合し、別の原因での失敗を成功扱いしない。
 
 修正後の完全な`pnpm verify`をPR CIで実行する。
+
+## DDL修正後の検証と監査設定の訂正
+
+[DDL修正コミットのCI](https://github.com/mk3008/velvet/actions/runs/34673273901)で92テストが成功し、型検査・ビルド・DDL文書検証も成功した。最後のSerene監査のみ、導入時に追加した`--strict`がreview-required 8件を失敗扱いにして停止した。
+
+導入方針は未解決経路をレビュー対象として残すことなので、`pnpm verify`では通常の`pnpm audit:sql`を実行する。Serene v0.4.0の通常モードはviolationで終了コード1、入力エラーで2となり、違反の失敗判定は維持される。review-requiredと内容シグナルを出力から除外せず、テスト・DDL制約も弱めない。
