@@ -14,6 +14,6 @@ Use [Business Design](business-design/README.md) → [Decision Records](decision
 
 For SQL construction review, run `pnpm audit:sql` (or `pnpm audit:sql --actionable-only`). Unresolved/imported paths remain for review; ordinary construction does not prove SQL correctness, binding, authorization or business behavior. Do not introduce a host-side source filter without a separate need and explicit integration.
 
-Raw SQL Rules covers executable application SQL. `source_sql_body` and generated transfer SQL columns are currently stored as bound data by the registration features; this does not authorize executing arbitrary submitted SQL. Future execution must establish the application-owned review/approval boundary under the existing concepts and Rules. DDL and documentation generation remain distinct from runtime query mirrors.
+Raw SQL Rules covers executable application SQL. Registration stores SQL as bound data. Phase 1 execution uses developer-managed stored SQL under the owner's explicit [trusted-configuration decision](decisions/0002-phase1-trusted-execution.md); analysis/generation status is not approval. The stored-SQL marker-lowering path is an explicit Serene exception requiring review. DDL and documentation generation remain distinct from runtime query mirrors.
 
 See [verification and the existing DDL blocker](adoption-verification.md) before starting further implementation.
