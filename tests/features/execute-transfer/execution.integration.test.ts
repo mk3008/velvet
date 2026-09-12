@@ -218,7 +218,9 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
           arguments: { branch: 'north' },
         }),
       ).rejects.toThrow(/JSON-compatible/);
-      expect((await db.query('select count(*) from rawsql_transfer.run')).rows[0].count).toBe('0');
+      expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
+        { run_status: 'failed' },
+      ]);
     },
   );
   test('rejects a PostgreSQL Date key without successful work or false lineage', async () => {
@@ -253,5 +255,120 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
     ]) {
       expect((await db.query('select count(*) from ' + table)).rows[0].count).toBe('0');
     }
+  });
+  test('Run is committed before destination work and a deferred FK failure retains failed Run', async () => {
+    await db.query('create table public.phase1_allowed_amount(amount integer primary key)');
+    await db.query(
+      'alter table public.phase1_destination add constraint phase1_deferred_fk foreign key(amount) references public.phase1_allowed_amount(amount) deferrable initially deferred',
+    );
+    const url = new URL(process.env.ASHIBA_DB_URL!);
+    url.pathname = '/' + database;
+    const observer = new Client({ connectionString: url.toString() });
+    await observer.connect();
+    let sawDurableRun = false;
+    let sawInsertedRow = false;
+    const client = {
+      async query(text: string, values?: unknown[]) {
+        if (text.startsWith('insert into public.phase1_destination')) {
+          expect((await observer.query('select run_status from rawsql_transfer.run')).rows).toEqual(
+            [{ run_status: 'running' }],
+          );
+          sawDurableRun = true;
+        }
+        const result = await db.query(text, values);
+        if (text.startsWith('insert into public.phase1_destination'))
+          sawInsertedRow = result.rowCount === 1;
+        return result;
+      },
+    };
+    try {
+      const error = await executeTransfer(client, [definition], {
+        settingId: '1',
+        arguments: { branch: 'north' },
+      }).catch((error) => error);
+      expect(error).toBeInstanceOf(TransferExecutionError);
+      expect(error.cause.code).toBe('23503');
+      expect(error.message).toContain('phase1_deferred_fk');
+      expect(error.recoveryErrors).toEqual([]);
+      expect(sawDurableRun && sawInsertedRow).toBe(true);
+      expect(
+        (await db.query('select run_id, run_status, error_message from rawsql_transfer.run')).rows,
+      ).toEqual([{ run_id: error.runId, run_status: 'failed', error_message: error.message }]);
+      for (const table of [
+        'public.phase1_destination',
+        'rawsql_transfer.work_item',
+        'rawsql_transfer.active_black',
+        'rawsql_transfer.lineage',
+        'rawsql_transfer.dirty_key_processing',
+      ])
+        expect((await db.query('select count(*) from ' + table)).rows[0].count).toBe('0');
+    } finally {
+      await observer.end();
+      await db.query('alter table public.phase1_destination drop constraint phase1_deferred_fk');
+      await db.query('drop table public.phase1_allowed_amount');
+    }
+  });
+  test('failure recording errors remain secondary to the transfer error', async () => {
+    const original = new Error('original source execution failure');
+    const recovery = new Error('failed Run recording unavailable');
+    const client = {
+      async query(text: string, values?: unknown[]) {
+        if (text.startsWith('select id as logical_id')) throw original;
+        if (text.startsWith('update rawsql_transfer.run') && values?.includes('failed'))
+          throw recovery;
+        return db.query(text, values);
+      },
+    };
+    const error = await executeTransfer(client, [definition], {
+      settingId: '1',
+      arguments: { branch: 'north' },
+    }).catch((error) => error);
+    expect(error).toBeInstanceOf(TransferExecutionError);
+    expect(error.message).toBe(original.message);
+    expect(error.cause).toBe(original);
+    expect(error.recoveryErrors).toEqual([recovery]);
+    expect((await db.query('select run_id, run_status from rawsql_transfer.run')).rows).toEqual([
+      { run_id: error.runId, run_status: 'running' },
+    ]);
+    expect(
+      (await db.query('select count(*) from rawsql_transfer.dirty_key_processing')).rows[0].count,
+    ).toBe('0');
+  });
+  test('configuration changes between Run creation and work fail closed', async () => {
+    let changed = false;
+    const client = {
+      async query(text: string, values?: unknown[]) {
+        const result = await db.query(text, values);
+        if (text === 'commit' && !changed) {
+          changed = true;
+          await db.query('update rawsql_transfer.setting set is_enabled = false');
+        }
+        return result;
+      },
+    };
+    await expect(
+      executeTransfer(client, [definition], { settingId: '1', arguments: { branch: 'north' } }),
+    ).rejects.toThrow(/configuration changed/);
+    expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
+      { run_status: 'failed' },
+    ]);
+    expect((await db.query('select count(*) from public.phase1_destination')).rows[0].count).toBe(
+      '0',
+    );
+  });
+  test('known Phase 1 limit: dirty prior Active Black blocks new keys without partial success', async () => {
+    await run();
+    await db.query("insert into public.phase1_source values ('b', 200, 'north')");
+    await db.query(
+      "insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json) values ('public','phase1_source','{\"id\":\"a\"}'),('public','phase1_source','{\"id\":\"b\"}')",
+    );
+    await expect(run()).rejects.toThrow(/Existing Active Black/);
+    await expect(run()).rejects.toThrow(/Existing Active Black/);
+    expect((await db.query('select row_id from public.phase1_destination')).rows).toEqual([
+      { row_id: 'a' },
+    ]);
+    expect(
+      (await db.query('select count(*) from rawsql_transfer.dirty_key_processing')).rows[0].count,
+    ).toBe('1');
   });
 });

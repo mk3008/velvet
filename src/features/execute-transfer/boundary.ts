@@ -20,6 +20,8 @@ export class TransferExecutionError extends Error {
   constructor(
     message: string,
     readonly runId: string,
+    readonly cause?: unknown,
+    readonly recoveryErrors: readonly unknown[] = [],
   ) {
     super(message);
   }
@@ -61,7 +63,7 @@ function projection(row: Row, columns: string[]): Row {
   );
 }
 
-/** Owns one transaction on an idle, dedicated PostgreSQL client. */
+/** Owns Run creation, transfer work and failure-recording transactions on an idle, dedicated PostgreSQL client. */
 export async function executeTransfer(
   client: TransferExecutionClient,
   definitions: readonly TransferExecutionDefinition[],
@@ -79,6 +81,7 @@ export async function executeTransfer(
     return (await client.query(prepared.text, prepared.values)).rows;
   };
   let runId: string | undefined;
+  let runPersisted = false;
   await client.query('begin');
   try {
     // The Setting lock serializes runs of this Setting without locking Dirty Key intake.
@@ -119,6 +122,20 @@ export async function executeTransfer(
       )
         throw new Error('Invalid Destination Link mapping');
     }
+    [{ run_id: runId }] = await query(queries.runSql, {
+      setting: input.settingId,
+      args: JSON.stringify(args),
+    });
+    await client.query('commit');
+    runPersisted = true;
+    await client.query('begin');
+    // Reacquire configuration locks: another Run may have completed between transactions.
+    const [currentSetting] = await query(queries.settingSql, { id: input.settingId });
+    const currentLinks = (await query(queries.linksSql, { id: input.settingId })).filter(
+      (l) => l.is_enabled,
+    );
+    if (!isDeepStrictEqual(currentSetting, setting) || !isDeepStrictEqual(currentLinks, links))
+      throw new Error('Transfer configuration changed after Run creation');
     const pending = await query(queries.pendingSql, {
       setting: input.settingId,
       schema: definition.sourceSchema,
@@ -132,12 +149,7 @@ export async function executeTransfer(
       projection(key, keyColumns);
       return { ...item, key: keyText(key) };
     });
-    [{ run_id: runId }] = await query(queries.runSql, {
-      setting: input.settingId,
-      args: JSON.stringify(args),
-    });
-    await client.query('savepoint transfer_work');
-    try {
+    {
       // Explicit exception: execute the developer-owned DB source, never a mirrored literal.
       const source = work.length
         ? await client.query(...storedArguments(setting.source_sql_body, args))
@@ -233,15 +245,41 @@ export async function executeTransfer(
       await query(queries.finishSql, { run: runId, status: 'succeeded', error: null });
       await client.query('commit');
       return { runId: runId!, inserted, skipped };
-    } catch (error) {
-      await client.query('rollback to savepoint transfer_work');
-      const message = error instanceof Error ? error.message : String(error);
-      await query(queries.finishSql, { run: runId, status: 'failed', error: message });
-      await client.query('commit');
-      throw new TransferExecutionError(message, runId!);
     }
   } catch (error) {
-    if (!(error instanceof TransferExecutionError)) await client.query('rollback');
+    const recoveryErrors: unknown[] = [];
+    let discarded = false;
+    try {
+      await client.query('rollback');
+      discarded = true;
+    } catch (recoveryError) {
+      recoveryErrors.push(recoveryError);
+    }
+    if (runPersisted && discarded) {
+      try {
+        await client.query('begin');
+        await query(queries.finishSql, {
+          run: runId,
+          status: 'failed',
+          error: error instanceof Error ? error.message : String(error),
+        });
+        await client.query('commit');
+      } catch (recoveryError) {
+        recoveryErrors.push(recoveryError);
+        try {
+          await client.query('rollback');
+        } catch (cleanupError) {
+          recoveryErrors.push(cleanupError);
+        }
+      }
+    }
+    if (runId)
+      throw new TransferExecutionError(
+        error instanceof Error ? error.message : String(error),
+        runId,
+        error,
+        recoveryErrors,
+      );
     throw error;
   }
 }

@@ -32,3 +32,7 @@ For an Alder review, read Business Design, Decision Records, then implementation
 For Raw SQL data-access work, read `rules/raw-sql-rules.md` and follow it as the repository contract. This v0.3 contract supersedes the former Ashiba `.sql` / generated SQL snapshot convention.
 
 Use `@mk3008/serene` as the default construction path for executable raw SQL; if it cannot preserve needed SQL behavior, keep the exception explicit for additional review. For SQL-construction review, use the installed `pnpm audit:sql` and keep unresolved paths in review. Use ordinary results to skip redundant construction-provenance review, not SQL meaning/binding, authorization, or business-behavior checks. See `docs/adoption.md` for pinned sources and scope.
+
+## Code structure ownership
+
+The owner does not prescribe a named architecture, recursive feature framework, mandatory `boundary.ts`, or fixed roles for `features` / `libraries` / `adapters`. Structure, splitting and naming are AI-owned implementation choices justified by current needs. Retain useful existing structure without treating it as a future requirement. Alder review, Raw SQL Rules and Serene remain the cross-cutting implementation contracts. This does not remove product Business Design, Concept/DFD/Process/DDL meaning, PostgreSQL assumptions, or verification requirements.

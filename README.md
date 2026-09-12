@@ -38,7 +38,7 @@ Run `pnpm audit:sql` for construction review. Keep imported or unresolved paths 
 
 ## Transfer Execution Phase 1
 
-`executeTransfer(client, definitions, { settingId, arguments })` owns a transaction on an idle, dedicated node-postgres client. It accepts run arguments, not source rows. The application registers exactly one definition for the selected Setting:
+`executeTransfer(client, definitions, { settingId, arguments })` owns separate Run-creation and transfer-work transactions on an idle, dedicated node-postgres client. It accepts run arguments, not source rows. The application registers exactly one definition for the selected Setting:
 
 ```ts
 const result = await executeTransfer(client, [{
@@ -54,7 +54,7 @@ The expected key definition must match the stored Setting exactly. Logical and d
 
 Developers prepare the enabled Setting and immutable Destination Links, including each link's stored `generated_insert_transfer_sql_body`. That statement binds destination-column names from `mapping_definition.columns`, inserts one row, and returns its destination key columns. The saved source SQL remains the only source SQL definition. SQL uses named value parameters; analysis/generation statuses are not execution approval. See [the trusted execution decision](docs/decisions/0002-phase1-trusted-execution.md) for prerequisites and the explicit stored-SQL exception.
 
-Successful execution returns `{ runId, inserted, skipped }`. A work failure rolls back destination and processing changes, retains a failed Run, and throws `TransferExecutionError` with its `runId`. Configuration rejection before Run creation throws without a Run. Existing Active Black, absent source rows, red/update/delete and retransfer routes are outside Phase 1.
+Successful execution returns `{ runId, inserted, skipped }`. Run creation is committed first. Destination and processing changes, including Run success, commit atomically in a second transaction. On work or commit failure, that transaction is discarded and a separate transaction records failed Run. `TransferExecutionError` preserves the original `cause` and `runId`; secondary cleanup/recording failures are available in `recoveryErrors` and may leave the durable Run running. Recovery from process interruption between transactions is outside this phase. Configuration rejection before Run creation throws without a Run. Existing Active Black, absent source rows, red/update/delete and retransfer routes are outside Phase 1.
 
 ## Transfer Destination Definition
 
@@ -92,4 +92,6 @@ The destination feature accepts `CreateTransferDestinationDefinitionInput` with 
 The setting feature accepts `CreateTransferSettingInput`, resolves destination definitions by name, and creates the setting plus one or more destination links transactionally.
 Destination-link input owns transfer-setting-specific mapping and diff-comparison metadata.
 
-Feature-specific validation stays inside this feature. Do not move this validation into `src/libraries/` unless it becomes independent enough to extract as a reusable external package.
+The current source layout is an implementation choice, not a required architecture or feature framework. See [source layout](src/features/README.md).
+
+A new Dirty Key for a previously transferred logical key currently fails the entire Run, including any other new keys. This is an accepted Phase 1 limit: repeated Dirty Keys are normal snapshot reevaluation requests, not event replay. The next phase must implement snapshot reevaluation routes; Active Black existence is not a permanent error condition.
