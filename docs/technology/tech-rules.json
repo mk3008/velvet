@@ -17,13 +17,13 @@
       ]
     },
     {
-      "id": "sql-first-ashiba-cli",
+      "id": "sql-first-serene",
       "kind": "data-access",
-      "statement": "transfer の標準実装経路は SQL-first、Ashiba CLI、thin SQL execution adapter である。",
+      "statement": "transfer の標準実装経路は SQL-first、Serene、thin SQL execution adapter である。",
       "reviewRisk": "implementation-boundary",
       "probes": [
         "この変更はレビュー可能なSQLを標準経路として維持しているか。",
-        "Ashiba CLI / thin adapter の生成・検証経路を迂回していないか。"
+        "Serene / thin adapter の構築・検証経路を迂回していないか。"
       ]
     },
     {
@@ -33,7 +33,7 @@
       "reviewRisk": "architecture-boundary",
       "probes": [
         "ORM 導入が adapter-level の例外ではなく標準経路変更になっていないか。",
-        "ORM を使う場合、なぜ SQL-first / Ashiba CLI / thin adapter では不足するのかが明示されているか。"
+        "ORM を使う場合、なぜ SQL-first / Serene / thin adapter では不足するのかが明示されているか。"
       ]
     },
     {

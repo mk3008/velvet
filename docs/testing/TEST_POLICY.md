@@ -10,12 +10,12 @@
 
 `@mk3008/velvet` は、SQL、DDL、queryspec、application-owned DB tests を組み合わせて検証する。
 
-hot mapper path に runtime validation を追加することではなく、DB制約、queryspec contract、generated mapper drift check、DB-backed tests へ検証責務を左シフトする。
+hot mapper path に runtime validation を追加することではなく、DB制約、queryspec contract、mapper contract check、DB-backed tests へ検証責務を左シフトする。
 
 ## In Scope
 
 - DDL制約、型、CHECK、unique、index設計の検証
-- queryspec contract と generated mapper の整合確認
+- queryspec contract と application-owned mapper の整合確認
 - application-owned physical/integration tests によるDBバインディング検証
 - NULL、blank、空配列、空object、JSON shape、enum境界の検証
 - source key / destination key の identity 境界検証
@@ -45,7 +45,7 @@ mapperの安全性は、以下で担保する。
 
 - DDL constraints
 - queryspec contracts
-- generated mapper drift checks
+- mapper contract checks
 - application-owned DB tests
 
 feature側でDB resultをZodなどで再validationする場合は、なぜ上記では不足するのかをレビューで説明する。

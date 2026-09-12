@@ -7,7 +7,7 @@ export type {
  * Minimal SQL client contract shared by the app and adapter boundaries.
  *
  * - Production: adapt this contract to your preferred driver (node-postgres, mysql2, etc.) and normalize the results to `T[]`.
- * - SQL files remain canonical. Runtime code uses generated query snapshots and metadata.
+ * - Each query.ts owns one Serene SQL literal; the native adapter binds by name.
  * - Tests: replace the implementation with a mock, a fixture helper, or an adapter that follows this contract.
  *
  * Connection strategy note:

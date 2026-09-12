@@ -28,15 +28,13 @@ This package was migrated from the former rawsql-ts transfer dogfood package:
 
 The product now lives in `mk3008/velvet`. See [repository migration](docs/migration/README.md) for the Ashiba source commit and preserved history.
 
-## Ashiba Runtime Boundary
+## Review and SQL contracts
 
-Transfer keeps SQL as the canonical source and uses generated runtime SQL snapshots plus metadata for execution.
+Start at [Business Design](docs/business-design/README.md). [Adoption and versions](docs/adoption.md) documents Alder, Raw SQL Rules v0.3 and Serene v0.4.0.
 
-- `.sql` files are the reviewed source.
-- `generated/query.sql.ts` and `generated/query.meta.ts` are runtime snapshots and metadata generated from the SQL.
-- Feature code receives `FeatureQueryExecutor`.
-- PostgreSQL wiring stays in `src/adapters/pg`.
-- No ORM runtime, entity model, lazy loading, or hidden SQL DSL is introduced.
+Each `queries/<query>/query.ts` owns one fixed Serene SQL literal. Names are bound through Serene at `src/adapters/pg`; node-postgres execution and transactions remain application-owned. No generated SQL copy or separately maintained binding map is needed. Current schema remains in `db/ddl/`.
+
+Run `pnpm audit:sql` for construction review. Keep imported or unresolved paths visible and review SQL meaning and business behavior separately.
 
 ## Transfer Destination Definition
 

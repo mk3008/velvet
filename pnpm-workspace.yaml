@@ -13,6 +13,7 @@ overrides:
   vite: 6.4.3
   vitepress>vite: 6.4.3
 allowBuilds:
+  "@mk3008/serene@https://codeload.github.com/mk3008/serene/tar.gz/284ff8fff0a6170752b22ac9d336a8ee283e48e5": true
   cpu-features: false
   esbuild: true
   protobufjs: true

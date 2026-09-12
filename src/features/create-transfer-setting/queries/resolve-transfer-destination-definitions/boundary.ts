@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import type { FeatureQueryExecutor } from '#features/_shared/featureQueryExecutor.js';
-import { mapResolveTransferDestinationDefinitionsRowsToResult } from './generated/row-mapper.js';
+import { mapResolveTransferDestinationDefinitionsRowsToResult } from './row-mapper.js';
 import { executeResolveTransferDestinationDefinitionsQuery } from './query.js';
 
 const QueryParamsSchema = z.object({

@@ -1,21 +1,42 @@
 import { queryMany, type FeatureQuerySource } from '#features/_shared/featureQueryExecutor.js';
 import type { FeatureQueryExecutor } from '#features/_shared/featureQueryExecutor.js';
-import { bindingMetadata } from './generated/query.meta.js';
-import { querySql } from './generated/query.sql.js';
+import { sql } from '@mk3008/serene';
 
-export const insertTransferSettingSql = querySql;
+export const insertTransferSettingSql = sql`insert into rawsql_transfer.setting(
+    setting_name
+    , description
+    , source_sql_body
+    , source_sql_hash
+    , source_key_definition
+    , source_sql_analysis_result
+    , search_condition_analysis_result
+    , source_sql_analysis_status
+    , source_sql_analysis_error
+    , is_enabled
+    , note
+)
+values
+    (:setting_name, :description, :source_sql_body, :source_sql_hash, cast(:source_key_definition as jsonb), cast(:source_sql_analysis_result as jsonb), cast(:search_condition_analysis_result as jsonb), :source_sql_analysis_status, :source_sql_analysis_error, :is_enabled, :note)
+returning
+    setting_id
+    , setting_name
+    , description
+    , source_sql_body
+    , source_sql_hash
+    , source_key_definition
+    , source_sql_analysis_result
+    , search_condition_analysis_result
+    , source_sql_analysis_status
+    , source_sql_analysis_error
+    , is_enabled
+    , created_at
+    , updated_at
+    , note;
+`;
 export const insertTransferSettingQuery: FeatureQuerySource<InsertTransferSettingQueryParams, InsertTransferSettingQueryResult> = {
   id: 'insert-transfer-setting',
-  path: 'insert-transfer-setting.sql',
-  sqlPath: 'insert-transfer-setting.sql',
+  path: 'src/features/create-transfer-setting/queries/insert-transfer-setting/query.ts',
   sql: insertTransferSettingSql,
-  binding: bindingMetadata.bindings.postgres,
-  metadata: {
-    sqlId: 'insert-transfer-setting',
-    queryId: 'insert-transfer-setting',
-    sqlFile: 'insert-transfer-setting.sql',
-    sqlPath: 'insert-transfer-setting.sql',
-  },
 };
 
 export interface InsertTransferSettingQueryParams {

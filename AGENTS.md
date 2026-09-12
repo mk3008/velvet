@@ -20,3 +20,15 @@ Read `docs/scope/SYSTEM_SCOPE.md`, `docs/technology/TECHNOLOGY_POLICY.md`, `docs
 Run `pnpm verify` for changes affecting repository wiring or runtime behavior. A PostgreSQL connection via `ASHIBA_DB_URL`, or Docker for Testcontainers, is required for the complete test suite. Existing `ASHIBA_*` environment names and `rawsql_transfer` schema names remain contracts during this repository-only migration.
 
 Do not merge PRs or publish packages unless explicitly requested. Report incomplete or skipped verification. Keep temporary task notes in `tmp/`.
+
+## Business Design and Alder
+
+Start at `docs/business-design/README.md` for current Business Design. Preserve existing source formats and follow their lifecycle and authority rules. Record material implementation assumptions and choices in `docs/decisions/`; do not treat records as human approval of unresolved business meaning.
+
+For an Alder review, read Business Design, Decision Records, then implementation / DDL / tests. Use `docs/alder/review-knowledge.md` (Alder v0.1, knowledge v0.3; provenance in `docs/adoption.md`) in a separate agent or fresh context. Apply the full knowledge only during review.
+
+## Raw SQL
+
+For Raw SQL data-access work, read `rules/raw-sql-rules.md` and follow it as the repository contract. This v0.3 contract supersedes the former Ashiba `.sql` / generated SQL snapshot convention.
+
+Use `@mk3008/serene` as the default construction path for executable raw SQL; if it cannot preserve needed SQL behavior, keep the exception explicit for additional review. For SQL-construction review, use the installed `pnpm audit:sql` and keep unresolved paths in review. Use ordinary results to skip redundant construction-provenance review, not SQL meaning/binding, authorization, or business-behavior checks. See `docs/adoption.md` for pinned sources and scope.

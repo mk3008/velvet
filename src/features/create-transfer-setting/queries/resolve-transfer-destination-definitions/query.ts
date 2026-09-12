@@ -1,21 +1,21 @@
 import { queryMany, type FeatureQuerySource } from '#features/_shared/featureQueryExecutor.js';
 import type { FeatureQueryExecutor } from '#features/_shared/featureQueryExecutor.js';
-import { bindingMetadata } from './generated/query.meta.js';
-import { querySql } from './generated/query.sql.js';
+import { sql } from '@mk3008/serene';
 
-export const resolveTransferDestinationDefinitionsSql = querySql;
+export const resolveTransferDestinationDefinitionsSql = sql`select
+    destination_definition_id
+    , destination_definition_name
+from
+    rawsql_transfer.destination_definition
+where
+    destination_definition_name = any(cast(:destination_definition_names as text[]))
+order by
+    destination_definition_name;
+`;
 export const resolveTransferDestinationDefinitionsQuery: FeatureQuerySource<ResolveTransferDestinationDefinitionsQueryParams, ResolveTransferDestinationDefinitionsQueryResult> = {
   id: 'resolve-transfer-destination-definitions',
-  path: 'resolve-transfer-destination-definitions.sql',
-  sqlPath: 'resolve-transfer-destination-definitions.sql',
+  path: 'src/features/create-transfer-setting/queries/resolve-transfer-destination-definitions/query.ts',
   sql: resolveTransferDestinationDefinitionsSql,
-  binding: bindingMetadata.bindings.postgres,
-  metadata: {
-    sqlId: 'resolve-transfer-destination-definitions',
-    queryId: 'resolve-transfer-destination-definitions',
-    sqlFile: 'resolve-transfer-destination-definitions.sql',
-    sqlPath: 'resolve-transfer-destination-definitions.sql',
-  },
 };
 
 export interface ResolveTransferDestinationDefinitionsQueryParams {
