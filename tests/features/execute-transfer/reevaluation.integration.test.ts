@@ -108,8 +108,8 @@ describe.skipIf(!enabled)('immutable snapshot reevaluation on PostgreSQL', () =>
       [redSql],
     );
     await db.query(
-      `insert into rawsql_transfer.setting(setting_id, setting_name, source_sql_body, source_sql_hash, source_key_definition)
-      values (1, 'source', $1, 'trusted-config', $2)`,
+      `insert into rawsql_transfer.setting(setting_id, setting_name, source_sql_body, source_sql_hash, source_key_definition, source_sql_analysis_status)
+      values (1, 'source', $1, 'trusted-config', $2, 'not_analyzed')`,
       [sourceSql, definition.sourceKeyDefinition],
     );
     await db.query(
