@@ -98,7 +98,7 @@ export async function executeTransfer(
     if (!links.length) throw new Error('Setting has no enabled Destination Link');
     for (const link of links) {
       if (link.transfer_model !== 'immutable')
-        throw new Error('Phase 1 requires enabled immutable destinations');
+        throw new Error('Execution requires enabled immutable destinations');
       if (!link.generated_insert_transfer_sql_body.trim())
         throw new Error('Destination Link has no stored Black Insert SQL');
       const mapping = link.mapping_definition?.columns;
@@ -167,15 +167,65 @@ export async function executeTransfer(
       for (const item of work) {
         const link = links.find((l) => l.destination_link_id === item.destination_link_id)!;
         const row = current.get(item.key);
-        if (!row) throw new Error('Source current row is absent; this route is outside Phase 1');
+        if (!row) throw new Error('Source current row is absent; this route is outside Phase 2');
         const context = JSON.stringify([link.destination_link_id, item.key]);
         const duplicate = completed.has(context);
-        if (
-          !duplicate &&
-          (await query(queries.activeSql, { link: link.destination_link_id, key: item.key })).length
-        ) {
-          throw new Error('Existing Active Black requires a route outside Phase 1');
+        const [active] = duplicate
+          ? []
+          : await query(queries.activeSql, {
+              link: link.destination_link_id,
+              key: item.key,
+            });
+        const mapped = duplicate
+          ? {}
+          : Object.fromEntries(
+              Object.entries(link.mapping_definition.columns).map(([target, source]) => {
+                if (!Object.hasOwn(row, source as string) || row[source as string] === undefined)
+                  throw new Error(`Missing mapping source: ${source}`);
+                return [target, row[source as string]];
+              }),
+            );
+        let noOp = false;
+        if (active) {
+          const excluded = link.diff_compare_excluded_columns?.columns ?? [];
+          const allowed = link.destination_columns.columns.map((c: Row) => c.name);
+          if (
+            (link.diff_compare_excluded_columns !== null &&
+              (!object(link.diff_compare_excluded_columns) ||
+                !Array.isArray(link.diff_compare_excluded_columns.columns))) ||
+            !Array.isArray(excluded) ||
+            excluded.some((c: unknown) => typeof c !== 'string' || !allowed.includes(c))
+          )
+            throw new Error('Invalid comparison exclusions');
+          if (!link.generated_reassessment_sql_body.trim())
+            throw new Error('Destination Link has no stored reassessment SQL');
+          if (Object.hasOwn(mapped, 'velvet_active_destination_key'))
+            throw new Error('Mapping collides with reserved reassessment parameter');
+          const prepared = bindStoredSql(link.generated_reassessment_sql_body, {
+            ...mapped,
+            velvet_active_destination_key: keyText(active.destination_key_json),
+          });
+          if (!prepared.names.includes('velvet_active_destination_key'))
+            throw new Error('Reassessment SQL must bind the Active Black destination key');
+          const comparison = await client.query(prepared.text, prepared.values);
+          if (
+            comparison.rows?.length !== 1 ||
+            typeof comparison.rows[0].current_values !== 'string' ||
+            typeof comparison.rows[0].active_values !== 'string'
+          )
+            throw new Error('Reassessment SQL must return one pair of JSON object texts');
+          const [decision] = await query(queries.compareSql, {
+            current: comparison.rows[0].current_values,
+            previous: comparison.rows[0].active_values,
+            columns: allowed.filter((c: string) => !excluded.includes(c)),
+            allColumns: allowed,
+            excluded,
+          });
+          if (!decision.valid)
+            throw new Error('Reassessment returned invalid destination comparison columns');
+          noOp = !decision.changed;
         }
+        const skip = duplicate ? 'duplicate_ignore' : noOp ? 'no_op' : null;
         const common = {
           run: runId,
           dirty: item.dirty_key_id,
@@ -186,18 +236,50 @@ export async function executeTransfer(
         };
         const [{ work_item_id: workId }] = await query(queries.workSql, {
           ...common,
-          route: duplicate ? 'skipped' : 'immutable',
-          insert: !duplicate,
-          skip: duplicate ? 'duplicate_ignore' : null,
+          route: skip ? 'skipped' : 'immutable',
+          insert: !skip,
+          skip,
+          active: active?.active_black_id ?? null,
+          evaluated: active ? keyText(active.destination_key_json) : null,
+          red: !!active && !skip,
         });
-        if (!duplicate) {
-          const mapped = Object.fromEntries(
-            Object.entries(link.mapping_definition.columns).map(([target, source]) => {
-              if (!Object.hasOwn(row, source as string) || row[source as string] === undefined)
-                throw new Error(`Missing mapping source: ${source}`);
-              return [target, row[source as string]];
-            }),
-          );
+        if (!skip) {
+          if (active) {
+            if (!link.generated_red_transfer_sql_body.trim())
+              throw new Error('Destination has no stored Red Transfer SQL');
+            const prepared = bindStoredSql(
+              link.generated_red_transfer_sql_body,
+              active.destination_key_json,
+            );
+            if (link.destination_key_columns.some((name: string) => !prepared.names.includes(name)))
+              throw new Error('Red SQL must bind every original destination key column');
+            const red = await client.query(prepared.text, prepared.values);
+            if (red.rows?.length !== 1 || red.rowCount !== 1)
+              throw new Error('Red Transfer must return exactly one destination row');
+            const redKey = projection(red.rows[0], link.destination_key_columns);
+            if (isDeepStrictEqual(redKey, active.destination_key_json))
+              throw new Error('Red Transfer must create a different destination row');
+            await query(queries.releaseActiveReferencesSql, {
+              active: active.active_black_id,
+              link: common.link,
+            });
+            const removed = await query(queries.activeDeleteSql, {
+              active: active.active_black_id,
+              link: common.link,
+            });
+            if (removed.length !== 1) throw new Error('Active Black retirement failed');
+            const originalText = keyText(active.destination_key_json);
+            const redText = keyText(redKey);
+            await query(queries.redLineageSql, {
+              ...common,
+              work: workId,
+              key: originalText,
+              hash: hash(originalText),
+              table: link.destination_table_name,
+              destination: redText,
+              destinationHash: hash(redText),
+            });
+          }
           const prepared = bindStoredSql(link.generated_insert_transfer_sql_body, mapped);
           // Every mapped column must actually be bound by the stored insertion statement.
           if (Object.keys(mapped).some((name) => !prepared.names.includes(name)))
@@ -233,13 +315,13 @@ export async function executeTransfer(
             destinationHash: hash(destinationText),
           });
           inserted++;
-          completed.add(context);
         } else skipped++;
+        completed.add(context);
         await query(queries.processingSql, {
           ...common,
           work: workId,
-          status: duplicate ? 'skipped' : 'succeeded',
-          result: duplicate ? 'duplicate_ignore' : 'black_insert',
+          status: skip ? 'skipped' : 'succeeded',
+          result: skip ?? (active ? 'red_then_black_insert' : 'black_insert'),
         });
       }
       await query(queries.finishSql, { run: runId, status: 'succeeded', error: null });
