@@ -64,9 +64,7 @@
           }
         },
         "destination_key_columns": {
-          "sample": [
-            "journal_id"
-          ]
+          "sample": ["journal_id"]
         },
         "sequence_expression_definition": {
           "sample": {
@@ -77,9 +75,7 @@
           "sample": "immutable"
         },
         "sign_inversion_columns": {
-          "sample": [
-            "amount"
-          ]
+          "sample": ["amount"]
         },
         "date_lower_bound_adjustments": {
           "sample": {
@@ -87,10 +83,7 @@
               {
                 "destinationColumn": "journal_date",
                 "functionName": "fn_lower_limit_date",
-                "argumentColumns": [
-                  "shop_id",
-                  "journal_date"
-                ],
+                "argumentColumns": ["shop_id", "journal_date"],
                 "adjustmentNotice": {
                   "destinationColumn": "system_note",
                   "value": "date lower bound adjusted"
@@ -203,9 +196,7 @@
           ]
         },
         "uq_setting_destination_execution_order": {
-          "designNotes": [
-            "同一 Transfer Setting 内の転送順序を一意にし、転送順の曖昧さを避ける。"
-          ]
+          "designNotes": ["同一 Transfer Setting 内の転送順序を一意にし、転送順の曖昧さを避ける。"]
         },
         "uq_destination_link_setting_identity": {
           "designNotes": [
@@ -236,9 +227,7 @@
         },
         "destination_key_mapping": {
           "sample": {
-            "sourceKey": [
-              "sales_id"
-            ],
+            "sourceKey": ["sales_id"],
             "destinationKey": [
               {
                 "name": "journal_id",
@@ -263,10 +252,7 @@
         },
         "diff_compare_excluded_columns": {
           "sample": {
-            "columns": [
-              "journal_id",
-              "created_at"
-            ]
+            "columns": ["journal_id", "created_at"]
           }
         },
         "generated_insert_transfer_sql_body": {
@@ -295,18 +281,19 @@
         },
         "note": {
           "sample": "Destination Link role for journal rows"
+        },
+        "generated_reassessment_sql_body": {
+          "designNotes": [
+            "保存済みBlack Insertと同じ補正後の転送先値、およびActive Blackが指す既存行を返す開発者管理の読取SQL。比較除外と最終比較は転送実行側で適用する。"
+          ]
         }
       }
     },
     "rawsql_transfer.active_black": {
       "decision": "active_black は転送プロセス用の current-state table とし、履歴や転送先行からの逆引きは持たせない。",
       "reviewRisk": "identity-boundary",
-      "conceptRefs": [
-        "active-black"
-      ],
-      "processRefs": [
-        "transfer-execution"
-      ],
+      "conceptRefs": ["active-black"],
+      "processRefs": ["transfer-execution"],
       "tradeoff": [
         "Destination Link と source key から現在有効な黒伝を高速に見つけるため、source_key_hash をlookup補助値として保持する。",
         "転送先行からの追跡は lineage に寄せ、active_black には destination_key_hash を持たせない。"
@@ -351,9 +338,7 @@
           "sample": {
             "sales_id": 123
           },
-          "designNotes": [
-            "この値は、Destination Link 文脈における転送元論理行の正本キーである。"
-          ]
+          "designNotes": ["この値は、Destination Link 文脈における転送元論理行の正本キーである。"]
         },
         "source_key_hash": {
           "sample": "sha256:source-key-json",
@@ -384,9 +369,7 @@
       ],
       "constraints": {
         "idx_dirty_key_source_created_at": {
-          "designNotes": [
-            "転送対象候補を発生元テーブルと登録順で読むための基本lookup経路である。"
-          ]
+          "designNotes": ["転送対象候補を発生元テーブルと登録順で読むための基本lookup経路である。"]
         }
       },
       "columns": {
@@ -480,8 +463,7 @@
             "Destination Link と source_key_hash で作業対象を絞り込むための大規模lookup経路である。最終的な同一性は source_key_json で確認する。"
           ]
         }
-      }
-      ,
+      },
       "columns": {
         "source_key_json": {
           "sample": {
@@ -492,6 +474,19 @@
           "sample": "sha256:source-key-json",
           "designNotes": [
             "Work Item 作成後の大規模検索を支える前段絞り込み用補助値である。source_key_json が正本であり、hashだけで同一性を確定しない。"
+          ]
+        },
+        "evaluated_destination_key_json": {
+          "designNotes": [
+            "評価時のActive Blackが指す転送先キーを保持し、現在状態参照が退役しても評価対象を失わない。"
+          ],
+          "sample": {
+            "journal_id": 456
+          }
+        },
+        "active_black_id": {
+          "designNotes": [
+            "現在状態への参照。退役時にNULLへ解放する。評価時の転送先キーはevaluated_destination_key_jsonで固定する。"
           ]
         }
       }

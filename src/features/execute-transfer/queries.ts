@@ -2,7 +2,8 @@ import { sql } from '@mk3008/serene';
 
 export const settingSql = sql`select * from rawsql_transfer.setting where setting_id = :id for update`;
 export const linksSql = sql`select l.*, d.destination_table_name, d.destination_columns,
-  d.destination_key_columns, d.transfer_model
+  d.destination_key_columns, d.transfer_model, d.sign_inversion_columns,
+  d.generated_red_transfer_sql_body, d.date_lower_bound_adjustments, d.sequence_expression_definition
   from rawsql_transfer.destination_link l
   join rawsql_transfer.destination_definition d using (destination_definition_id)
   where l.setting_id = :id order by l.execution_order for share of l, d`;
@@ -17,13 +18,14 @@ export const pendingSql = sql`select dk.dirty_key_id, dk.source_key_json, l.dest
   order by dk.dirty_key_id, l.execution_order`;
 export const runSql = sql`insert into rawsql_transfer.run(setting_id, run_arguments, run_status, started_at)
   values (:setting, cast(:args as jsonb), 'running', current_timestamp) returning run_id`;
-export const activeSql = sql`select active_black_id from rawsql_transfer.active_black
-  where destination_link_id = :link and source_key_json = cast(:key as jsonb)`;
+export const activeSql = sql`select active_black_id, destination_key_json from rawsql_transfer.active_black
+  where destination_link_id = :link and source_key_json = cast(:key as jsonb) for update`;
 export const workSql = sql`insert into rawsql_transfer.work_item(
   run_id, dirty_key_id, setting_id, destination_link_id, source_key_json, source_key_hash,
-  source_exists, transfer_model, route_type, requires_black_insert_transfer, skip_reason)
+  source_exists, transfer_model, route_type, requires_black_insert_transfer, skip_reason,
+  active_black_id, evaluated_destination_key_json, requires_red_transfer)
   values (:run, :dirty, :setting, :link, cast(:key as jsonb), :hash,
-  true, 'immutable', :route, :insert, :skip) returning work_item_id`;
+  true, 'immutable', :route, :insert, :skip, :active, cast(:evaluated as jsonb), :red) returning work_item_id`;
 export const activeInsertSql = sql`insert into rawsql_transfer.active_black(
   destination_link_id, source_key_json, source_key_hash, destination_key_json)
   values (:link, cast(:key as jsonb), :hash, cast(:destination as jsonb))`;
@@ -42,3 +44,25 @@ export const finishSql = sql`update rawsql_transfer.run set run_status = :status
 export const failSql = sql`update rawsql_transfer.run set run_status = 'failed',
   finished_at = current_timestamp, updated_at = current_timestamp, error_message = :error
   where run_id = :run and run_status = 'running'`;
+
+export const compareSql = sql`with values_to_compare as (
+  select cast(:current as jsonb) as current_values, cast(:previous as jsonb) as active_values
+)
+select jsonb_typeof(current_values) = 'object' and jsonb_typeof(active_values) = 'object'
+  and current_values ?& cast(:columns as text[]) and active_values ?& cast(:columns as text[])
+  and not exists (select 1 from jsonb_object_keys(current_values) k where not k = any(cast(:allColumns as text[])))
+  and not exists (select 1 from jsonb_object_keys(active_values) k where not k = any(cast(:allColumns as text[]))) as valid,
+  (current_values - cast(:excluded as text[])) is distinct from
+  (active_values - cast(:excluded as text[])) as changed
+from values_to_compare`;
+export const activeDeleteSql = sql`delete from rawsql_transfer.active_black
+  where active_black_id = :active and destination_link_id = :link returning active_black_id`;
+export const redLineageSql = sql`insert into rawsql_transfer.lineage(
+  run_id, setting_id, destination_link_id, work_item_id, transfer_operation, source_kind,
+  source_key_json, source_key_hash, destination_table_name, destination_key_json, destination_key_hash)
+  values (:run, :setting, :link, :work, 'red_insert', 'reversed_destination_row',
+  cast(:key as jsonb), :hash, :table, cast(:destination as jsonb), :destinationHash)`;
+
+export const releaseActiveReferencesSql = sql`update rawsql_transfer.work_item
+  set active_black_id = null
+  where active_black_id = :active and destination_link_id = :link`;

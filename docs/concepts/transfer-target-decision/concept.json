@@ -14,9 +14,7 @@
         "polarity": "positive",
         "type": "essence",
         "text": "変更キーは転送の候補である。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "evidence": ["spec:transfer-target-decision"]
       },
       {
         "id": "dirty-key-is-not-direct-transfer-target",
@@ -24,12 +22,8 @@
         "polarity": "negative",
         "type": "essence",
         "text": "変更キーはそのまま転送するわけではなく、転送対象判定によって転送要否と転送表現の候補を決める。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ],
-        "negatesSimilarityWith": [
-          "dirty-key"
-        ]
+        "evidence": ["spec:transfer-target-decision"],
+        "negatesSimilarityWith": ["dirty-key"]
       },
       {
         "id": "transfer-model-changes-decision",
@@ -37,9 +31,7 @@
         "polarity": "positive",
         "type": "essence",
         "text": "転送対象判定は、転送モデルによって判定を変える。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "evidence": ["spec:transfer-target-decision"]
       },
       {
         "id": "ignored-columns-owned-by-destination-link",
@@ -47,10 +39,7 @@
         "polarity": "positive",
         "type": "essence",
         "text": "比較対象外列は、宛先別の設定として転送先リンクが持つ。",
-        "evidence": [
-          "spec:transfer-target-decision",
-          "spec:destination-link"
-        ]
+        "evidence": ["spec:transfer-target-decision", "spec:destination-link"]
       },
       {
         "id": "immutable-no-active-black-is-insert-candidate",
@@ -58,9 +47,7 @@
         "polarity": "positive",
         "type": "responsibility",
         "text": "immutable transfer model で有効黒伝がなければ、追加転送候補として扱う。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "evidence": ["spec:transfer-target-decision"]
       },
       {
         "id": "immutable-active-black-is-red-candidate",
@@ -68,9 +55,7 @@
         "polarity": "positive",
         "type": "responsibility",
         "text": "immutable transfer model で有効黒伝があれば、赤伝転送候補として扱う。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "evidence": ["spec:transfer-target-decision"]
       },
       {
         "id": "red-candidate-needs-column-evaluation",
@@ -78,9 +63,7 @@
         "polarity": "positive",
         "type": "responsibility",
         "text": "赤伝転送候補では、列の検査を行い、比較対象外列以外が変更されている場合に転送対象として扱う。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "evidence": ["spec:transfer-target-decision"]
       },
       {
         "id": "mutable-no-active-black-is-insert-candidate",
@@ -88,9 +71,7 @@
         "polarity": "positive",
         "type": "responsibility",
         "text": "mutable transfer model で有効黒伝がなければ、追加転送候補として扱う。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "evidence": ["spec:transfer-target-decision"]
       },
       {
         "id": "mutable-active-black-is-update-candidate",
@@ -98,9 +79,7 @@
         "polarity": "positive",
         "type": "responsibility",
         "text": "mutable transfer model で有効黒伝があれば、更新転送候補として扱う。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "evidence": ["spec:transfer-target-decision"]
       },
       {
         "id": "update-candidate-needs-column-evaluation",
@@ -108,19 +87,15 @@
         "polarity": "positive",
         "type": "responsibility",
         "text": "更新転送候補では、列の検査を行い、比較対象外列以外が変更されている場合に転送対象として扱う。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "evidence": ["spec:transfer-target-decision"]
       },
       {
         "id": "ignored-columns-only-is-no-transfer",
         "displayName": "比較対象外列だけが変わっている場合は転送不要",
         "polarity": "negative",
         "type": "invariant",
-        "text": "比較対象外列だけが変わっている場合は、転送対象として扱わない。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "text": "比較対象外列だけが変わっている場合は、転送対象として扱わない。 日付下限制御などの補正後にDestinationへ保持する比較対象列の値が同一ならno-opとする。補正前の日付だけの変更を転送差分にしない。元日付をoriginal_date等の別の業務列へ明示的に保持する場合は、その列も差分比較除外でない限り比較する。元日付の共通二重管理は要求しない。",
+        "evidence": ["spec:transfer-target-decision"]
       },
       {
         "id": "not-dirty-key-registration",
@@ -128,12 +103,8 @@
         "polarity": "negative",
         "type": "boundary",
         "text": "転送対象判定は、変更キーの登録方法を定義しない。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ],
-        "negatesSimilarityWith": [
-          "dirty-key"
-        ]
+        "evidence": ["spec:transfer-target-decision"],
+        "negatesSimilarityWith": ["dirty-key"]
       },
       {
         "id": "not-column-comparison-expression",
@@ -141,9 +112,7 @@
         "polarity": "negative",
         "type": "boundary",
         "text": "転送対象判定は、列の具体的な比較式、SQL、NULL 比較、型変換規則を定義しない。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "evidence": ["spec:transfer-target-decision"]
       },
       {
         "id": "not-transfer-operation-storage",
@@ -151,9 +120,7 @@
         "polarity": "negative",
         "type": "boundary",
         "text": "転送対象判定は、黒伝転送、赤伝転送、物理削除転送の保存形式や実行手順を定義しない。",
-        "evidence": [
-          "spec:transfer-target-decision"
-        ]
+        "evidence": ["spec:transfer-target-decision"]
       }
     ]
   },
@@ -163,45 +130,35 @@
       "to": "dirty-key-is-not-direct-transfer-target",
       "kind": "bounds",
       "reason": "変更キーは候補であって、転送対象の確定ではないため。",
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "evidence": ["spec:transfer-target-decision"]
     },
     {
       "from": "immutable-active-black-is-red-candidate",
       "to": "red-candidate-needs-column-evaluation",
       "kind": "requires",
       "reason": "有効黒伝があるだけでは赤伝転送が必要とは限らず、列の値評価が必要であるため。",
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "evidence": ["spec:transfer-target-decision"]
     },
     {
       "from": "mutable-active-black-is-update-candidate",
       "to": "update-candidate-needs-column-evaluation",
       "kind": "requires",
       "reason": "有効黒伝があるだけでは更新転送が必要とは限らず、列の値評価が必要であるため。",
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "evidence": ["spec:transfer-target-decision"]
     },
     {
       "from": "ignored-columns-only-is-no-transfer",
       "to": "red-candidate-needs-column-evaluation",
       "kind": "constrains",
       "reason": "赤伝転送候補でも比較対象外列だけの変更なら転送不要になるため。",
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "evidence": ["spec:transfer-target-decision"]
     },
     {
       "from": "ignored-columns-only-is-no-transfer",
       "to": "update-candidate-needs-column-evaluation",
       "kind": "constrains",
       "reason": "更新転送候補でも比較対象外列だけの変更なら転送不要になるため。",
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "evidence": ["spec:transfer-target-decision"]
     }
   ],
   "externalRelationships": [
@@ -209,13 +166,8 @@
       "to": "dirty-key",
       "kind": "uses",
       "reason": "変更キーを転送候補として受け取るため。",
-      "supportedBy": [
-        "dirty-key-is-transfer-candidate",
-        "dirty-key-is-not-direct-transfer-target"
-      ],
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "supportedBy": ["dirty-key-is-transfer-candidate", "dirty-key-is-not-direct-transfer-target"],
+      "evidence": ["spec:transfer-target-decision"]
     },
     {
       "to": "active-black",
@@ -227,20 +179,14 @@
         "mutable-no-active-black-is-insert-candidate",
         "mutable-active-black-is-update-candidate"
       ],
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "evidence": ["spec:transfer-target-decision"]
     },
     {
       "to": "destination",
       "kind": "uses",
       "reason": "転送先仕様が持つ transfer model によって判定が変わるため。",
-      "supportedBy": [
-        "transfer-model-changes-decision"
-      ],
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "supportedBy": ["transfer-model-changes-decision"],
+      "evidence": ["spec:transfer-target-decision"]
     },
     {
       "to": "destination-link",
@@ -252,10 +198,7 @@
         "update-candidate-needs-column-evaluation",
         "ignored-columns-only-is-no-transfer"
       ],
-      "evidence": [
-        "spec:transfer-target-decision",
-        "spec:destination-link"
-      ]
+      "evidence": ["spec:transfer-target-decision", "spec:destination-link"]
     },
     {
       "to": "red-transfer",
@@ -265,9 +208,7 @@
         "immutable-active-black-is-red-candidate",
         "red-candidate-needs-column-evaluation"
       ],
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "evidence": ["spec:transfer-target-decision"]
     },
     {
       "to": "black-transfer",
@@ -279,21 +220,14 @@
         "mutable-active-black-is-update-candidate",
         "update-candidate-needs-column-evaluation"
       ],
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "evidence": ["spec:transfer-target-decision"]
     },
     {
       "to": "work-item",
       "kind": "supports",
       "reason": "転送作業対象に転送要否と転送表現候補の判断材料を与えるため。",
-      "supportedBy": [
-        "dirty-key-is-not-direct-transfer-target",
-        "transfer-model-changes-decision"
-      ],
-      "evidence": [
-        "spec:transfer-target-decision"
-      ]
+      "supportedBy": ["dirty-key-is-not-direct-transfer-target", "transfer-model-changes-decision"],
+      "evidence": ["spec:transfer-target-decision"]
     }
   ],
   "evidence": [

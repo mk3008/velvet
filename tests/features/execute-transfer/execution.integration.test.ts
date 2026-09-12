@@ -356,20 +356,28 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
       '0',
     );
   });
-  test('known Phase 1 limit: dirty prior Active Black blocks new keys without partial success', async () => {
+  test('reevaluates prior Active Black without blocking a new key in the same Run', async () => {
     await run();
     await db.query("insert into public.phase1_source values ('b', 200, 'north')");
     await db.query(
       "insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json) values ('public','phase1_source','{\"id\":\"a\"}'),('public','phase1_source','{\"id\":\"b\"}')",
     );
-    await expect(run()).rejects.toThrow(/Existing Active Black/);
-    await expect(run()).rejects.toThrow(/Existing Active Black/);
-    expect((await db.query('select row_id from public.phase1_destination')).rows).toEqual([
-      { row_id: 'a' },
-    ]);
+    await db.query(
+      `update rawsql_transfer.destination_link set generated_reassessment_sql_body = $1`,
+      [
+        `select jsonb_build_object('row_id', :row_id::text, 'amount', :amount::integer)::text current_values,
+        to_jsonb(d)::text active_values from public.phase1_destination d
+        where d.row_id = (:velvet_active_destination_key::jsonb ->> 'row_id')`,
+      ],
+    );
+    expect(await run()).toMatchObject({ inserted: 1, skipped: 1 });
+    expect(await run()).toMatchObject({ inserted: 0, skipped: 0 });
+    expect(
+      (await db.query('select row_id from public.phase1_destination order by row_id')).rows,
+    ).toEqual([{ row_id: 'a' }, { row_id: 'b' }]);
     expect(
       (await db.query('select count(*) from rawsql_transfer.dirty_key_processing')).rows[0].count,
-    ).toBe('1');
+    ).toBe('3');
   });
   test('a lost work COMMIT response cannot relabel committed success as failed', async () => {
     let commits = 0;

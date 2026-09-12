@@ -36,25 +36,31 @@ Each `queries/<query>/query.ts` owns one fixed Serene SQL literal. Names are bou
 
 Run `pnpm audit:sql` for construction review. Keep imported or unresolved paths visible and review SQL meaning and business behavior separately.
 
-## Transfer Execution Phase 1
+## Transfer Execution: immutable snapshots
 
 `executeTransfer(client, definitions, { settingId, arguments })` owns separate Run-creation and transfer-work transactions on an idle, dedicated node-postgres client. It accepts run arguments, not source rows. The application registers exactly one definition for the selected Setting:
 
 ```ts
-const result = await executeTransfer(client, [{
-  settingId: '1',
-  sourceSchema: 'public',
-  sourceTable: 'orders',
-  sourceKeyDefinition: { keys: [{ column: 'order_id', type: 'text' }] },
-  resolveLogicalKey: key => ({ order_id: key.id }),
-}], { settingId: '1', arguments: { branch: 'north' } });
+const result = await executeTransfer(
+  client,
+  [
+    {
+      settingId: '1',
+      sourceSchema: 'public',
+      sourceTable: 'orders',
+      sourceKeyDefinition: { keys: [{ column: 'order_id', type: 'text' }] },
+      resolveLogicalKey: (key) => ({ order_id: key.id }),
+    },
+  ],
+  { settingId: '1', arguments: { branch: 'north' } },
+);
 ```
 
 The expected key definition must match the stored Setting exactly. Logical and destination keys must have matching JSON-compatible types; unsupported values such as Date and nonfinite numbers are rejected. The source SQL must project those logical key columns and the columns used by each link's mapping.
 
 Developers prepare the enabled Setting and immutable Destination Links, including each link's stored `generated_insert_transfer_sql_body`. That statement binds destination-column names from `mapping_definition.columns`, inserts one row, and returns its destination key columns. The saved source SQL remains the only source SQL definition. SQL uses named value parameters; analysis/generation statuses are not execution approval. See [the trusted execution decision](docs/decisions/0002-phase1-trusted-execution.md) for prerequisites and the explicit stored-SQL exception.
 
-Successful execution returns `{ runId, inserted, skipped }`. Run creation is committed first. Destination and processing changes, including Run success, commit atomically in a second transaction. On work or commit failure, that transaction is discarded and a separate transaction marks a still-running Run failed; already committed success is preserved if only the COMMIT response was lost. `TransferExecutionError` preserves the original `cause` and `runId`; secondary cleanup/recording failures are available in `recoveryErrors` and may leave the durable Run running. Recovery from process interruption between transactions is outside this phase. Configuration rejection before Run creation throws without a Run. Existing Active Black, absent source rows, red/update/delete and retransfer routes are outside Phase 1.
+Successful execution returns `{ runId, inserted, skipped }`. Run creation is committed first. Destination and processing changes, including Run success, commit atomically in a second transaction. On work or commit failure, that transaction is discarded and a separate transaction marks a still-running Run failed; already committed success is preserved if only the COMMIT response was lost. `TransferExecutionError` preserves the original `cause` and `runId`; secondary cleanup/recording failures are available in `recoveryErrors` and may leave the durable Run running. Recovery from process interruption between transactions is outside this phase. Configuration rejection before Run creation throws without a Run. Absent source rows, mutable update/delete and general retransfer routes remain outside this phase.
 
 ## Transfer Destination Definition
 
@@ -94,4 +100,6 @@ Destination-link input owns transfer-setting-specific mapping and diff-compariso
 
 The current source layout is an implementation choice, not a required architecture or feature framework. See [source layout](src/features/README.md).
 
-A new Dirty Key for a previously transferred logical key currently fails the entire Run, including any other new keys. This is an accepted Phase 1 limit: repeated Dirty Keys are normal snapshot reevaluation requests, not event replay. The next phase must implement snapshot reevaluation routes; Active Black existence is not a permanent error condition.
+Previously transferred immutable keys are reevaluated against their Active Black. Equal effective destination values (after correction and configured exclusions) complete as no-op; differences produce Red followed by a new Black atomically. Repeated Dirty Keys are coalesced within the Run/link and never replay source events. Initial and previously transferred keys can run together.
+
+For reevaluation, developers supply the link's stored `generated_reassessment_sql_body` and, for corrections, the Destination's stored `generated_red_transfer_sql_body`. See [Phase 2 contracts and schema upgrade](docs/decisions/0003-phase2-immutable-reevaluation.md). The reassessment statement returns the corrected candidate and existing Black values as JSON object texts; Velvet applies the link's exclusions and compares them in PostgreSQL. It does not infer correction logic from arbitrary Insert SQL.
