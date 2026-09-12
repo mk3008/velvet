@@ -40,7 +40,7 @@ function keyText(value: unknown): string {
   ) {
     throw new Error('Keys must contain only JSON-compatible values');
   }
-  if (Array.isArray(value)) return '[' + value.map(keyText).join(',') + ']';
+  if (Array.isArray(value)) return '[' + Array.from(value, keyText).join(',') + ']';
   return (
     '{' +
     Object.keys(value)
