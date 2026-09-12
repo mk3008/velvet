@@ -3,11 +3,6 @@
   "target": "@mk3008/velvet",
   "reviewKind": "concept-spec-review",
   "status": "needs-review",
-  "metadataLanguagePolicy": {
-    "humanFacingLanguage": "ja",
-    "source": "docs/review/authority-rules.json",
-    "policy": "AI-authored human-facing review metadata follows the package human-facing language unless this file explicitly overrides it."
-  },
   "findings": [
     {
       "id": "transfer-duplicate-control-candidate",

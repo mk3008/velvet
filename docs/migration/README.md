@@ -25,7 +25,7 @@ The product is named Velvet (`@mk3008/velvet`); its development documentation to
 
 The workspace, lockfile, verification commands, license, lint parser configuration, and CI now live here. The old CLI lint command had no ESLint configuration in Ashiba; the migrated configuration enables TypeScript syntax checking without introducing new stylistic rules. Type checking and tests remain separate mandatory gates.
 
-`ASHIBA_DB_URL`, `ASHIBA_SKIP_DB_BACKED_TESTS`, and the `rawsql_transfer` schema are retained to avoid unrelated contract changes. The technology policy's Ashiba CLI expectations are retained, not silently redesigned. Existing semantic AI-review findings are historical input, not a fresh approval of the design; reviewing them and implementing execution are later phases.
+`ASHIBA_DB_URL`, `ASHIBA_SKIP_DB_BACKED_TESTS`, and the `rawsql_transfer` schema are retained to avoid unrelated contract changes. The former implementation-policy constraints were subsequently removed by the owner in PR #4; current requirements are listed in AGENTS.md. Existing semantic AI-review findings are historical input, not a fresh approval of the design; reviewing them and implementing execution are later phases.
 
 ## External runtime dependency
 
