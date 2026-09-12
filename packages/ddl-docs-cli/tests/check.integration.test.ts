@@ -1837,26 +1837,28 @@ test('review-plan reports unmapped DDL and classifies generated docs as review v
 });
 
 test('review-plan retains business inputs without imposing implementation technology choices', () => {
-  const cwd = vi.spyOn(process, 'cwd').mockReturnValue(repoRoot);
-  try {
   const work = createTempDir('review-plan-implementation-choice');
+  const cwd = vi.spyOn(process, 'cwd').mockReturnValue(work);
+  try {
+  writeText(path.join(work, 'src/web.tsx'), 'import React from "react"; export const App = () => <main />;');
+  writeText(path.join(work, 'package.json'), JSON.stringify({ dependencies: { "@prisma/client": "example" } }));
   const changedFilesPath = path.join(work, 'changed.txt');
-  writeText(changedFilesPath, 'src/web.tsx\npackage.json\ndb/ddl/setting.sql\n');
+  writeText(changedFilesPath, 'src/web.tsx\npackage.json\n' + path.join(repoRoot, 'db/ddl/setting.sql') + '\n');
   const plan = buildReviewPlan({
     changedFilesPath,
-    ddlDirectories: [{ path: 'db/ddl', instance: '' }],
-    relationshipPath: 'db/ddl/relationship.json',
-    scopeDocPath: 'docs/scope/SYSTEM_SCOPE.md',
-    scopeRulesPath: 'docs/scope/scope-rules.json',
-    testPolicyPath: 'docs/testing/TEST_POLICY.md',
-    testRulesPath: 'docs/testing/test-rules.json',
-    authorityModelPath: 'docs/review/AUTHORITY_MODEL.md',
-    authorityRulesPath: 'docs/review/authority-rules.json',
+    ddlDirectories: [{ path: path.join(repoRoot, 'db/ddl'), instance: '' }],
+    relationshipPath: path.join(repoRoot, 'db/ddl/relationship.json'),
+    scopeDocPath: path.join(repoRoot, 'docs/scope/SYSTEM_SCOPE.md'),
+    scopeRulesPath: path.join(repoRoot, 'docs/scope/scope-rules.json'),
+    testPolicyPath: path.join(repoRoot, 'docs/testing/TEST_POLICY.md'),
+    testRulesPath: path.join(repoRoot, 'docs/testing/test-rules.json'),
+    authorityModelPath: path.join(repoRoot, 'docs/review/AUTHORITY_MODEL.md'),
+    authorityRulesPath: path.join(repoRoot, 'docs/review/authority-rules.json'),
   });
   expect(plan.mandatoryScope?.rules.map(rule => rule.id)).toContain('human-owned-logical-model');
   expect(plan.mandatoryVerification?.policies.map(rule => rule.id)).toContain('db-backed-contract-verification');
   expect(plan.mandatoryAuthority?.rules.map(rule => rule.id)).toContain('human-owned-requirements');
-  expect(plan.changedFiles.find(entry => entry.path === 'db/ddl/setting.sql')?.reviewClass).toBe('business-bearing');
+  expect(plan.changedFiles.find(entry => entry.path.endsWith('db/ddl/setting.sql'))?.reviewClass).toBe('business-bearing');
   expect(JSON.stringify(plan)).not.toMatch(/mandatoryTechnology|technologyRules|technology-policy-exception|no-hot-path-runtime-validation/);
   } finally { cwd.mockRestore(); }
 });

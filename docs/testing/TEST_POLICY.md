@@ -25,7 +25,7 @@
 ## Out of Scope
 
 - 実装コードからAIが推論した decision table を正本として扱うこと
-- E2EだけでSQL / mapper contract の検証を代替すること
+- SQL parameter/resultやidentity/stateの保証を検証せず、E2E成功だけで十分と扱うこと
 - external producer、CDC runtime、scheduler、host runtime の検証責務を transfer core に含めること
 
 ## Required Review Posture
