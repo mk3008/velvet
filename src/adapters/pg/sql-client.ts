@@ -1,4 +1,4 @@
-import { bindNamedParameters } from '@ashiba-ts/named-parameters';
+import { bind } from '@mk3008/serene';
 import type {
   AnyFeatureQuerySource,
   AshibaQueryParams,
@@ -9,7 +9,7 @@ import type {
 /**
  * Adapt a node-postgres `pg`-style queryable (Client or Pool) into a feature query executor.
  *
- * Generated query sources keep reviewed binding metadata. The application binds
+ * Query sources own one reviewed Serene SQL literal. The application binds
  * values, invokes the native driver, owns its pool, and keeps transaction
  * policy at this boundary.
  *
@@ -25,8 +25,8 @@ export function fromPg(queryable: {
 }): FeatureQueryExecutor {
   return {
     async query<Query extends AnyFeatureQuerySource>(query: Query, params: AshibaQueryParams<Query>): Promise<AshibaQueryRow<Query>[]> {
-      const prepared = bindNamedParameters(query.binding, { ...params });
-      const result = await queryable.query(prepared.sql, prepared.values);
+      const prepared = bind(query.sql, { ...params }, 'indexed');
+      const result = await queryable.query(prepared.text, prepared.values);
       return result.rows as AshibaQueryRow<Query>[];
     },
   };

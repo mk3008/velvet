@@ -8,7 +8,7 @@
 
 ## Purpose
 
-`@mk3008/velvet` は、PostgreSQL、SQL-first、Ashiba CLI、thin SQL execution adapter を標準経路にした転送制御 package である。
+`@mk3008/velvet` は、PostgreSQL、SQL-first、Serene、thin SQL execution adapter を標準経路にした転送制御 package である。
 
 コードから現在の実装技術を観測することはできるが、コードだけでは「その技術が意図した制約なのか、偶然の現状なのか」を判定しにくい。
 
@@ -18,8 +18,8 @@
 
 - Primary database: PostgreSQL
 - Data access style: SQL-first
-- Standard generation / verification path: Ashiba CLI, generated query snapshots, generated query metadata, and DB-backed tests
-- Standard transfer implementation path: reviewed SQL, DDL metadata, generated query contracts, mapper checks, and DB-backed tests
+- Standard construction / verification path: Serene fixed SQL literals, named binding at the native driver boundary, and DB-backed tests
+- Standard transfer implementation path: reviewed SQL, DDL metadata, application-owned query contracts, mapper checks, and DB-backed tests
 - Standard front-facing surface: CLI
 - Web UI is not a standard surface for this package. If a Web surface is needed, treat it as an owning application boundary outside `@mk3008/velvet`.
 
@@ -39,7 +39,7 @@
 
 例外を採用する場合は、少なくとも次を明示する。
 
-- なぜ既存の PostgreSQL / SQL-first / Ashiba CLI / thin adapter 経路では不足するのか
+- なぜ既存の PostgreSQL / SQL-first / Serene / thin adapter 経路では不足するのか
 - 例外が一時的な adapter なのか、package の標準経路を変える scope expansion なのか
 - Concept Spec、Scope Spec、Test Policy、DDL metadata、generated docs への影響
 - 追加で必要になる検証方法

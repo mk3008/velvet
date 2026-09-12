@@ -4,9 +4,8 @@ This package organizes application work under `src/features/<feature>/`.
 
 The review center is the SQL contract:
 
-- `queries/<query>/<query>.sql` is the canonical source.
-- `queries/<query>/query.ts` is the feature query boundary.
-- `queries/<query>/query.ts` is the application-owned DB-facing boundary.
+- `queries/<query>/query.ts` owns one fixed Serene SQL literal and its parameter/result types.
+- It is the application-owned DB-facing boundary; no SQL mirror or binding metadata is generated.
 
 ## Architecture as a Framework
 
@@ -28,8 +27,8 @@ boundary/
 ## Default shape
 
 - `boundary.ts`: the single feature boundary public surface for request parsing, normalization, and response shaping
-- `queries/<query>/query.ts`: the generated query boundary for DB-facing SQL execution
-- `queries/<query>/boundary.ts`: optional compatibility or feature-specific validation around the generated query boundary
+- `queries/<query>/query.ts`: the query boundary for DB-facing SQL execution
+- `queries/<query>/boundary.ts`: optional compatibility or feature-specific validation around the query boundary
 - `tests`: the feature-local verification group, including a thin `tests/<feature>.boundary.test.ts` Vitest entrypoint for the mock-based lane
 - `queries/<query>/tests`: an application-owned query-local verification group when the application needs it
 - add more child boundaries as child folders when one boundary grows; each child repeats the same `boundary.ts` plus `tests/` rule
@@ -55,4 +54,4 @@ Prefer stability at recursive boundary seams over one blanket import style.
 
 If you enabled the starter flow, `smoke` is the removable teaching feature.
 Copy its shape for the first real feature, then delete it once the project has a real slice of its own.
-Use native PostgreSQL/application tests for DB-backed proof and keep the named-parameter SQL style visible in the SQL asset.
+Use native PostgreSQL/application tests for DB-backed proof and keep the named-parameter SQL style visible in the Serene literal.

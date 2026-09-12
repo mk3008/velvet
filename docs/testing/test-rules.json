@@ -9,7 +9,7 @@
     {
       "id": "db-backed-contract-verification",
       "kind": "verification-policy",
-      "statement": "transfer のSQL、DDL、queryspec、generated mapperはDB-backed testsで検証する。",
+      "statement": "transfer のSQL、DDL、queryspec、application-owned mapperはDB-backed testsで検証する。",
       "reviewRisk": "test-coverage",
       "probes": [
         "この変更はDB制約、queryspec、application-owned DB testsのどこで検証されるか。",

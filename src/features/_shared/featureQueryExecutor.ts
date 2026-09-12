@@ -1,6 +1,4 @@
-import type { ParameterBinding } from '@ashiba-ts/named-parameters';
-
-export type PostgresBinding = Extract<ParameterBinding, { style: 'indexed' }>;
+import type { Sql } from '@mk3008/serene';
 
 export interface FeatureQuerySource<Params extends object = Record<string, unknown>, Row = unknown> {
   readonly __transferContract?: {
@@ -9,9 +7,7 @@ export interface FeatureQuerySource<Params extends object = Record<string, unkno
   };
   id: string;
   path: string;
-  sqlPath?: string;
-  sql: string;
-  binding: PostgresBinding;
+  sql: Sql;
   metadata?: Record<string, unknown>;
 }
 
