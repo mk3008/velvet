@@ -271,7 +271,9 @@ export async function executeTransfer(
             const originalText = keyText(active.destination_key_json);
             const redText = keyText(redKey);
             await query(queries.redLineageSql, {
-              ...common,
+              run: common.run,
+              setting: common.setting,
+              link: common.link,
               work: workId,
               key: originalText,
               hash: hash(originalText),
