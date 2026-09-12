@@ -25,7 +25,7 @@ export const workSql = sql`insert into rawsql_transfer.work_item(
   source_exists, transfer_model, route_type, requires_black_insert_transfer, skip_reason,
   active_black_id, evaluated_destination_key_json, requires_red_transfer)
   values (:run, :dirty, :setting, :link, cast(:key as jsonb), :hash,
-  true, 'immutable', :route, :insert, :skip, :active, cast(:evaluated as jsonb), :red) returning work_item_id`;
+  :sourceExists, 'immutable', :route, :insert, :skip, :active, cast(:evaluated as jsonb), :red) returning work_item_id`;
 export const activeInsertSql = sql`insert into rawsql_transfer.active_black(
   destination_link_id, source_key_json, source_key_hash, destination_key_json)
   values (:link, cast(:key as jsonb), :hash, cast(:destination as jsonb))`;

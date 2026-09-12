@@ -7,3 +7,4 @@ A record of an implementation choice is not approval of unresolved business poli
 - [Adopt Alder, Raw SQL Rules and Serene](0001-adopt-review-and-sql-contracts.md)
 - [Phase 1 trusted execution](0002-phase1-trusted-execution.md)
 - [Phase 2 immutable reevaluation](0003-phase2-immutable-reevaluation.md)
+- [Phase 3 source disappearance](0004-phase3-source-disappearance.md)
