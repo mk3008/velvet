@@ -287,7 +287,7 @@ describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', ()
     ]);
   });
   test('100 to 120 correction retains original Red provenance and correlates all new Blacks', async () => {
-    const initial = await run();
+    await run();
     const old = await state();
     await db.query('update public.source set amount=120,version=2');
     await dirty();
@@ -355,13 +355,6 @@ describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', ()
         destination_key_json: { row_id: '6' },
       },
     ]);
-    expect(
-      (
-        await db.query('select active_black_id from rawsql_transfer.work_item where run_id=$1', [
-          initial.runId,
-        ])
-      ).rows.every((w) => w.active_black_id === null),
-    ).toBe(true);
   });
   test('one Dirty Key changes only the journal memo while both ledger links independently no-op', async () => {
     await run();
@@ -397,6 +390,16 @@ describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', ()
       // Existing work makes rollback also prove that retired Active Blacks and cleared references return.
       if (phase === 'correction') {
         await run();
+        await dirty();
+        const unchanged = await run();
+        expect(
+          (
+            await db.query(
+              'select active_black_id from rawsql_transfer.work_item where run_id=$1',
+              [unchanged.runId],
+            )
+          ).rows.every((w) => w.active_black_id !== null),
+        ).toBe(true);
         await db.query('update public.source set amount=120,version=2');
         await dirty();
       }
@@ -432,7 +435,7 @@ describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', ()
         (await db.query('select run_status from rawsql_transfer.run order by run_id')).rows,
       ).toEqual(
         phase === 'correction'
-          ? [{ run_status: 'succeeded' }, { run_status: 'failed' }]
+          ? [{ run_status: 'succeeded' }, { run_status: 'succeeded' }, { run_status: 'failed' }]
           : [{ run_status: 'failed' }],
       );
       await db.query("set velvet.fail_role=''");
