@@ -25,8 +25,12 @@ create table rawsql_transfer.work_item (
   ),
   constraint chk_work_item_source_key_json_object check (jsonb_typeof (source_key_json) = 'object'),
   constraint chk_work_item_source_key_hash_not_blank check (btrim (source_key_hash) <> ''),
-  constraint chk_work_item_transfer_model check (transfer_model in ('immutable', 'mutable')),
-  constraint chk_work_item_route_type check (route_type in ('immutable', 'mutable', 'skipped')),
+  constraint chk_work_item_transfer_model check (
+    transfer_model in ('immutable', 'mutable', 'insert_only')
+  ),
+  constraint chk_work_item_route_type check (
+    route_type in ('immutable', 'mutable', 'insert_only', 'skipped')
+  ),
   constraint chk_work_item_skip_reason check (
     skip_reason is null
     or skip_reason in ('duplicate_ignore', 'no_op')
@@ -98,9 +102,9 @@ comment on column rawsql_transfer.work_item.source_key_hash is '転送元キー�
 
 comment on column rawsql_transfer.work_item.source_exists is '転送元存在フラグ。作業対象の評価時点で転送元の現在値が存在するかを表す。';
 
-comment on column rawsql_transfer.work_item.transfer_model is '転送モデル。評価時点で使用する転送モデル。許可値は immutable, mutable。';
+comment on column rawsql_transfer.work_item.transfer_model is '転送モデル。評価時点で使用する転送モデル。許可値は immutable, mutable, insert_only。';
 
-comment on column rawsql_transfer.work_item.route_type is '転送ルート種別。許可値は immutable, mutable, skipped。転送操作の実行経路を表す。';
+comment on column rawsql_transfer.work_item.route_type is '転送ルート種別。許可値は immutable, mutable, insert_only, skipped。転送操作の実行経路を表す。';
 
 comment on column rawsql_transfer.work_item.requires_red_transfer is '赤伝転送要否。赤伝追加が必要かを表す。';
 
