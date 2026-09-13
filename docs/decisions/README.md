@@ -11,3 +11,5 @@ A record of an implementation choice is not approval of unresolved business poli
 - [Phase 4 mutable snapshots](0005-phase4-mutable-snapshots.md)
 - [Phase 5 insert-only identity mapping](0006-phase5-insert-only-identity-mapping.md)
 - [Structural inventory and cleanup](0007-structure-inventory.md)
+
+- [Three correlated destination links](0008-multi-destination-verification.md)
