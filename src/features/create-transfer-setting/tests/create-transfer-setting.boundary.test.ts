@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { expect, test } from 'vitest';
 
 import { execute, type CreateTransferSettingInput } from '../boundary.js';
-import type { FeatureQueryExecutor, FeatureQuerySource } from '../../_shared/featureQueryExecutor.js';
+import type { QueryExecutor, QuerySource } from '../../_shared/query-executor.js';
 
 const validInput: CreateTransferSettingInput = {
   name: 'sales_transfer',
@@ -38,7 +38,7 @@ const validInput: CreateTransferSettingInput = {
 };
 
 test('creates a transfer setting and destination links in one transaction', async () => {
-  const seenQueries: Array<{ query: FeatureQuerySource; params: Record<string, unknown> }> = [];
+  const seenQueries: Array<{ query: QuerySource; params: Record<string, unknown> }> = [];
   const executor = createMockTransactionalExecutor(seenQueries);
 
   const result = await execute(executor, validInput);
@@ -129,7 +129,7 @@ test.each([
 });
 
 test('rejects missing destination definitions before inserting the transfer setting', async () => {
-  const seenQueries: Array<{ query: FeatureQuerySource; params: Record<string, unknown> }> = [];
+  const seenQueries: Array<{ query: QuerySource; params: Record<string, unknown> }> = [];
   const executor = createMockTransactionalExecutor(seenQueries, { resolvedDestinations: [] });
 
   await expect(execute(executor, validInput)).rejects.toThrow(
@@ -139,7 +139,7 @@ test('rejects missing destination definitions before inserting the transfer sett
 });
 
 test('requires a transactional executor', async () => {
-  const executor: FeatureQueryExecutor = {
+  const executor: QueryExecutor = {
     async query() {
       throw new Error('query should not be reached');
     },
@@ -148,21 +148,21 @@ test('requires a transactional executor', async () => {
   await expect(execute(executor, validInput)).rejects.toThrow(/transactional executor/);
 });
 
-function createGuardedTransactionalExecutor(): FeatureQueryExecutor {
+function createGuardedTransactionalExecutor(): QueryExecutor {
   return {
     async query() {
       throw new Error('Validation failures must not reach the query boundary.');
     },
-    async transaction<T>(operation: (executor: FeatureQueryExecutor) => Promise<T>): Promise<T> {
+    async transaction<T>(operation: (executor: QueryExecutor) => Promise<T>): Promise<T> {
       return operation(this);
     },
   };
 }
 
 function createMockTransactionalExecutor(
-  seenQueries: Array<{ query: FeatureQuerySource; params: Record<string, unknown> }>,
+  seenQueries: Array<{ query: QuerySource; params: Record<string, unknown> }>,
   options: { resolvedDestinations?: Array<Record<string, unknown>> } = {},
-): FeatureQueryExecutor {
+): QueryExecutor {
   return {
     async query(query, params) {
       seenQueries.push({ query, params });
@@ -219,13 +219,13 @@ function createMockTransactionalExecutor(
       }
       throw new Error(`Unexpected query: ${query.id}`);
     },
-    async transaction<T>(operation: (executor: FeatureQueryExecutor) => Promise<T>): Promise<T> {
+    async transaction<T>(operation: (executor: QueryExecutor) => Promise<T>): Promise<T> {
       return operation(this);
     },
   };
 }
 
-function classifyQuery(query: FeatureQuerySource): string {
+function classifyQuery(query: QuerySource): string {
   if (query.id === 'resolve-transfer-destination-definitions') {
     return 'resolve-destinations';
   }

@@ -32,7 +32,7 @@ The product now lives in `mk3008/velvet`. See [repository migration](docs/migrat
 
 Start at [Business Design](docs/business-design/README.md). [Adoption and versions](docs/adoption.md) documents Alder, Raw SQL Rules v0.3 and Serene v0.4.0.
 
-Each `queries/<query>/query.ts` owns one fixed Serene SQL literal. Names are bound through Serene at `src/adapters/pg`; node-postgres execution and transactions remain application-owned. No generated SQL copy or separately maintained binding map is needed. Current schema remains in `db/ddl/`.
+Registration SQL uses fixed Serene literals in the INSERT `query.ts` files and `queries/resolve-transfer-destination-definitions.ts`. Names are bound through Serene at `src/adapters/pg`; node-postgres execution and transactions remain application-owned. No generated SQL copy or separately maintained binding map is needed. Current schema remains in `db/ddl/`.
 
 Run `pnpm audit:sql` for construction review. Keep imported or unresolved paths visible and review SQL meaning and business behavior separately.
 
@@ -89,7 +89,7 @@ DDL lives in `db/ddl/schema.sql` and `db/ddl/destination_definition.sql`.
 The `rawsql_transfer.setting` table stores the source SQL text, a deterministic source SQL hash, and analysis placeholders.
 Source SQL parsing is intentionally out of scope for the create feature; new rows save `source_sql_analysis_status` as `not_analyzed`.
 
-## Feature Boundary
+## Registration entrypoints
 
 `src/features/create-transfer-destination-definition/` owns the create destination definition use case.
 `src/features/create-transfer-setting/` owns the create transfer setting use case.

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import type { FeatureQueryExecutor } from '../_shared/featureQueryExecutor.js';
+import type { QueryExecutor } from '../_shared/query-executor.js';
 import type { CreateTransferSettingDestinationInput, CreateTransferSettingInput } from './input.js';
 import {
   executeInsertTransferSettingQuerySpec,
@@ -10,15 +10,15 @@ import {
   executeInsertTransferSettingDestinationDefinitionQuerySpec,
   type InsertTransferSettingDestinationDefinitionQueryResult,
 } from './queries/insert-transfer-setting-destination-definition/boundary.js';
-import { executeResolveTransferDestinationDefinitionsQuerySpec } from './queries/resolve-transfer-destination-definitions/boundary.js';
+import { executeResolveTransferDestinationDefinitionsQuerySpec } from './queries/resolve-transfer-destination-definitions.js';
 
 export type CreateTransferSettingWorkflowResult = {
   transferSetting: InsertTransferSettingQueryResult;
   destinations: InsertTransferSettingDestinationDefinitionQueryResult[];
 };
 
-type TransactionalFeatureQueryExecutor = FeatureQueryExecutor & {
-  transaction<T>(operation: (executor: FeatureQueryExecutor) => Promise<T>): Promise<T>;
+type TransactionalQueryExecutor = QueryExecutor & {
+  transaction<T>(operation: (executor: QueryExecutor) => Promise<T>): Promise<T>;
 };
 
 /**
@@ -28,7 +28,7 @@ type TransactionalFeatureQueryExecutor = FeatureQueryExecutor & {
  * generated SQL creation are intentionally deferred.
  */
 export async function execute(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   request: CreateTransferSettingInput,
 ): Promise<CreateTransferSettingWorkflowResult> {
   // Creating a transfer setting writes the parent setting and one or more destination links.
@@ -56,12 +56,12 @@ export async function execute(
 }
 
 function assertTransactionalExecutor(
-  executor: FeatureQueryExecutor,
-): TransactionalFeatureQueryExecutor {
+  executor: QueryExecutor,
+): TransactionalQueryExecutor {
   if (typeof executor.transaction !== 'function') {
     throw new Error('create-transfer-setting requires a transactional executor.');
   }
-  return executor as TransactionalFeatureQueryExecutor;
+  return executor as TransactionalQueryExecutor;
 }
 
 /**
@@ -69,7 +69,7 @@ function assertTransactionalExecutor(
  * Resolve those names to IDs inside the transaction before link rows are inserted.
  */
 async function resolveTransferDestinationDefinitionIds(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   destinations: readonly CreateTransferSettingDestinationInput[],
 ): Promise<Map<string, string>> {
   const destinationDefinitionNames = destinations.map(
@@ -96,7 +96,7 @@ async function resolveTransferDestinationDefinitionIds(
  * Full SQL parsing is out of scope, so analysis fields remain empty and status is not_analyzed.
  */
 async function insertTransferSetting(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   request: CreateTransferSettingInput,
 ): Promise<InsertTransferSettingQueryResult> {
   return executeInsertTransferSettingQuerySpec(executor, {
@@ -119,7 +119,7 @@ async function insertTransferSetting(
  * Generated SQL columns are initialized as placeholders in this issue.
  */
 async function insertTransferSettingDestinations(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   transferSettingId: string,
   destinations: readonly CreateTransferSettingDestinationInput[],
   destinationDefinitionIdByName: ReadonlyMap<string, string>,

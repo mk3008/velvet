@@ -6,10 +6,7 @@
     "moduleResolution": "NodeNext",
     "baseUrl": ".",
     "paths": {
-      "#features/*": ["src/features/*"],
-      "#libraries/*": ["src/libraries/*"],
-      "#adapters/*": ["src/adapters/*"],
-      "#tests/*": ["tests/*"]
+      "#features/*": ["src/features/*"]
     },
     "strict": true,
     "esModuleInterop": true,

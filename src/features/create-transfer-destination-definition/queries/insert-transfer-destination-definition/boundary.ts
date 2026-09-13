@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import type { FeatureQueryExecutor } from '#features/_shared/featureQueryExecutor.js';
+import type { QueryExecutor } from '#features/_shared/query-executor.js';
 import { executeInsertTransferDestinationDefinitionQuery } from './query.js';
 
 const JsonObjectSchema = z.record(z.string(), z.unknown());
@@ -61,7 +61,7 @@ function mapRowToResult(
 }
 
 async function loadInsertedRow(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   params: Record<string, unknown>
 ): Promise<InsertTransferDestinationDefinitionRow> {
   const rows = await executeInsertTransferDestinationDefinitionQuery(executor, params as never);
@@ -72,7 +72,7 @@ async function loadInsertedRow(
 }
 
 export async function executeInsertTransferDestinationDefinitionQuerySpec(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   rawParams: unknown
 ): Promise<InsertTransferDestinationDefinitionQueryResult> {
   const params = parseQueryParams(rawParams);

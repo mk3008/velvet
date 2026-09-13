@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import type { FeatureQueryExecutor } from '#features/_shared/featureQueryExecutor.js';
+import type { QueryExecutor } from '#features/_shared/query-executor.js';
 import { executeInsertTransferSettingDestinationDefinitionQuery } from './query.js';
 
 const JsonObjectSchema = z.record(z.string(), z.unknown());
@@ -52,7 +52,7 @@ function parseRow(raw: unknown): InsertTransferSettingDestinationDefinitionRow {
 }
 
 async function loadInsertedRow(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   params: Record<string, unknown>
 ): Promise<InsertTransferSettingDestinationDefinitionRow> {
   const rows = await executeInsertTransferSettingDestinationDefinitionQuery(executor, params as never);
@@ -63,7 +63,7 @@ async function loadInsertedRow(
 }
 
 export async function executeInsertTransferSettingDestinationDefinitionQuerySpec(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   rawParams: unknown
 ): Promise<InsertTransferSettingDestinationDefinitionQueryResult> {
   const params = parseQueryParams(rawParams);

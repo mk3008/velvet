@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { FeatureQueryExecutor } from '../_shared/featureQueryExecutor.js';
+import type { QueryExecutor } from '../_shared/query-executor.js';
 
 import {
   executeInsertTransferDestinationDefinitionQuerySpec,
@@ -191,7 +191,7 @@ function fromQueryResult(
 }
 
 export async function executeCreateTransferDestinationDefinitionEntrySpec(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   rawRequest: unknown,
 ): Promise<CreateTransferDestinationDefinitionResult> {
   const request = normalizeRequest(parseRequest(rawRequest));

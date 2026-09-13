@@ -10,3 +10,4 @@ A record of an implementation choice is not approval of unresolved business poli
 - [Phase 3 source disappearance](0004-phase3-source-disappearance.md)
 - [Phase 4 mutable snapshots](0005-phase4-mutable-snapshots.md)
 - [Phase 5 insert-only identity mapping](0006-phase5-insert-only-identity-mapping.md)
+- [Structural inventory and cleanup](0007-structure-inventory.md)

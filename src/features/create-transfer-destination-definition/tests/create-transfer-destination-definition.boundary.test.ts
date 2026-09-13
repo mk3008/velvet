@@ -4,7 +4,7 @@ import {
   executeCreateTransferDestinationDefinitionEntrySpec,
   type CreateTransferDestinationDefinitionInput,
 } from '../boundary.js';
-import type { FeatureQueryExecutor } from '../../_shared/featureQueryExecutor.js';
+import type { QueryExecutor } from '../../_shared/query-executor.js';
 
 const validInput: CreateTransferDestinationDefinitionInput = {
   name: 'journal',
@@ -27,7 +27,7 @@ const validInput: CreateTransferDestinationDefinitionInput = {
 
 test('maps camelCase feature input to snake_case query params and response fields', async () => {
   const seenParams: Record<string, unknown>[] = [];
-  const executor: FeatureQueryExecutor = {
+  const executor: QueryExecutor = {
     async query(_query, params) {
       seenParams.push(params);
       return [
@@ -125,7 +125,7 @@ test.each([
   ).rejects.toThrow();
 });
 
-function createGuardedExecutor(): FeatureQueryExecutor {
+function createGuardedExecutor(): QueryExecutor {
   return {
     async query() {
       throw new Error('Validation failures must not reach the query boundary.');
