@@ -31,7 +31,7 @@ const DestinationKeyMappingSchema = z
         z
           .object({
             name: z.string().trim().min(1),
-            sourceColumn: z.string().trim().min(1),
+            sourceColumn: z.string().trim().min(1).optional(),
           })
           .strict(),
       )
