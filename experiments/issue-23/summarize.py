@@ -1,9 +1,11 @@
 """Emit reviewable evidence into job logs as well as the complete artifact."""
 import json
 import re
+import sys
 from pathlib import Path
 
-report=json.loads(Path('tmp/issue-23-results.json').read_text())
+root=Path(sys.argv[1]) if len(sys.argv)>1 else Path('tmp')
+report=json.loads((root/'issue-23-results.json').read_text())
 for trial in report.get('trials',[]):
     trial.pop('counts',None)
     trial.pop('timings',None)
@@ -18,9 +20,9 @@ if recovery:
     if recovery.get('catchupMs'):
         recovery['observedArrivalPerSecond']=recovery['arrivalsDuringCatchup']/(recovery['catchupMs']/1000)
 stats=[]
-for line in Path('tmp/issue-23-postgres-stats.jsonl').read_text().splitlines():
-    try: stats.append(json.loads(line))
-    except json.JSONDecodeError: pass
+for line in (root/'issue-23-postgres-stats.jsonl').read_text().splitlines():
+    try: stats.append(json.loads(line[line.index('{'):line.rindex('}')+1]))
+    except (json.JSONDecodeError,ValueError): pass
 cpu=[float(s['CPUPerc'].rstrip('%')) for s in stats if s.get('CPUPerc')]
 def memory_bytes(value):
     match=re.match(r'([0-9.]+)([A-Za-z]+)',value.split('/')[0].strip())

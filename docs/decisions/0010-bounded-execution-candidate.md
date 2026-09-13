@@ -23,3 +23,17 @@ The Phase 1–5 and #19 PostgreSQL lifecycle suites run independently with row a
 Serene audits the bound runtime call sites and fixed admission SQL in `src`. The PL/pgSQL body is outside that TypeScript audit: review its ordinary sequential SQL directly, compare each operation against the row reference, and execute it in PostgreSQL regression tests. It has named function parameters, no dynamic EXECUTE, identifier construction or SECURITY DEFINER. Baseline/candidate statement duplication is deliberately retained as experimental reference evidence; do not silently diverge their meanings.
 
 Measurements, audit findings, completed CI links and the fresh Alder review are recorded in `experiments/issue-23`. Missing measurements remain explicit adoption gaps, not evidence of fitness.
+
+### Timeout and retry interpretation
+
+The evaluation's 60-second invocation budget reserves 15 seconds and tests work below 45 seconds; these are explicit assumptions. A complete 10,000-source-row scan still occurs even for a one-key Run. A source statement, lock wait or stored mutation that exceeds the host deadline can therefore defeat any admission cap. If every attempt rolls back before COMMIT, durable throughput is zero and continuing intake grows the backlog indefinitely. This candidate does not hide that case behind automatic retries. Deployment must verify the slowest statement/source and host timeout/cancellation/connection-disposal policy before adoption.
+
+The controlled recovery fixture provides finite-backlog evidence under its measured source, RTT, cap, two-Setting concurrency and low arrival rate. It does not establish catch-up when arrival exceeds measured durable throughput, when the host launches unbounded concurrent retries, or under production contention. Those cases remain rejected/unresolved, rather than being described as recoverable because smaller Runs exist.
+
+## Completed evidence and disposition
+
+[The completed results](../../experiments/issue-23/results.md) include 80 matrix invocations and four RTT/cap recovery cases on PostgreSQL 18.6; Verify passed 298 tests with no skips. The candidate cuts initial/correction calls by one third and no-op calls by one fifth, but was slower in the observed 10,000 × 3 low-latency comparison. Keep it opt-in; there is no general performance promotion.
+
+With a 600-key backlog, approximately 2 keys/s continuing to arrive, two Settings and a neighbor probe, the 5 ms additional-delay cases returned to normal pending levels in about 47 seconds. The cap-250 correction Run took about 34.1 seconds within the illustrative 45-second safety allowance. This demonstrates finite recovery for that controlled envelope, not for arbitrary source sizes/SQL or production arrival rates. Neighbor maxima up to about 335 ms and whole-source memory remain deployment concerns. Large verification snapshots inflate full-matrix memory/DB peaks; the report distinguishes the pre-oracle normal-route measurements from the whole instrumented job.
+
+All SQL audit findings and the fresh Alder review are retained. Production adoption remains unresolved; the default row reference and unbounded behavior are not endorsed for the target serverless workload. Explicit bulk I/O/materialization is the next experiment if the actual deployment envelope rejects bounded routine execution.
