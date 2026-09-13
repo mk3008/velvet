@@ -54,3 +54,7 @@ Correctness failures trigger a fix or rejection, never weaker tests. If the prof
 ## Knowledge retained
 
 Inference ranks candidates and identifies the uncertainties worth testing. Measurements decide those uncertainties; they do not replace cardinality analysis. Evaluation effort itself has a budget. These principles are added locally to AGENTS.md now; no Alder version update is required, and this PR does not modify the Alder repository.
+
+## Measured disposition
+
+[The structural result](../../experiments/issue-23/ordered/results.md) selects the bounded ordered worker for its explicit immutable profile: 11 calls per Run; 10,000-key catch-up with continuing intake and two Settings in 18.329 seconds; largest measured bounded execution 3.013 seconds. No further optimum search is required. An unbounded mostly-no-op observation took 76.77 seconds and spilled, so unbounded deployment is not selected. Profile compatibility and actual production qualification remain explicitly limited in the report.
