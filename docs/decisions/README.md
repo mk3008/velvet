@@ -13,3 +13,4 @@ A record of an implementation choice is not approval of unresolved business poli
 - [Structural inventory and cleanup](0007-structure-inventory.md)
 
 - [Three correlated destination links](0008-multi-destination-verification.md)
+- [Scalable execution evaluation](0009-scalable-execution-evaluation.md)
