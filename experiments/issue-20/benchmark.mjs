@@ -11,7 +11,7 @@ if (!process.env.ASHIBA_DB_URL) throw new Error('ASHIBA_DB_URL must allow creati
 const admin = new Client({ connectionString: process.env.ASHIBA_DB_URL });
 const database = 'velvet_scale_' + randomUUID().replaceAll('-', '');
 let db;
-const report = { base: '58c0182', node: process.version, trials: [], transport: [] };
+const report = { base: '58c0182', node: process.version, trials: [], transport: [], completed: false };
 const execute = async (statement, params = {}) => {
   const p = bind(statement, params, 'indexed');
   return db.query(p.text, p.values);
@@ -51,7 +51,7 @@ async function setup(n, links) {
   for (let role=1; role<=links; role++) {
     await execute(sql`insert into rawsql_transfer.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,
       execution_order,destination_key_mapping,mapping_definition,diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body)
-      values(:role,1,1,:name,:role,:keys::jsonb,:mapping::jsonb,'{"columns":["row_id","allocation"]}',:insert,:compare)`,
+      values(:role::int,1,1,:name,:role::int,:keys::jsonb,:mapping::jsonb,'{"columns":["row_id","allocation"]}',:insert,:compare)`,
       { role, name:'role'+role, keys:JSON.stringify({sourceKey:['logical_id'],destinationKey:[{name:'row_id',sourceColumn:'key'+role}]}),
         mapping:JSON.stringify({columns:{row_id:'key'+role,logical_id:'logical_id',amount:'amount',memo:'memo',allocation:'allocation',role:'role'+role}}),insert,compare });
   }
@@ -142,7 +142,15 @@ try {
     }
   }
   report.transport=await runTransportProbe(db);
+  report.completed=true;
 } finally {
-  await writeFile(process.env.VELVET_BENCH_OUTPUT ?? 'tmp/issue-20-results.json',JSON.stringify(report,null,2)+'\n');
-  await db?.end(); await admin.query('drop database if exists '+database); await admin.end();
+  try {
+    await writeFile(process.env.VELVET_BENCH_OUTPUT ?? 'tmp/issue-20-results.json',JSON.stringify(report,null,2)+'\n');
+  } finally {
+    try {
+      await db?.end();
+    } finally {
+      try { await admin.query('drop database if exists '+database); } finally { await admin.end(); }
+    }
+  }
 }
