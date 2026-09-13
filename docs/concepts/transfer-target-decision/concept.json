@@ -46,7 +46,15 @@
         "displayName": "immutable transfer model で有効黒伝がなければ追加転送候補",
         "polarity": "positive",
         "type": "responsibility",
-        "text": "immutable transfer model で有効黒伝がなければ、追加転送候補として扱う。",
+        "text": "immutable transfer model で転送元の現在行が存在し、有効黒伝がなければ、追加転送候補として扱う。",
+        "evidence": ["spec:transfer-target-decision"]
+      },
+      {
+        "id": "immutable-no-source-no-active-black-is-no-op",
+        "displayName": "転送元と有効黒伝がなければ転送不要",
+        "polarity": "positive",
+        "type": "responsibility",
+        "text": "immutable transfer model で転送元の現在行と有効黒伝が両方存在しない場合、変更キーを skipped / no_op として処理済みにし、以後の再評価対象から外す。初回黒伝転送前の削除と取消済みキーの再Dirty化を含む。転送元が再出現した場合は、新しく登録された変更キーで現在状態を再評価する。イベント履歴は逐次再生しない。",
         "evidence": ["spec:transfer-target-decision"]
       },
       {

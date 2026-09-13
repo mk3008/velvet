@@ -239,10 +239,24 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
     );
   });
   test('failure after an earlier insertion rolls back destination and processing but retains failed Run', async () => {
-    await db.query(
-      "insert into rawsql_transfer.dirty_key(source_schema_name, source_table_name, source_key_json) values ('public','phase1_source','{\"id\":\"missing\"}')",
-    );
-    await expect(run()).rejects.toBeInstanceOf(TransferExecutionError);
+    const cause = new Error('failure after destination insertion');
+    const client = {
+      async query(text: string, values?: unknown[]) {
+        if (text.startsWith('insert into rawsql_transfer.dirty_key_processing')) {
+          expect(
+            (await db.query('select count(*) from public.phase1_destination')).rows[0].count,
+          ).toBe('1');
+          throw cause;
+        }
+        return db.query(text, values);
+      },
+    };
+    const error = await executeTransfer(client, [definition], {
+      settingId: '1',
+      arguments: { branch: 'north' },
+    }).catch((error) => error);
+    expect(error).toBeInstanceOf(TransferExecutionError);
+    expect(error.cause).toBe(cause);
     expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
       { run_status: 'failed' },
     ]);

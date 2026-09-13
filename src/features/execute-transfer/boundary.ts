@@ -167,7 +167,6 @@ export async function executeTransfer(
       for (const item of work) {
         const link = links.find((l) => l.destination_link_id === item.destination_link_id)!;
         const row = current.get(item.key);
-        if (!row) throw new Error('Source current row is absent; this route is outside Phase 2');
         const context = JSON.stringify([link.destination_link_id, item.key]);
         const duplicate = completed.has(context);
         const [active] = duplicate
@@ -176,17 +175,18 @@ export async function executeTransfer(
               link: link.destination_link_id,
               key: item.key,
             });
-        const mapped = duplicate
-          ? {}
-          : Object.fromEntries(
-              Object.entries(link.mapping_definition.columns).map(([target, source]) => {
-                if (!Object.hasOwn(row, source as string) || row[source as string] === undefined)
-                  throw new Error(`Missing mapping source: ${source}`);
-                return [target, row[source as string]];
-              }),
-            );
-        let noOp = false;
-        if (active) {
+        const mapped =
+          duplicate || !row
+            ? {}
+            : Object.fromEntries(
+                Object.entries(link.mapping_definition.columns).map(([target, source]) => {
+                  if (!Object.hasOwn(row, source as string) || row[source as string] === undefined)
+                    throw new Error(`Missing mapping source: ${source}`);
+                  return [target, row[source as string]];
+                }),
+              );
+        let noOp: boolean = !row && !active;
+        if (active && row) {
           const excluded = link.diff_compare_excluded_columns?.columns ?? [];
           const allowed = link.destination_columns.columns.map((c: Row) => c.name);
           if (
@@ -237,7 +237,8 @@ export async function executeTransfer(
         const [{ work_item_id: workId }] = await query(queries.workSql, {
           ...common,
           route: skip ? 'skipped' : 'immutable',
-          insert: !skip,
+          sourceExists: !!row,
+          insert: !!row && !skip,
           skip,
           active: active?.active_black_id ?? null,
           evaluated: active ? keyText(active.destination_key_json) : null,
@@ -282,48 +283,50 @@ export async function executeTransfer(
               destinationHash: hash(redText),
             });
           }
-          const prepared = bindStoredSql(link.generated_insert_transfer_sql_body, mapped);
-          // Every mapped column must actually be bound by the stored insertion statement.
-          if (Object.keys(mapped).some((name) => !prepared.names.includes(name)))
-            throw new Error('Stored Insert SQL does not consume mapping');
-          const result = await client.query(prepared.text, prepared.values);
-          if (result.rows?.length !== 1 || result.rowCount !== 1)
-            throw new Error('Black Insert must return exactly one destination row');
-          const destination = projection(result.rows[0], link.destination_key_columns);
-          const expected = Object.fromEntries(
-            link.destination_key_mapping.destinationKey.map((k: Row) => [
-              k.name,
-              row[k.sourceColumn],
-            ]),
-          );
-          if (!isDeepStrictEqual(destination, expected))
-            throw new Error('Inserted destination key does not match mapping');
-          const destinationText = keyText(destination);
-          await query(queries.activeInsertSql, {
-            link: common.link,
-            key: common.key,
-            hash: common.hash,
-            destination: destinationText,
-          });
-          await query(queries.lineageSql, {
-            run: common.run,
-            setting: common.setting,
-            link: common.link,
-            work: workId,
-            key: common.key,
-            hash: common.hash,
-            table: link.destination_table_name,
-            destination: destinationText,
-            destinationHash: hash(destinationText),
-          });
-          inserted++;
+          if (row) {
+            const prepared = bindStoredSql(link.generated_insert_transfer_sql_body, mapped);
+            // Every mapped column must actually be bound by the stored insertion statement.
+            if (Object.keys(mapped).some((name) => !prepared.names.includes(name)))
+              throw new Error('Stored Insert SQL does not consume mapping');
+            const result = await client.query(prepared.text, prepared.values);
+            if (result.rows?.length !== 1 || result.rowCount !== 1)
+              throw new Error('Black Insert must return exactly one destination row');
+            const destination = projection(result.rows[0], link.destination_key_columns);
+            const expected = Object.fromEntries(
+              link.destination_key_mapping.destinationKey.map((k: Row) => [
+                k.name,
+                row[k.sourceColumn],
+              ]),
+            );
+            if (!isDeepStrictEqual(destination, expected))
+              throw new Error('Inserted destination key does not match mapping');
+            const destinationText = keyText(destination);
+            await query(queries.activeInsertSql, {
+              link: common.link,
+              key: common.key,
+              hash: common.hash,
+              destination: destinationText,
+            });
+            await query(queries.lineageSql, {
+              run: common.run,
+              setting: common.setting,
+              link: common.link,
+              work: workId,
+              key: common.key,
+              hash: common.hash,
+              table: link.destination_table_name,
+              destination: destinationText,
+              destinationHash: hash(destinationText),
+            });
+            inserted++;
+          }
         } else skipped++;
         completed.add(context);
         await query(queries.processingSql, {
           ...common,
           work: workId,
           status: skip ? 'skipped' : 'succeeded',
-          result: skip ?? (active ? 'red_then_black_insert' : 'black_insert'),
+          result: skip ?? (active ? (row ? 'red_then_black_insert' : 'red') : 'black_insert'),
         });
       }
       await query(queries.finishSql, { run: runId, status: 'succeeded', error: null });

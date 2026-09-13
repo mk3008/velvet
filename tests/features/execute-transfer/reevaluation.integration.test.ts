@@ -456,4 +456,252 @@ describe.skipIf(!enabled)('immutable snapshot reevaluation on PostgreSQL', () =>
     expect(await active()).toEqual(activeBefore);
     expect(await results()).toHaveLength(1);
   });
+  test('source disappearance records Red only and supports reappearance as a fresh Black', async () => {
+    await run();
+    const old = (await rows())[0];
+    await db.query('delete from public.source');
+    await dirty();
+    // Cancellation has no current values to compare or map.
+    await db.query(
+      "update rawsql_transfer.destination_link set generated_reassessment_sql_body = ''",
+    );
+    const cancelled = await run();
+    expect(cancelled).toMatchObject({ inserted: 0, skipped: 0 });
+    expect(await rows()).toEqual([old, { ...old, row_id: 'red-1', amount: '-100' }]);
+    expect(await active()).toEqual([]);
+    expect((await results()).at(-1)).toEqual({
+      processing_status: 'succeeded',
+      processing_result: 'red',
+    });
+    expect(
+      (
+        await db.query(
+          `select source_exists, requires_red_transfer, requires_black_insert_transfer,
+      active_black_id, evaluated_destination_key_json from rawsql_transfer.work_item where run_id = $1`,
+          [cancelled.runId],
+        )
+      ).rows,
+    ).toEqual([
+      {
+        source_exists: false,
+        requires_red_transfer: true,
+        requires_black_insert_transfer: false,
+        active_black_id: null,
+        evaluated_destination_key_json: { row_id: 'a-1' },
+      },
+    ]);
+    expect(
+      (
+        await db.query(
+          `select transfer_operation, source_kind, source_key_json, destination_key_json
+      from rawsql_transfer.lineage where run_id = $1`,
+          [cancelled.runId],
+        )
+      ).rows,
+    ).toEqual([
+      {
+        transfer_operation: 'red_insert',
+        source_kind: 'reversed_destination_row',
+        source_key_json: { row_id: 'a-1' },
+        destination_key_json: { row_id: 'red-1' },
+      },
+    ]);
+    expect(await run()).toMatchObject({ inserted: 0, skipped: 0 });
+    await db.query("insert into public.source values ('a',2,130,'2026-05-10','returned')");
+    await dirty();
+    expect(await run()).toMatchObject({ inserted: 1, skipped: 0 });
+    expect((await active()).map((a) => a.destination_key_json)).toEqual([{ row_id: 'a-2' }]);
+    expect((await results()).map((r) => r.processing_result)).toEqual([
+      'black_insert',
+      'red',
+      'black_insert',
+    ]);
+  });
+  test('absence is determined by stored source SQL results, coalescing duplicate cancellation keys', async () => {
+    await run();
+    await db.query('update rawsql_transfer.setting set source_sql_body = $1', [
+      sourceSql + " where id <> 'a'",
+    ]);
+    await dirty();
+    await dirty();
+    expect(await run()).toMatchObject({ inserted: 0, skipped: 1 });
+    expect(await rows()).toHaveLength(2);
+    expect(await active()).toEqual([]);
+    expect((await results()).map((r) => r.processing_result)).toEqual([
+      'black_insert',
+      'red',
+      'duplicate_ignore',
+    ]);
+    expect((await db.query('select count(*)::int n from public.source')).rows[0].n).toBe(1);
+  });
+  test('cancellation uses the currently permitted posting date without mutating the original', async () => {
+    await run();
+    const old = (await rows())[0];
+    await db.query('delete from public.source');
+    await dirty();
+    const correction = (date: string) => `create or replace function public.destination_values(
+      input_amount numeric, input_date date, input_original date, input_memo text)
+      returns table(amount numeric, posting_date date, original_date date, memo text)
+      language sql stable as $$ select input_amount, greatest(input_date, date '${date}'), input_original, input_memo $$`;
+    try {
+      await db.query(correction('2026-06-01'));
+      await run();
+      expect(await rows()).toEqual([
+        old,
+        { ...old, row_id: 'red-1', amount: '-100', posting_date: '2026-06-01' },
+      ]);
+    } finally {
+      await db.query(correction('2026-05-01'));
+    }
+  });
+  test('cancellation, correction, initial insertion and no-op commit together', async () => {
+    await db.query(
+      "insert into public.source(id,amount,source_date) values ('b',200,'2026-04-10'),('d',400,'2026-04-10')",
+    );
+    await dirty('b');
+    await dirty('d');
+    await run();
+    await db.query(
+      "delete from public.source where id = 'a'; update public.source set amount = 250, version = 2 where id = 'b'; insert into public.source(id,amount,source_date) values ('c',300,'2026-05-10')",
+    );
+    for (const id of ['a', 'b', 'c', 'd']) await dirty(id);
+    const mixed = await run();
+    expect(mixed).toMatchObject({ inserted: 2, skipped: 1 });
+    expect((await results()).slice(-4).map((r) => r.processing_result)).toEqual([
+      'red',
+      'red_then_black_insert',
+      'black_insert',
+      'no_op',
+    ]);
+    expect((await active()).map((a) => a.destination_key_json.row_id).sort()).toEqual([
+      'b-2',
+      'c-1',
+      'd-1',
+    ]);
+    expect(await rows()).toHaveLength(7);
+    expect(
+      (
+        await db.query('select run_status from rawsql_transfer.run where run_id = $1', [
+          mixed.runId,
+        ])
+      ).rows[0].run_status,
+    ).toBe('succeeded');
+  });
+  test.each(['red', 'lineage', 'processing', 'finish'])(
+    'cancellation failure at %s rolls back Red, retirement and all work, preserving cause',
+    async (stage) => {
+      await run();
+      const before = await rows();
+      const activeBefore = await active();
+      await db.query('delete from public.source');
+      await dirty();
+      const marker = {
+        red: 'insert into public.destination',
+        lineage: 'insert into rawsql_transfer.lineage',
+        processing: 'insert into rawsql_transfer.dirty_key_processing',
+        finish: 'update rawsql_transfer.run set run_status =',
+      }[stage]!;
+      const cause = new Error('injected cancellation ' + stage);
+      let injected = false;
+      const client = {
+        query: async (text: string, values?: unknown[]) => {
+          if (!injected && text.includes(marker)) {
+            injected = true;
+            throw cause;
+          }
+          return db.query(text, values);
+        },
+      };
+      const error = await executeTransfer(client, [definition], { settingId: '1' }).catch((e) => e);
+      expect(error).toBeInstanceOf(TransferExecutionError);
+      expect(error.cause).toBe(cause);
+      expect(await rows()).toEqual(before);
+      expect(await active()).toEqual(activeBefore);
+      expect(await results()).toHaveLength(1);
+      expect(
+        (await db.query('select count(*)::int n from rawsql_transfer.work_item')).rows[0].n,
+      ).toBe(1);
+      expect(
+        (await db.query('select count(*)::int n from rawsql_transfer.lineage')).rows[0].n,
+      ).toBe(1);
+      expect(
+        (
+          await db.query(
+            'select run_status, error_message from rawsql_transfer.run where run_id = $1',
+            [error.runId],
+          )
+        ).rows[0],
+      ).toEqual({ run_status: 'failed', error_message: cause.message });
+      expect(await run()).toMatchObject({ inserted: 0, skipped: 0 });
+      expect(await active()).toEqual([]);
+    },
+  );
+  test.each(['before first Black', 'after cancellation'])(
+    'absent source and Active Black complete no-op %s',
+    async (stage) => {
+      if (stage === 'after cancellation') {
+        await run();
+        await db.query('delete from public.source');
+        await dirty();
+        await run();
+      } else await db.query('delete from public.source');
+      const before = await rows();
+      const lineageBefore = (
+        await db.query('select * from rawsql_transfer.lineage order by lineage_id')
+      ).rows;
+      await dirty();
+      const completed = await run();
+      expect(completed).toMatchObject({
+        inserted: 0,
+        skipped: stage === 'after cancellation' ? 1 : 2,
+      });
+      expect(await rows()).toEqual(before);
+      expect(await active()).toEqual([]);
+      expect(
+        (await db.query('select * from rawsql_transfer.lineage order by lineage_id')).rows,
+      ).toEqual(lineageBefore);
+      expect(
+        (
+          await db.query(
+            `select processing_status, processing_result from rawsql_transfer.dirty_key_processing where run_id = $1 order by dirty_key_id`,
+            [completed.runId],
+          )
+        ).rows,
+      ).toEqual(
+        stage === 'after cancellation'
+          ? [{ processing_status: 'skipped', processing_result: 'no_op' }]
+          : [
+              { processing_status: 'skipped', processing_result: 'no_op' },
+              { processing_status: 'skipped', processing_result: 'duplicate_ignore' },
+            ],
+      );
+      expect(
+        (
+          await db.query(
+            `select source_exists, route_type, skip_reason, requires_red_transfer,
+      requires_black_insert_transfer, active_black_id, evaluated_destination_key_json
+      from rawsql_transfer.work_item where run_id = $1 and skip_reason = 'no_op'`,
+            [completed.runId],
+          )
+        ).rows,
+      ).toEqual([
+        {
+          source_exists: false,
+          route_type: 'skipped',
+          skip_reason: 'no_op',
+          requires_red_transfer: false,
+          requires_black_insert_transfer: false,
+          active_black_id: null,
+          evaluated_destination_key_json: null,
+        },
+      ]);
+      await db.query("insert into public.source values ('a',2,130,'2026-05-10','returned')");
+      // The finalized keys cannot cause a transfer, even when the snapshot changes.
+      expect(await run()).toMatchObject({ inserted: 0, skipped: 0 });
+      expect(await rows()).toEqual(before);
+      await dirty();
+      expect(await run()).toMatchObject({ inserted: 1, skipped: 0 });
+      expect((await active()).map((a) => a.destination_key_json)).toEqual([{ row_id: 'a-2' }]);
+    },
+  );
 });
