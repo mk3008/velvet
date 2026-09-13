@@ -29,6 +29,14 @@ Rank implementation candidates using requirements, cardinality, resource costs a
 
 ## Business Design and Alder
 
+For SQL-first transfer scaling, prefer reviewable complete set-based phase SQL and
+fixed TEMP materialization over growing a generic database worker. Preallocated keys
+do not prove prior writes exist or remove Link dependencies. Reorder independent
+keys only under an explicit authored contract; retain legacy behavior for arbitrary
+stored SQL. Keep SQL construction provenance separate from TEMP/permanent DDL review
+priority. A narrow reviewed composition exception must never become a generic raw
+fragment escape hatch. See Decision 0012 for the current candidate and boundaries.
+
 Start at `docs/business-design/README.md` for current Business Design. Preserve existing source formats and follow their lifecycle and authority rules. Record material implementation assumptions and choices in `docs/decisions/`; do not treat records as human approval of unresolved business meaning.
 
 For an Alder review, read Business Design, Decision Records, then implementation / DDL / tests. Use `docs/alder/review-knowledge.md` (Alder v0.1, knowledge v0.3; provenance in `docs/adoption.md`) in a separate agent or fresh context. Apply the full knowledge only during review.

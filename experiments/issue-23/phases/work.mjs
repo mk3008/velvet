@@ -78,8 +78,18 @@ const redLineage = sql`insert into rawsql_transfer.lineage(
  on w.run_id=:run and w.dirty_key_id=d.dirty_key_id and w.destination_link_id=d.destination_link_id
  where d.red_key is not null`;
 const black = sql`insert into public.scale_destination(row_id,logical_id,amount,memo,allocation,role)
- select black_key,logical_id,amount,memo,allocation,execution_order::text
- from pg_temp.velvet_phase_decision where source_exists and skip is null`;
+ select d.black_key,d.logical_id,
+ case when d.execution_order=1 then d.amount else journal.amount end,
+ d.memo,d.allocation,d.execution_order::text
+ from pg_temp.velvet_phase_decision d
+ left join lateral (
+  select j.amount from public.scale_destination j
+  where j.logical_id=d.logical_id and j.role='1' and j.amount is not distinct from d.amount
+  order by j.row_id::bigint desc limit 1
+ ) journal on d.execution_order>1
+ where d.source_exists and d.skip is null
+ and (d.execution_order=1 or exists(select 1 from public.scale_destination j
+  where j.logical_id=d.logical_id and j.role='1' and j.amount is not distinct from d.amount))`;
 const active = sql`insert into rawsql_transfer.active_black(
  destination_link_id,source_key_json,source_key_hash,destination_key_json)
  select destination_link_id,source_key::jsonb,source_hash,jsonb_build_object('row_id',black_key)

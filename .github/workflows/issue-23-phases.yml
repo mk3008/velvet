@@ -44,6 +44,7 @@ jobs:
       - run: pnpm build
       - run: mkdir -p tmp
       - run: node experiments/issue-23/phases/materialize.test.mjs
+      - run: node experiments/issue-23/phases/audit.mjs > tmp/phases-sql-audit.json
       - name: Sample database resources
         run: docker stats --format '{{json .}}' > tmp/phases-postgres.jsonl &
       - run: node experiments/issue-23/phases/evaluate.mjs > tmp/phases.log

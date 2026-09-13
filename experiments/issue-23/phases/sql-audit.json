@@ -1,0 +1,1418 @@
+{
+  "construction": [
+    {
+      "file": "controller.mjs",
+      "line": 11,
+      "column": 58,
+      "boundary": "serene",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 11,
+      "column": 105,
+      "boundary": "driver-candidate",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 13,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "configure",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 13,
+      "column": 17,
+      "boundary": "serene",
+      "function": "configure",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 14,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "configure",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 14,
+      "column": 17,
+      "boundary": "serene",
+      "function": "configure",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_UPDATE_WITHOUT_WHERE",
+          "detail": "Review suggested: UPDATE has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "controller.mjs",
+      "line": 15,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "configure",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 15,
+      "column": 17,
+      "boundary": "serene",
+      "function": "configure",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 19,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 21,
+      "column": 25,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 22,
+      "column": 28,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 38,
+      "column": 26,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 39,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 39,
+      "column": 53,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 40,
+      "column": 27,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 41,
+      "column": 26,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 43,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 44,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 47,
+      "column": 13,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 49,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 49,
+      "column": 38,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 49,
+      "column": 100,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "controller.mjs",
+      "line": 50,
+      "column": 46,
+      "boundary": "driver-candidate",
+      "function": "executeProfile",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 23,
+      "column": 58,
+      "boundary": "serene",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 23,
+      "column": 105,
+      "boundary": "driver-candidate",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 24,
+      "column": 33,
+      "boundary": "driver-candidate",
+      "function": "snapshot",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 33,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 33,
+      "column": 60,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 34,
+      "column": 24,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 35,
+      "column": 25,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 41,
+      "column": 22,
+      "boundary": "driver-candidate",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 46,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 46,
+      "column": 60,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 47,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 49,
+      "column": 31,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 49,
+      "column": 40,
+      "boundary": "serene",
+      "function": "measured",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 52,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 52,
+      "column": 32,
+      "boundary": "serene",
+      "function": "measured",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 56,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 64,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 65,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 66,
+      "column": 26,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 71,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 74,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 76,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 77,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 78,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 80,
+      "column": 24,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 86,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 90,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 90,
+      "column": 19,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 93,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 102,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 104,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 110,
+      "column": 25,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 112,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 113,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 113,
+      "column": 18,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 114,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 117,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 119,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "evaluate.mjs",
+      "line": 119,
+      "column": 32,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "materialize.mjs",
+      "line": 7,
+      "column": 16,
+      "boundary": "serene",
+      "function": "materializeSource",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 6,
+      "column": 17,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 12,
+      "column": 74,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 14,
+      "column": 37,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 15,
+      "column": 37,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 16,
+      "column": 37,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 27,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 27,
+      "column": 38,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 28,
+      "column": 28,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 29,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 30,
+      "column": 24,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 32,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 33,
+      "column": 35,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 34,
+      "column": 24,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "materialize.test.mjs",
+      "line": 35,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "work.mjs",
+      "line": 6,
+      "column": 32,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "work.mjs",
+      "line": 7,
+      "column": 17,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_DROP",
+          "detail": "Review suggested: DROP keyword may indicate an exceptional operation."
+        },
+        {
+          "code": "SQL_CREATE_TEMP",
+          "detail": "Review suggested: Temporary creation may introduce operational state."
+        }
+      ]
+    },
+    {
+      "file": "work.mjs",
+      "line": 26,
+      "column": 16,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_DROP",
+          "detail": "Review suggested: DROP keyword may indicate an exceptional operation."
+        },
+        {
+          "code": "SQL_CREATE_TEMP",
+          "detail": "Review suggested: Temporary creation may introduce operational state."
+        },
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "work.mjs",
+      "line": 51,
+      "column": 21,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "work.mjs",
+      "line": 61,
+      "column": 13,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 64,
+      "column": 17,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 67,
+      "column": 16,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 69,
+      "column": 20,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 80,
+      "column": 15,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "work.mjs",
+      "line": 93,
+      "column": 16,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 97,
+      "column": 22,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 106,
+      "column": 20,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "work.mjs",
+      "line": 116,
+      "column": 53,
+      "boundary": "serene",
+      "function": "execute",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "work.mjs",
+      "line": 116,
+      "column": 93,
+      "boundary": "driver-candidate",
+      "function": "execute",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "work.mjs",
+      "line": 117,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 119,
+      "column": 22,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 119,
+      "column": 30,
+      "boundary": "serene",
+      "function": "phaseWork",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 123,
+      "column": 27,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "work.mjs",
+      "line": 124,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 124,
+      "column": 16,
+      "boundary": "serene",
+      "function": "phaseWork",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 125,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 125,
+      "column": 16,
+      "boundary": "serene",
+      "function": "phaseWork",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 128,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 129,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 129,
+      "column": 31,
+      "boundary": "serene",
+      "function": "phaseWork",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 132,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 133,
+      "column": 24,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 133,
+      "column": 32,
+      "boundary": "serene",
+      "function": "phaseWork",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 136,
+      "column": 25,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 138,
+      "column": 24,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 138,
+      "column": 32,
+      "boundary": "serene",
+      "function": "phaseWork",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 144,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 145,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 146,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 147,
+      "column": 27,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 149,
+      "column": 26,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 149,
+      "column": 34,
+      "boundary": "serene",
+      "function": "phaseWork",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 155,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 156,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 157,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 158,
+      "column": 22,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 158,
+      "column": 30,
+      "boundary": "serene",
+      "function": "phaseWork",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "work.mjs",
+      "line": 160,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "phaseWork",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "work.mjs",
+      "line": 160,
+      "column": 17,
+      "boundary": "serene",
+      "function": "phaseWork",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_DROP",
+          "detail": "Review suggested: DROP keyword may indicate an exceptional operation."
+        }
+      ]
+    }
+  ],
+  "content": [
+    {
+      "file": "dependency.sql",
+      "signals": [
+        {
+          "code": "SQL_DROP",
+          "category": "destructive-candidate",
+          "priority": "elevated"
+        }
+      ]
+    },
+    {
+      "file": "evaluate.mjs",
+      "signals": [
+        {
+          "code": "SQL_DROP",
+          "category": "destructive-candidate",
+          "priority": "elevated"
+        }
+      ]
+    },
+    {
+      "file": "materialize.mjs",
+      "signals": [
+        {
+          "code": "SQL_CREATE_TEMP",
+          "category": "temporary-state",
+          "priority": "advisory"
+        }
+      ]
+    },
+    {
+      "file": "materialize.test.mjs",
+      "signals": [
+        {
+          "code": "SQL_CREATE_TEMP",
+          "category": "temporary-state",
+          "priority": "advisory"
+        },
+        {
+          "code": "SQL_CREATE_TABLE",
+          "category": "persistent-schema",
+          "priority": "elevated"
+        },
+        {
+          "code": "SQL_CREATE_TEMP",
+          "category": "temporary-state",
+          "priority": "advisory"
+        },
+        {
+          "code": "SQL_CREATE_TABLE",
+          "category": "persistent-schema",
+          "priority": "elevated"
+        },
+        {
+          "code": "SQL_DROP",
+          "category": "destructive-candidate",
+          "priority": "elevated"
+        }
+      ]
+    },
+    {
+      "file": "work.mjs",
+      "signals": [
+        {
+          "code": "SQL_CREATE_TEMP",
+          "category": "temporary-state",
+          "priority": "advisory"
+        },
+        {
+          "code": "SQL_CREATE_TEMP",
+          "category": "temporary-state",
+          "priority": "advisory"
+        },
+        {
+          "code": "SQL_DROP",
+          "category": "destructive-candidate",
+          "priority": "elevated"
+        }
+      ]
+    }
+  ],
+  "exceptions": [
+    {
+      "file": "materialize.mjs",
+      "function": "materializeSource",
+      "scope": "fixed CTAS prefix + identity-checked bound complete SELECT only",
+      "disposition": "explicit local reviewed exception; original findings retained, not promoted to ordinary"
+    }
+  ]
+}

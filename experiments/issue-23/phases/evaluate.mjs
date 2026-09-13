@@ -62,15 +62,20 @@ await withFixture(async()=>{
  db=databaseClient();
  try{
   await db.query(await readFile(new URL('../ordered/profile.sql',import.meta.url),'utf8'));
+  await db.query(await readFile(new URL('dependency.sql',import.meta.url),'utf8'));
   report.postgres=(await db.query('select version()')).rows[0].version;
   // Differential semantic oracle before capacity sampling, with all metadata and history.
   const semanticStates=[];
   for(const backend of ['reference','ordered']){
    await setup(5,links);await configure();
-   await db.query("truncate public.ordered_write_observation restart identity;set velvet.ordered_oracle='on'");
+   await db.query("truncate public.ordered_write_observation restart identity;set velvet.ordered_oracle='on';set velvet.phase_causality='on'");
    const run=()=>backend==='ordered'?ordered(db):executeTransfer(db,[definition],{settingId:'1',metadataMode:'row'});
    await dirty();await run();await dirty();await run();
    await db.query('update public.scale_source set amount=121 where id=2');await dirty();await run();
+   // Only journal changes: ledgers already have the new memo and must remain no-op.
+   await db.query("update public.scale_destination set memo='journal-only' where role<>'1'");
+   await db.query("update public.scale_source set memo='journal-only'");await dirty();await run();
+   await db.query('update public.scale_source set amount=12345678901234567890.123456789,memo=null where id=2');await dirty();await run();
    await dirty();await dirty();await run();
    await dirty();await db.query('delete from public.scale_source where id=1');await run();
    const state=JSON.parse(await snapshot());
@@ -78,7 +83,17 @@ await withFixture(async()=>{
    semanticStates.push(normalize(state));
   }
   assert.deepEqual(semanticStates[1],semanticStates[0]);report.differentialState='passed';
-  await db.query("set velvet.ordered_oracle='off'");
+  await db.query("set velvet.ordered_oracle='off';set velvet.phase_causality='off'");
+  // A silently dropped or rewritten destination must fail before success metadata.
+  for(const rewrite of ['drop','key']){
+   await setup(1,links);await configure();await dirty();const before=await snapshot();
+   await query(db,sql`select set_config('velvet.phase_rewrite',:rewrite,false)`,{rewrite});
+   await assert.rejects(ordered(db),/Black cardinality|Black identity/);
+   assert.equal(await snapshot(),before);
+   await db.query("set velvet.phase_rewrite=''");
+   assert.equal((await ordered(db)).inserted,links);
+  }
+  report.identityFailure='passed';
   // Pair the same canonical profile on both paths; localhost route observations first.
   for(let repetition=0;repetition<2;repetition++){
    await setup(size,links);await configure();await dirty();

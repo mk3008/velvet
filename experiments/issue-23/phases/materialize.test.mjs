@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {sql,bind} from '@mk3008/serene';
 import {materializeSource} from './materialize.mjs';
+import {contentReview} from './content-review.mjs';
 
 const statement=sql`select :value::text value, :value::text repeated`;
 const value="'; DROP TABLE permanent_table; --";
@@ -14,6 +15,10 @@ assert.throws(()=>materializeSource(sql`select 1; select 2`));
 assert.throws(()=>materializeSource(sql`select 1;`));
 assert.throws(()=>materializeSource(sql`select ';'`));
 assert.throws(()=>materializeSource(statement,{value,unused:1}));
+assert.deepEqual(contentReview('CREATE TEMP TABLE t ON COMMIT DROP AS SELECT 1').map(s=>s.priority),['advisory']);
+assert.deepEqual(contentReview('CREATE UNLOGGED TABLE t(id int)').map(s=>s.priority),['elevated']);
+assert.deepEqual(contentReview('CREATE TEMPORARY TABLE t ON COMMIT DROP AS SELECT 1; CREATE TABLE p(id int); DROP TABLE p')
+ .map(s=>s.code),['SQL_CREATE_TEMP','SQL_CREATE_TABLE','SQL_DROP']);
 if(process.env.ASHIBA_DB_URL){
  const {Client}=await import('pg');
  const client=new Client({connectionString:process.env.ASHIBA_DB_URL});await client.connect();
