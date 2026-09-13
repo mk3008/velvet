@@ -67,8 +67,23 @@ function projection(row: Row, columns: string[]): Row {
 export async function executeTransfer(
   client: TransferExecutionClient,
   definitions: readonly TransferExecutionDefinition[],
-  input: { settingId: string; arguments?: Record<string, unknown> },
+  input: {
+    settingId: string;
+    arguments?: Record<string, unknown>;
+    /** Opt-in PoC: deploy db/runtime/execute-transfer-metadata.sql first. */
+    metadataMode?: 'row' | 'routine';
+    /** Maximum distinct Dirty Key records; every eligible link of each is admitted. */
+    maxDirtyKeys?: number;
+  },
 ): Promise<{ runId: string; inserted: number; skipped: number }> {
+  if (input.metadataMode !== undefined && !['row', 'routine'].includes(input.metadataMode))
+    throw new Error('Invalid metadata mode');
+  if (
+    input.maxDirtyKeys !== undefined &&
+    (!Number.isSafeInteger(input.maxDirtyKeys) || input.maxDirtyKeys < 1)
+  )
+    throw new Error('maxDirtyKeys must be a positive safe integer');
+  const routine = input.metadataMode === 'routine';
   const definitionsForSetting = definitions.filter((d) => d.settingId === input.settingId);
   if (definitionsForSetting.length !== 1)
     throw new Error('Exactly one execution definition is required for the Setting');
@@ -136,11 +151,15 @@ export async function executeTransfer(
     );
     if (!isDeepStrictEqual(currentSetting, setting) || !isDeepStrictEqual(currentLinks, links))
       throw new Error('Transfer configuration changed after Run creation');
-    const pending = await query(queries.pendingSql, {
-      setting: input.settingId,
-      schema: definition.sourceSchema,
-      table: definition.sourceTable,
-    });
+    const pending = await query(
+      input.maxDirtyKeys === undefined ? queries.pendingSql : queries.boundedPendingSql,
+      {
+        setting: input.settingId,
+        maximum: input.maxDirtyKeys,
+        schema: definition.sourceSchema,
+        table: definition.sourceTable,
+      },
+    );
     // Freeze the explicit logical identity before looking at source current values.
     const work = pending.map((item): Row & { key: string } => {
       const key = definition.resolveLogicalKey(Object.freeze({ ...item.source_key_json }));
@@ -246,7 +265,7 @@ export async function executeTransfer(
           key: item.key,
           hash: hash(item.key),
         };
-        const [{ work_item_id: workId }] = await query(queries.workSql, {
+        const workFields = {
           ...common,
           model: link.transfer_model,
           route: skip ? 'skipped' : link.transfer_model,
@@ -258,7 +277,29 @@ export async function executeTransfer(
           active: active?.active_black_id ?? null,
           evaluated: active ? keyText(active.destination_key_json) : null,
           red: immutable && !!active && !skip,
-        });
+        };
+        const resultFields = {
+          ...common,
+          status: skip ? 'skipped' : 'succeeded',
+          result:
+            skip ??
+            (active
+              ? mutable
+                ? row
+                  ? 'black_update'
+                  : 'physical_delete'
+                : row
+                  ? 'red_then_black_insert'
+                  : 'red'
+              : 'black_insert'),
+        };
+        const [{ work_item_id: workId }] =
+          routine && skip
+            ? await query(queries.skippedMetadataSql, {
+                fields: JSON.stringify({ ...workFields, ...resultFields }),
+              })
+            : await query(queries.workSql, workFields);
+        let processingRecorded = routine && !!skip;
         if (!skip) {
           if (active && mutable) {
             const operation = row ? 'Black Update' : 'Physical Delete';
@@ -288,15 +329,22 @@ export async function executeTransfer(
             )
               throw new Error(`${operation} destination key does not match Active Black`);
             if (!row) {
-              await query(queries.releaseActiveReferencesSql, {
-                active: active.active_black_id,
-                link: common.link,
-              });
-              const removed = await query(queries.activeDeleteSql, {
-                active: active.active_black_id,
-                link: common.link,
-              });
-              if (removed.length !== 1) throw new Error('Active Black retirement failed');
+              if (routine) {
+                await query(queries.retireMetadataSql, {
+                  fields: JSON.stringify({ active: active.active_black_id, link: common.link }),
+                  withLineage: false,
+                });
+              } else {
+                await query(queries.releaseActiveReferencesSql, {
+                  active: active.active_black_id,
+                  link: common.link,
+                });
+                const removed = await query(queries.activeDeleteSql, {
+                  active: active.active_black_id,
+                  link: common.link,
+                });
+                if (removed.length !== 1) throw new Error('Active Black retirement failed');
+              }
             }
           }
           if (active && immutable) {
@@ -314,18 +362,9 @@ export async function executeTransfer(
             const redKey = projection(red.rows[0], link.destination_key_columns);
             if (isDeepStrictEqual(redKey, active.destination_key_json))
               throw new Error('Red Transfer must create a different destination row');
-            await query(queries.releaseActiveReferencesSql, {
-              active: active.active_black_id,
-              link: common.link,
-            });
-            const removed = await query(queries.activeDeleteSql, {
-              active: active.active_black_id,
-              link: common.link,
-            });
-            if (removed.length !== 1) throw new Error('Active Black retirement failed');
             const originalText = keyText(active.destination_key_json);
             const redText = keyText(redKey);
-            await query(queries.redLineageSql, {
+            const redFields = {
               run: common.run,
               setting: common.setting,
               link: common.link,
@@ -335,7 +374,24 @@ export async function executeTransfer(
               table: link.destination_table_name,
               destination: redText,
               destinationHash: hash(redText),
-            });
+            };
+            if (routine) {
+              await query(queries.retireMetadataSql, {
+                fields: JSON.stringify({ ...redFields, active: active.active_black_id }),
+                withLineage: true,
+              });
+            } else {
+              await query(queries.releaseActiveReferencesSql, {
+                active: active.active_black_id,
+                link: common.link,
+              });
+              const removed = await query(queries.activeDeleteSql, {
+                active: active.active_black_id,
+                link: common.link,
+              });
+              if (removed.length !== 1) throw new Error('Active Black retirement failed');
+              await query(queries.redLineageSql, redFields);
+            }
           }
           if (row && (!mutable || !active)) {
             const prepared = bindStoredSql(link.generated_insert_transfer_sql_body, mapped);
@@ -355,44 +411,44 @@ export async function executeTransfer(
             if (!isDeepStrictEqual(destination, expected))
               throw new Error('Inserted destination key does not match mapping');
             const destinationText = keyText(destination);
-            await query(queries.activeInsertSql, {
-              link: common.link,
-              key: common.key,
-              hash: common.hash,
-              destination: destinationText,
-            });
-            if (!mutable)
-              await query(queries.lineageSql, {
-                run: common.run,
-                setting: common.setting,
+            if (routine) {
+              await query(queries.blackMetadataSql, {
+                fields: JSON.stringify({
+                  ...resultFields,
+                  work: workId,
+                  table: link.destination_table_name,
+                  destination: destinationText,
+                  destinationHash: hash(destinationText),
+                }),
+                withLineage: !mutable,
+              });
+              processingRecorded = true;
+            } else {
+              await query(queries.activeInsertSql, {
                 link: common.link,
-                work: workId,
                 key: common.key,
                 hash: common.hash,
-                table: link.destination_table_name,
                 destination: destinationText,
-                destinationHash: hash(destinationText),
               });
+              if (!mutable)
+                await query(queries.lineageSql, {
+                  run: common.run,
+                  setting: common.setting,
+                  link: common.link,
+                  work: workId,
+                  key: common.key,
+                  hash: common.hash,
+                  table: link.destination_table_name,
+                  destination: destinationText,
+                  destinationHash: hash(destinationText),
+                });
+            }
             inserted++;
           }
         } else skipped++;
         completed.add(context);
-        await query(queries.processingSql, {
-          ...common,
-          work: workId,
-          status: skip ? 'skipped' : 'succeeded',
-          result:
-            skip ??
-            (active
-              ? mutable
-                ? row
-                  ? 'black_update'
-                  : 'physical_delete'
-                : row
-                  ? 'red_then_black_insert'
-                  : 'red'
-              : 'black_insert'),
-        });
+        if (!processingRecorded)
+          await query(queries.processingSql, { ...resultFields, work: workId });
       }
       await query(queries.finishSql, { run: runId, status: 'succeeded', error: null });
       await client.query('commit');

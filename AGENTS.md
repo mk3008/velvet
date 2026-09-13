@@ -19,6 +19,8 @@ Read `docs/scope/SYSTEM_SCOPE.md` before implementation. Follow the concept inde
 
 Run `pnpm verify` for changes affecting repository wiring or runtime behavior. A PostgreSQL connection via `ASHIBA_DB_URL`, or Docker for Testcontainers, is required for the complete test suite. Existing `ASHIBA_*` environment names and `rawsql_transfer` schema names remain contracts during this repository-only migration.
 
+Missing local PostgreSQL or Docker is not a stopping condition. Complete the implementation and available local checks, push the dedicated branch, open a PR, and use the existing PostgreSQL-backed Verify workflow for real database regression testing. Inspect CI results and fix failures before reporting completion. For task-specific performance, memory, RTT, concurrency or recovery measurements, add a reproducible GitHub Actions evaluation following `experiments/issue-20` and its workflow. Report measured evidence separately from assumptions and local skipped checks; do not claim deployment fitness from compilation alone.
+
 Do not merge PRs or publish packages unless explicitly requested. Report incomplete or skipped verification. Keep temporary task notes in `tmp/`.
 
 ## Business Design and Alder
