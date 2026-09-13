@@ -35,7 +35,7 @@ Completed on PostgreSQL 18.6 / Node 22.23.2 in [GitHub Actions run 34754006818](
 
 [Full verify](https://github.com/mk3008/velvet/actions/runs/34754006817) succeeded with **183 tests (52 CLI + 131 application), no skips**, plus type/build/document consistency and SQL audit. Local verification separately passed 87 tests with 96 DB tests explicitly skipped because no local PostgreSQL was available; the complete verification claim comes from CI. [Fresh Alder review](alder-review.md) records scope, the fixed cleanup finding and limits.
 
-The measurements support retaining the current source snapshot and targeting owned metadata batching first, without shipping the reduced kernel as an executor. They do not establish the effect of three separate physical destination tables, concurrent runs, or wider source payloads.
+After the owner added the serverless/shared-DB requirement, the measurements support owned metadata batching only as the first experiment, with the current source snapshot serving as a correctness baseline. The existing 150,012–360,012 serial-call protocol is not accepted for the target deployment. Memory materialization is not a final production choice; adoption requires the [serverless gates in Decision 0009](../../docs/decisions/0009-scalable-execution-evaluation.md#serverless-reassessment-and-adoption-gates), including peak total memory, intended-like RTT and concurrent shared-DB impact. No new measurements are claimed in this documentation reassessment. They do not establish the effect of three separate physical destination tables, concurrent runs, or wider source payloads.
 
 ### Current executor observations
 
