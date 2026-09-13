@@ -287,11 +287,11 @@
         ]
       },
       {
-        "id": "immutable-model-only",
-        "displayName": "immutable model の概念",
+        "id": "lineage-model-boundary",
+        "displayName": "immutable と insert_only の転送結果を追跡する",
         "polarity": "positive",
         "type": "invariant",
-        "text": "この文書では、Lineage は immutable transfer model の転送時に存在する概念として扱い、mutable transfer model では Lineage を持たないと扱う。",
+        "text": "Lineage は immutable transfer model と insert_only transfer model の Black Insert で存在し、転送先行を直接更新または削除する mutable transfer model では持たない。",
         "evidence": [
           "spec:lineage"
         ]
@@ -404,9 +404,9 @@
     },
     {
       "from": "mutable-overwrite-loses-history",
-      "to": "immutable-model-only",
+      "to": "lineage-model-boundary",
       "kind": "explains",
-      "reason": "mutable transfer model では履歴として Lineage を持ちようがないことが、immutable model の概念として扱う理由になるため。",
+      "reason": "mutable transfer model は転送先行を上書きまたは削除する一方、immutable と insert_only の Black Insert は生成した転送先行を追跡できるため。",
       "evidence": [
         "spec:lineage"
       ]
