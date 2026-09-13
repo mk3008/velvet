@@ -6,8 +6,7 @@
     "moduleResolution": "NodeNext",
     "baseUrl": ".",
     "paths": {
-      "#features/*": ["src/features/*"],
-      "#tests/*": ["tests/*"]
+      "#features/*": ["src/features/*"]
     },
     "strict": true,
     "esModuleInterop": true,

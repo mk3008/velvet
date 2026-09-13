@@ -16,10 +16,6 @@
     "#features/*.js": {
       "types": "./src/features/*.ts",
       "default": "./dist/features/*.js"
-    },
-    "#tests/*.js": {
-      "types": "./tests/*.ts",
-      "default": "./tests/*.ts"
     }
   },
   "scripts": {

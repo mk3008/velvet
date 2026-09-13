@@ -14,8 +14,8 @@ Inventory recorded before implementation for Issue #13 against main `5d551595fdb
 | `queryMany`, `queryOne`, `queryOneOrNull` | obsolete / over-structured | First only forwards to executor; latter two have no consumers. Use the executor directly; retain INSERT-specific cardinality checks. |
 | `src/libraries/sql/sql-client.ts` | obsolete | Unused re-export, with misleading multi-DB advice. Remove; no root export depends on it. |
 | PostgreSQL adapter | useful | Serene named-to-indexed binding and native pg seam support actual runtime and tests. Retain implementation, remove obsolete Ashiba CLI example. |
-| `#libraries`, `#adapters` aliases | obsolete | No consumers in source or tests. Remove matching package, TypeScript and Vitest mappings. |
-| `#features`, `#tests` aliases | useful | Existing imports use these access paths. Retain; names do not prescribe architecture. |
+| `#libraries`, `#adapters`, `#tests` aliases | obsolete | No consumers in source or tests. Remove matching package, TypeScript and Vitest mappings. |
+| `#features` alias | useful | Existing imports use this access path. Retain; the name does not prescribe architecture. |
 | `features`, `_shared`, `adapters/pg` directories | incidental / useful | Current use cases, shared query contract and driver code are easy to locate. Keep without a mandatory tree. |
 | `ashiba.config.json` | obsolete | No repository script, dependency, build/test config or code reads it. DDL tooling passes paths/schema explicitly; runtime schema is in SQL; Serene audits `src`. Remove unused featureRoot/sqlRoots/format settings. Keep ASHIBA environment contracts. |
 | Feature README structure language | misleading | Remove imperative CRUD/layout advice and describe actual entrypoints and validation responsibilities. Retain product scope and transaction requirements. |
