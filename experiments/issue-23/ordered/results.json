@@ -1,0 +1,750 @@
+[
+  {
+    "commit": "40569a3a6c85f6759adcc7ce1385dda507f2a29d",
+    "mode": "ordered",
+    "size": 1000,
+    "links": 1,
+    "completed": true,
+    "differentialState": "passed",
+    "routes": {
+      "initial": {
+        "observations": 2,
+        "ms": [
+          549.1753630000001,
+          542.2894660000002
+        ],
+        "meanMs": 545.7324145000001,
+        "calls": [
+          11
+        ],
+        "maxRSSBytes": 66723840,
+        "walBytes": [
+          3955744,
+          3954616
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 27,
+            "blks_hit": 614287,
+            "tup_inserted": 5134,
+            "tup_updated": 5,
+            "tup_deleted": 133,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 27,
+            "blks_hit": 614079,
+            "tup_inserted": 5134,
+            "tup_updated": 5,
+            "tup_deleted": 133,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "all_no_op": {
+        "observations": 2,
+        "ms": [
+          491.78662099999997,
+          476.34766299999956
+        ],
+        "meanMs": 484.06714199999976,
+        "calls": [
+          11
+        ],
+        "maxRSSBytes": 66985984,
+        "walBytes": [
+          1829232,
+          1834120
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 867460,
+            "tup_inserted": 2134,
+            "tup_updated": 5,
+            "tup_deleted": 133,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 0,
+            "blks_hit": 867462,
+            "tup_inserted": 2134,
+            "tup_updated": 5,
+            "tup_deleted": 133,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "mostly_no_op": {
+        "observations": 2,
+        "ms": [
+          616.5542390000003,
+          644.0517849999997
+        ],
+        "meanMs": 630.303012,
+        "calls": [
+          11
+        ],
+        "maxRSSBytes": 67510272,
+        "walBytes": [
+          1919040,
+          1922856
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 1417911,
+            "tup_inserted": 2184,
+            "tup_updated": 25,
+            "tup_deleted": 143,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 0,
+            "blks_hit": 1417911,
+            "tup_inserted": 2184,
+            "tup_updated": 25,
+            "tup_deleted": 143,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "correction": {
+        "observations": 2,
+        "ms": [
+          2609.641887,
+          2621.543440999999
+        ],
+        "meanMs": 2615.592664,
+        "calls": [
+          11
+        ],
+        "maxRSSBytes": 67665920,
+        "walBytes": [
+          8219024,
+          8219064
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 5754460,
+            "tup_inserted": 7134,
+            "tup_updated": 2985,
+            "tup_deleted": 1133,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 0,
+            "blks_hit": 5754459,
+            "tup_inserted": 7134,
+            "tup_updated": 2985,
+            "tup_deleted": 1133,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      }
+    },
+    "container": {
+      "observationsIncludingRefreshes": 58,
+      "maxCPUPercent": 106.91,
+      "maxMemoryBytes": 75172413.44
+    }
+  },
+  {
+    "commit": "40569a3a6c85f6759adcc7ce1385dda507f2a29d",
+    "mode": "ordered",
+    "size": 10000,
+    "links": 3,
+    "completed": true,
+    "differentialState": "passed",
+    "routes": {
+      "initial": {
+        "observations": 2,
+        "ms": [
+          30734.028861,
+          15316.349499000004
+        ],
+        "meanMs": 23025.18918,
+        "calls": [
+          11
+        ],
+        "maxRSSBytes": 72462336,
+        "walBytes": [
+          117428160,
+          123240496
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 27,
+            "blks_hit": 64762314,
+            "tup_inserted": 150164,
+            "tup_updated": 120,
+            "tup_deleted": 134,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 49,
+            "blks_hit": 4760227,
+            "tup_inserted": 150134,
+            "tup_updated": 5,
+            "tup_deleted": 133,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "all_no_op": {
+        "observations": 2,
+        "ms": [
+          29580.487938000002,
+          10266.37107199998
+        ],
+        "meanMs": 19923.429504999993,
+        "calls": [
+          11
+        ],
+        "maxRSSBytes": 67821568,
+        "walBytes": [
+          53439008,
+          56713416
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 3919165,
+            "tup_inserted": 60134,
+            "tup_updated": 5,
+            "tup_deleted": 133,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 2,
+            "blks_hit": 3355007,
+            "tup_inserted": 60134,
+            "tup_updated": 5,
+            "tup_deleted": 133,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "mostly_no_op": {
+        "observations": 2,
+        "ms": [
+          76766.376057,
+          10502.304108000011
+        ],
+        "meanMs": 43634.340082500006,
+        "calls": [
+          11
+        ],
+        "maxRSSBytes": 67325952,
+        "walBytes": [
+          55439656,
+          55194480
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 68,
+            "blks_hit": 3589964,
+            "tup_inserted": 61723,
+            "tup_updated": 611,
+            "tup_deleted": 433,
+            "temp_files": 1,
+            "temp_bytes": 11877408,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 146,
+            "blks_hit": 3373255,
+            "tup_inserted": 61634,
+            "tup_updated": 605,
+            "tup_deleted": 433,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "correction": {
+        "observations": 2,
+        "ms": [
+          30978.200397000008,
+          30785.71761600001
+        ],
+        "meanMs": 30881.95900650001,
+        "calls": [
+          11
+        ],
+        "maxRSSBytes": 67084288,
+        "walBytes": [
+          245923680,
+          255059928
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 8294,
+            "blks_hit": 11254821,
+            "tup_inserted": 210143,
+            "tup_updated": 89505,
+            "tup_deleted": 30142,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 6569,
+            "blks_hit": 11245370,
+            "tup_inserted": 210163,
+            "tup_updated": 89541,
+            "tup_deleted": 30162,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      }
+    },
+    "recovery": {
+      "primaryStartsOnFreshConnection": true,
+      "backlog": 10000,
+      "cap": 1000,
+      "targetArrivalPerSecond": 2,
+      "rtt": 5,
+      "completed": true,
+      "catchupMs": 18329.196742,
+      "arrivalsDuringCatchup": 36,
+      "remaining": 0,
+      "otherRemaining": 0,
+      "grossKeysPerSecond": 547.5417248920269,
+      "arrivals": 55,
+      "primaryRunMs": [
+        187.22578999999678,
+        1723.60465199998,
+        1745.2946710000106,
+        1800.3631079999905,
+        1720.2445920000027,
+        1743.4330079999927,
+        1764.8682409999892,
+        1744.2829379999894,
+        1738.6970150000125,
+        1785.7143959999958,
+        1779.2691179999965,
+        203.40305399999488,
+        161.88840600001276,
+        165.41245800000615,
+        164.44880499999272,
+        172.05825500001083,
+        163.35499000002164,
+        3012.630984999996
+      ],
+      "otherRunMs": [
+        1767.6904100000102,
+        1706.3541200000036,
+        1773.6536599999818,
+        1728.2014539999946,
+        1703.2486450000142,
+        1800.6623959999997,
+        1760.296359,
+        1753.6451769999985,
+        1831.3804839999939,
+        1780.777912999998,
+        210.8318900000013
+      ],
+      "neighbor": {
+        "idle": {
+          "n": 52,
+          "medianMs": 0.5922030000074301,
+          "p95Ms": 1.555926000000909,
+          "maxMs": 1.9666180000058375
+        },
+        "outage": {
+          "n": 9,
+          "medianMs": 0.5699019999883603,
+          "p95Ms": 2.924800000007963,
+          "maxMs": 2.924800000007963
+        },
+        "recovery": {
+          "n": 878,
+          "medianMs": 0.7113359999784734,
+          "p95Ms": 1.4903920000069775,
+          "maxMs": 12.411040000006324
+        },
+        "steady": {
+          "n": 295,
+          "medianMs": 0.5568449999846052,
+          "p95Ms": 0.8391819999960717,
+          "maxMs": 3.693333999981405
+        },
+        "correction": {
+          "n": 149,
+          "medianMs": 0.5902169999899343,
+          "p95Ms": 0.9993360000080429,
+          "maxMs": 2.157591000024695
+        }
+      },
+      "lockWaitObservations": 0
+    },
+    "container": {
+      "observationsIncludingRefreshes": 1086,
+      "maxCPUPercent": 214.44,
+      "maxMemoryBytes": 291504128.0
+    }
+  },
+  {
+    "commit": "40569a3a6c85f6759adcc7ce1385dda507f2a29d",
+    "mode": "routine",
+    "size": 1000,
+    "links": 1,
+    "completed": true,
+    "differentialState": "passed",
+    "routes": {
+      "initial": {
+        "observations": 2,
+        "ms": [
+          2119.33193,
+          1911.7175070000012
+        ],
+        "meanMs": 2015.5247185000005,
+        "calls": [
+          4012
+        ],
+        "maxRSSBytes": 122023936,
+        "walBytes": [
+          3891080,
+          3891080
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 27,
+            "blks_hit": 608347,
+            "tup_inserted": 5001,
+            "tup_updated": 1,
+            "tup_deleted": 0,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 27,
+            "blks_hit": 608153,
+            "tup_inserted": 5001,
+            "tup_updated": 1,
+            "tup_deleted": 0,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "all_no_op": {
+        "observations": 2,
+        "ms": [
+          2012.3796869999996,
+          1943.5330429999995
+        ],
+        "meanMs": 1977.9563649999996,
+        "calls": [
+          4012
+        ],
+        "maxRSSBytes": 104316928,
+        "walBytes": [
+          1766592,
+          1766592
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 857548,
+            "tup_inserted": 2001,
+            "tup_updated": 1,
+            "tup_deleted": 0,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 0,
+            "blks_hit": 857548,
+            "tup_inserted": 2001,
+            "tup_updated": 1,
+            "tup_deleted": 0,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "mostly_no_op": {
+        "observations": 2,
+        "ms": [
+          2174.829157,
+          2103.4037009999993
+        ],
+        "meanMs": 2139.1164289999997,
+        "calls": [
+          4052
+        ],
+        "maxRSSBytes": 105627648,
+        "walBytes": [
+          1856360,
+          1856360
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 1405996,
+            "tup_inserted": 2051,
+            "tup_updated": 21,
+            "tup_deleted": 10,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 0,
+            "blks_hit": 1405996,
+            "tup_inserted": 2051,
+            "tup_updated": 21,
+            "tup_deleted": 10,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "correction": {
+        "observations": 2,
+        "ms": [
+          6023.624372,
+          5982.185981999999
+        ],
+        "meanMs": 6002.905177,
+        "calls": [
+          8012
+        ],
+        "maxRSSBytes": 107724800,
+        "walBytes": [
+          8155424,
+          8155368
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 5740548,
+            "tup_inserted": 7001,
+            "tup_updated": 2981,
+            "tup_deleted": 1000,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 0,
+            "blks_hit": 5740548,
+            "tup_inserted": 7001,
+            "tup_updated": 2981,
+            "tup_deleted": 1000,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      }
+    },
+    "container": {
+      "observationsIncludingRefreshes": 122,
+      "maxCPUPercent": 84.01,
+      "maxMemoryBytes": 70757908.48
+    }
+  },
+  {
+    "commit": "40569a3a6c85f6759adcc7ce1385dda507f2a29d",
+    "mode": "routine",
+    "size": 10000,
+    "links": 3,
+    "completed": true,
+    "differentialState": "passed",
+    "routes": {
+      "initial": {
+        "observations": 2,
+        "ms": [
+          45712.571281,
+          37396.412352000014
+        ],
+        "meanMs": 41554.491816500005,
+        "calls": [
+          120012
+        ],
+        "maxRSSBytes": 219009024,
+        "walBytes": [
+          117688344,
+          123036544
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 27,
+            "blks_hit": 43809290,
+            "tup_inserted": 150031,
+            "tup_updated": 116,
+            "tup_deleted": 1,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 28,
+            "blks_hit": 4758289,
+            "tup_inserted": 150001,
+            "tup_updated": 1,
+            "tup_deleted": 0,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "all_no_op": {
+        "observations": 2,
+        "ms": [
+          37951.514647,
+          38128.13392000002
+        ],
+        "meanMs": 38039.82428350001,
+        "calls": [
+          120012
+        ],
+        "maxRSSBytes": 222048256,
+        "walBytes": [
+          53048776,
+          66443200
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 3906464,
+            "tup_inserted": 60001,
+            "tup_updated": 1,
+            "tup_deleted": 0,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 68,
+            "blks_hit": 3442509,
+            "tup_inserted": 60037,
+            "tup_updated": 71,
+            "tup_deleted": 28,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "mostly_no_op": {
+        "observations": 2,
+        "ms": [
+          38515.860631999996,
+          37780.732875999995
+        ],
+        "meanMs": 38148.296753999995,
+        "calls": [
+          121212
+        ],
+        "maxRSSBytes": 227323904,
+        "walBytes": [
+          55356336,
+          55171648
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 36,
+            "blks_hit": 3630551,
+            "tup_inserted": 61590,
+            "tup_updated": 607,
+            "tup_deleted": 300,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 202,
+            "blks_hit": 3458888,
+            "tup_inserted": 61509,
+            "tup_updated": 641,
+            "tup_deleted": 316,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "correction": {
+        "observations": 2,
+        "ms": [
+          92631.283553,
+          92038.64452000003
+        ],
+        "meanMs": 92334.96403650002,
+        "calls": [
+          240012
+        ],
+        "maxRSSBytes": 235425792,
+        "walBytes": [
+          245839024,
+          246007312
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 8441,
+            "blks_hit": 11253286,
+            "tup_inserted": 210009,
+            "tup_updated": 89444,
+            "tup_deleted": 30008,
+            "temp_files": 2,
+            "temp_bytes": 13148520,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 14728,
+            "blks_hit": 11169122,
+            "tup_inserted": 210009,
+            "tup_updated": 89444,
+            "tup_deleted": 30008,
+            "temp_files": 2,
+            "temp_bytes": 13148520,
+            "deadlocks": 0
+          }
+        ]
+      }
+    },
+    "container": {
+      "observationsIncludingRefreshes": 1708,
+      "maxCPUPercent": 141.92,
+      "maxMemoryBytes": 229952716.8
+    }
+  }
+]

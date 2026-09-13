@@ -3,13 +3,16 @@ import { randomUUID } from 'node:crypto';
 import { Client } from 'pg';
 import { beforeAll, afterAll, beforeEach, describe, expect, test } from 'vitest';
 import {
-  executeTransfer,
+  executeTransfer as executeTransferImpl,
   TransferExecutionError,
   type TransferExecutionDefinition,
 } from '../../../src/features/execute-transfer/boundary.js';
 
 const enabled = process.env.ASHIBA_SKIP_DB_BACKED_TESTS !== '1';
-describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
+const modes = describe.skipIf(!enabled).each(['row', 'routine'] as const);
+modes('immutable Black Insert (%s)', (metadataMode) => {
+  const executeTransfer: typeof executeTransferImpl = (client, definitions, input) =>
+    executeTransferImpl(client, definitions, { ...input, metadataMode });
   let admin: Client;
   let db: Client;
   let databaseCreated = false;
@@ -38,6 +41,12 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
     const root = new URL('../../../db/ddl/', import.meta.url);
     const order = JSON.parse(await readFile(new URL('order.json', root), 'utf8')).order as string[];
     for (const file of order) await db.query(await readFile(new URL(file, root), 'utf8'));
+    await db.query(
+      await readFile(
+        new URL('../../../db/runtime/execute-transfer-metadata.sql', import.meta.url),
+        'utf8',
+      ),
+    );
     await db.query(
       'create table public.phase1_source(id text primary key, amount integer not null, branch text)',
     );
@@ -242,7 +251,10 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
     const cause = new Error('failure after destination insertion');
     const client = {
       async query(text: string, values?: unknown[]) {
-        if (text.startsWith('insert into rawsql_transfer.dirty_key_processing')) {
+        if (
+          text.startsWith('insert into rawsql_transfer.dirty_key_processing') ||
+          text.startsWith('select rawsql_transfer.record_black')
+        ) {
           expect(
             (await db.query('select count(*) from public.phase1_destination')).rows[0].count,
           ).toBe('1');
@@ -268,6 +280,32 @@ describe.skipIf(!enabled)('immutable Black Insert on PostgreSQL', () => {
       'rawsql_transfer.dirty_key_processing',
     ]) {
       expect((await db.query('select count(*) from ' + table)).rows[0].count).toBe('0');
+    }
+  });
+  test('a database failure inside metadata recording rolls back destination and all earlier metadata', async () => {
+    await db.query(`create function public.reject_processing() returns trigger language plpgsql as $$
+        begin raise exception 'database processing rejected'; end $$;
+        create trigger reject_processing before insert on rawsql_transfer.dirty_key_processing
+        for each row execute function public.reject_processing()`);
+    try {
+      const error = await run().catch((error) => error);
+      expect(error).toBeInstanceOf(TransferExecutionError);
+      expect(error.cause.message).toBe('database processing rejected');
+      for (const table of [
+        'public.phase1_destination',
+        'rawsql_transfer.active_black',
+        'rawsql_transfer.lineage',
+        'rawsql_transfer.work_item',
+        'rawsql_transfer.dirty_key_processing',
+      ])
+        expect((await db.query('select count(*) from ' + table)).rows[0].count).toBe('0');
+      expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
+        { run_status: 'failed' },
+      ]);
+    } finally {
+      await db.query(
+        'drop trigger reject_processing on rawsql_transfer.dirty_key_processing;drop function public.reject_processing()',
+      );
     }
   });
   test('Run is committed before destination work and a deferred FK failure retains failed Run', async () => {

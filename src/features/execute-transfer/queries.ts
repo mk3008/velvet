@@ -68,3 +68,29 @@ export const redLineageSql = sql`insert into rawsql_transfer.lineage(
 export const releaseActiveReferencesSql = sql`update rawsql_transfer.work_item
   set active_black_id = null
   where active_black_id = :active and destination_link_id = :link`;
+
+// Optional, explicitly deployed sequential routines in db/runtime/execute-transfer-metadata.sql.
+export const skippedMetadataSql = sql`select rawsql_transfer.record_skipped(cast(:fields as jsonb)) as work_item_id`;
+export const blackMetadataSql = sql`select rawsql_transfer.record_black(cast(:fields as jsonb), :withLineage)`;
+export const retireMetadataSql = sql`select rawsql_transfer.retire_active(cast(:fields as jsonb), :withLineage)`;
+
+// Select whole Dirty Keys with all eligible links, not a LIMIT on cross-product rows.
+// No durable watermark: a late-committing lower ID remains eligible on the next Run.
+export const boundedPendingSql = sql`with admitted as materialized (
+  select dk.dirty_key_id, dk.source_key_json
+  from rawsql_transfer.dirty_key dk
+  where dk.source_schema_name = :schema and dk.source_table_name = :table
+    and exists (select 1 from rawsql_transfer.destination_link l
+      where l.setting_id = :setting and l.is_enabled
+        and not exists (select 1 from rawsql_transfer.dirty_key_processing p
+          where p.dirty_key_id = dk.dirty_key_id and p.destination_link_id = l.destination_link_id
+            and p.processing_status in ('succeeded', 'skipped')))
+  order by dk.dirty_key_id limit :maximum
+)
+select dk.dirty_key_id, dk.source_key_json, l.destination_link_id
+from admitted dk cross join rawsql_transfer.destination_link l
+where l.setting_id = :setting and l.is_enabled
+  and not exists (select 1 from rawsql_transfer.dirty_key_processing p
+    where p.dirty_key_id = dk.dirty_key_id and p.destination_link_id = l.destination_link_id
+      and p.processing_status in ('succeeded', 'skipped'))
+order by dk.dirty_key_id, l.execution_order`;

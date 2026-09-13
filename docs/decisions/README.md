@@ -14,3 +14,8 @@ A record of an implementation choice is not approval of unresolved business poli
 
 - [Three correlated destination links](0008-multi-destination-verification.md)
 - [Scalable execution evaluation](0009-scalable-execution-evaluation.md)
+
+- [Bounded execution candidate](0010-bounded-execution-candidate.md)
+
+- [Structural execution priority](0011-structural-execution-priority.md)
+- [Reviewable set-based phases](0012-reviewable-set-phases.md)

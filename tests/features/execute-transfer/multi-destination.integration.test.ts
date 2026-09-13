@@ -3,14 +3,17 @@ import { randomUUID } from 'node:crypto';
 import { Client } from 'pg';
 import { beforeAll, afterAll, beforeEach, describe, expect, test } from 'vitest';
 import {
-  executeTransfer,
+  executeTransfer as executeTransferImpl,
   TransferExecutionError,
   type TransferExecutionClient,
   type TransferExecutionDefinition,
 } from '../../../src/features/execute-transfer/boundary.js';
 
 const enabled = process.env.ASHIBA_SKIP_DB_BACKED_TESTS !== '1';
-describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', () => {
+const modes = describe.skipIf(!enabled).each(['row', 'routine'] as const);
+modes('three correlated destination links (%s)', (metadataMode) => {
+  const executeTransfer: typeof executeTransferImpl = (client, definitions, input) =>
+    executeTransferImpl(client, definitions, { ...input, metadataMode });
   let admin: Client;
   let db: Client;
   let created = false;
@@ -106,6 +109,12 @@ describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', ()
     const root = new URL('../../../db/ddl/', import.meta.url);
     const order = JSON.parse(await readFile(new URL('order.json', root), 'utf8')).order;
     for (const file of order) await db.query(await readFile(new URL(file, root), 'utf8'));
+    await db.query(
+      await readFile(
+        new URL('../../../db/runtime/execute-transfer-metadata.sql', import.meta.url),
+        'utf8',
+      ),
+    );
     await db.query(`create table public.source(id text primary key,version integer not null default 1,
       debit_account text,credit_account text,amount numeric,posting_date date,journal_memo text);
       create sequence public.allocation_sequence;
@@ -217,6 +226,96 @@ describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', ()
     );
     await dirty();
   });
+  test('bounded Runs admit whole keys, retain remaining work and evaluate the complete source once per Run', async () => {
+    await dirty();
+    await db.query(
+      "insert into public.source select 'J200',version,debit_account,credit_account,amount,posting_date,journal_memo from public.source where id='J100'",
+    );
+    await db.query(
+      "insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json) values('public','source','{\"id\":\"J200\"}')",
+    );
+    let evaluations = 0;
+    const client: TransferExecutionClient = {
+      async query(text, values) {
+        if (text === sourceSql) evaluations++;
+        return db.query(text, values);
+      },
+    };
+    for (const inserted of [3, 0, 3]) {
+      const result = await executeTransfer(client, [definition], {
+        settingId: '1',
+        maxDirtyKeys: 1,
+      });
+      expect(result).toMatchObject({ inserted, skipped: 3 - inserted });
+      const outcomes = await results(result.runId);
+      expect(outcomes).toHaveLength(3);
+      expect(new Set(outcomes.map((p) => p.dirty_key_id)).size).toBe(1);
+      expect(outcomes.map((p) => p.destination_link_id)).toEqual(['30', '20', '10']);
+    }
+    expect(evaluations).toBe(3);
+    // Each source evaluation includes both source rows, not only the admitted key.
+    expect(
+      (await db.query('select last_value from public.allocation_sequence')).rows[0].last_value,
+    ).toBe('6');
+    expect(
+      await executeTransfer(client, [definition], { settingId: '1', maxDirtyKeys: 1 }),
+    ).toMatchObject({ inserted: 0, skipped: 0 });
+    expect(evaluations).toBe(3);
+    expect(
+      (await db.query('select count(*) from rawsql_transfer.dirty_key_processing')).rows[0].count,
+    ).toBe('9');
+  });
+  test('bounded admission does not lose a lower ID committed after eligibility was frozen', async () => {
+    const url = new URL(process.env.ASHIBA_DB_URL!);
+    url.pathname = '/' + database;
+    const intake = new Client({ connectionString: url.toString() });
+    await intake.connect();
+    try {
+      await intake.query('begin');
+      await intake.query(
+        "insert into rawsql_transfer.dirty_key(dirty_key_id,source_schema_name,source_table_name,source_key_json) values(0,'public','source','{\"id\":\"J100\"}')",
+      );
+      expect(
+        await executeTransfer(db, [definition], { settingId: '1', maxDirtyKeys: 1 }),
+      ).toMatchObject({ inserted: 3, skipped: 0 });
+      await intake.query('commit');
+      const later = await executeTransfer(db, [definition], { settingId: '1', maxDirtyKeys: 1 });
+      expect(later).toMatchObject({ inserted: 0, skipped: 3 });
+      expect((await results(later.runId)).every((p) => p.dirty_key_id === '0')).toBe(true);
+    } finally {
+      await intake.query('rollback');
+      await intake.end();
+    }
+  });
+  test('a bounded Run rolls back every admitted link on downstream failure and remains retryable', async () => {
+    await dirty();
+    const before = await state();
+    await db.query("set velvet.fail_role='credit'");
+    await expect(
+      executeTransfer(db, [definition], { settingId: '1', maxDirtyKeys: 1 }),
+    ).rejects.toThrow(/rejected credit/);
+    expect(await state()).toEqual(before);
+    expect(
+      (await db.query("select run_status from rawsql_transfer.run where run_status='failed'"))
+        .rowCount,
+    ).toBe(1);
+    await db.query("set velvet.fail_role=''");
+    expect(
+      await executeTransfer(db, [definition], { settingId: '1', maxDirtyKeys: 1 }),
+    ).toMatchObject({ inserted: 3, skipped: 0 });
+    expect(
+      await executeTransfer(db, [definition], { settingId: '1', maxDirtyKeys: 1 }),
+    ).toMatchObject({ inserted: 0, skipped: 3 });
+  });
+  test.each([0, -1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])(
+    'rejects invalid admission limit %s before Run creation',
+    async (maxDirtyKeys) => {
+      await expect(
+        executeTransfer(db, [definition], { settingId: '1', maxDirtyKeys }),
+      ).rejects.toThrow(/positive safe integer/);
+      expect((await db.query('select count(*) from rawsql_transfer.run')).rows[0].count).toBe('0');
+    },
+  );
   test('one evaluated source snapshot shares allocation, mappings and write order across all three links', async () => {
     let evaluations = 0;
     const client: TransferExecutionClient = {

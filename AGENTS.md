@@ -19,9 +19,23 @@ Read `docs/scope/SYSTEM_SCOPE.md` before implementation. Follow the concept inde
 
 Run `pnpm verify` for changes affecting repository wiring or runtime behavior. A PostgreSQL connection via `ASHIBA_DB_URL`, or Docker for Testcontainers, is required for the complete test suite. Existing `ASHIBA_*` environment names and `rawsql_transfer` schema names remain contracts during this repository-only migration.
 
+Missing local PostgreSQL or Docker is not a stopping condition. Complete the implementation and available local checks, push the dedicated branch, open a PR, and use the existing PostgreSQL-backed Verify workflow for real database regression testing. Inspect CI results and fix failures before reporting completion. For task-specific performance, memory, RTT, concurrency or recovery measurements, add a reproducible GitHub Actions evaluation following `experiments/issue-20` and its workflow. Report measured evidence separately from assumptions and local skipped checks; do not claim deployment fitness from compilation alone.
+
 Do not merge PRs or publish packages unless explicitly requested. Report incomplete or skipped verification. Keep temporary task notes in `tmp/`.
 
+## Evaluation decisions
+
+Rank implementation candidates using requirements, cardinality, resource costs and timeout/backlog/retry dynamics before choosing experiments. A smaller change is not automatically the highest-value first experiment. Test uncertainties that can change the decision; do not deeply measure a coefficient improvement when reasoning already shows it leaves the main failure mode. Distinguish bounded work per Run from aggregate recovery cost. State the evaluation envelope and stopping condition; stop when a sufficiently good candidate is supported rather than searching indefinitely for an optimum. Ask the owner only when an unclear requirement level materially changes the work; record assumptions separately from production acceptance.
+
 ## Business Design and Alder
+
+For SQL-first transfer scaling, prefer reviewable complete set-based phase SQL and
+fixed TEMP materialization over growing a generic database worker. Preallocated keys
+do not prove prior writes exist or remove Link dependencies. Reorder independent
+keys only under an explicit authored contract; retain legacy behavior for arbitrary
+stored SQL. Keep SQL construction provenance separate from TEMP/permanent DDL review
+priority. A narrow reviewed composition exception must never become a generic raw
+fragment escape hatch. See Decision 0012 for the current candidate and boundaries.
 
 Start at `docs/business-design/README.md` for current Business Design. Preserve existing source formats and follow their lifecycle and authority rules. Record material implementation assumptions and choices in `docs/decisions/`; do not treat records as human approval of unresolved business meaning.
 

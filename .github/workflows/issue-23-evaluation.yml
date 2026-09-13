@@ -1,0 +1,112 @@
+name: Issue 23 execution evaluation
+on:
+  pull_request:
+    paths:
+      - 'experiments/issue-23/*.mjs'
+      - 'experiments/issue-23/summarize.py'
+      - 'src/features/execute-transfer/**'
+      - 'db/runtime/**'
+      - '.github/workflows/issue-23-evaluation.yml'
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [row, routine]
+        rows: [1000, 10000]
+        links: [1, 3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: velvet
+          POSTGRES_PASSWORD: velvet
+          POSTGRES_DB: velvet_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      ASHIBA_DB_URL: postgres://velvet:velvet@localhost:5432/velvet_test
+      VELVET_MODE: ${{ matrix.mode }}
+      VELVET_ROWS: ${{ matrix.rows }}
+      VELVET_LINKS: ${{ matrix.links }}
+      VELVET_BENCH_OUTPUT: tmp/issue-23-results.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: PostgreSQL CPU and memory sampling
+        run: |
+          mkdir -p tmp
+          docker stats --format '{{json .}}' > tmp/issue-23-postgres-stats.jsonl &
+      - run: mkdir -p tmp && node experiments/issue-23/benchmark.mjs > tmp/issue-23-benchmark.log
+      - name: Publish measurement summary to job log
+        if: always()
+        run: python experiments/issue-23/summarize.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue-23-${{ matrix.mode }}-${{ matrix.rows }}-${{ matrix.links }}
+          path: tmp/issue-23-*
+
+  recovery:
+    strategy:
+      fail-fast: false
+      matrix:
+        rtt: [1, 5]
+        cap: [50, 250]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: velvet
+          POSTGRES_PASSWORD: velvet
+          POSTGRES_DB: velvet_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      ASHIBA_DB_URL: postgres://velvet:velvet@localhost:5432/velvet_test
+      VELVET_MODE: routine
+      VELVET_MAX_DIRTY: ${{ matrix.cap }}
+      VELVET_RTT_MS: ${{ matrix.rtt }}
+      VELVET_BENCH_OUTPUT: tmp/issue-23-results.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: PostgreSQL CPU and memory sampling
+        run: |
+          mkdir -p tmp
+          docker stats --format '{{json .}}' > tmp/issue-23-postgres-stats.jsonl &
+      - run: mkdir -p tmp && node experiments/issue-23/recovery.mjs > tmp/issue-23-benchmark.log
+      - name: Publish measurement summary to job log
+        if: always()
+        run: python experiments/issue-23/summarize.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue-23-recovery-${{ matrix.rtt }}-${{ matrix.cap }}
+          path: tmp/issue-23-*

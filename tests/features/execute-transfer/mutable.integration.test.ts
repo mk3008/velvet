@@ -3,14 +3,17 @@ import { randomUUID } from 'node:crypto';
 import { Client } from 'pg';
 import { beforeAll, afterAll, beforeEach, describe, expect, test } from 'vitest';
 import {
-  executeTransfer,
+  executeTransfer as executeTransferImpl,
   TransferExecutionError,
   type TransferExecutionClient,
   type TransferExecutionDefinition,
 } from '../../../src/features/execute-transfer/boundary.js';
 
 const enabled = process.env.ASHIBA_SKIP_DB_BACKED_TESTS !== '1';
-describe.skipIf(!enabled)('mutable snapshot lifecycle on PostgreSQL', () => {
+const modes = describe.skipIf(!enabled).each(['row', 'routine'] as const);
+modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
+  const executeTransfer: typeof executeTransferImpl = (client, definitions, input) =>
+    executeTransferImpl(client, definitions, { ...input, metadataMode });
   let admin: Client;
   let db: Client;
   let created = false;
@@ -91,6 +94,12 @@ describe.skipIf(!enabled)('mutable snapshot lifecycle on PostgreSQL', () => {
     const root = new URL('../../../db/ddl/', import.meta.url);
     const order = JSON.parse(await readFile(new URL('order.json', root), 'utf8')).order;
     for (const file of order) await db.query(await readFile(new URL(file, root), 'utf8'));
+    await db.query(
+      await readFile(
+        new URL('../../../db/runtime/execute-transfer-metadata.sql', import.meta.url),
+        'utf8',
+      ),
+    );
     await db.query(`create table public.source(tenant text, id text, amount numeric, memo text,
       visible boolean not null default true, version integer not null default 1, primary key(tenant,id));
       create table public.destination(tenant text, row_id text, amount numeric, memo text, primary key(tenant,row_id));
@@ -438,7 +447,8 @@ describe.skipIf(!enabled)('mutable snapshot lifecycle on PostgreSQL', () => {
               ? text.startsWith(operation + ' public.destination') ||
                 (text.startsWith('delete from public.destination') && operation === 'delete')
               : point === 'retirement'
-                ? text.startsWith('delete from rawsql_transfer.active_black')
+                ? text.startsWith('delete from rawsql_transfer.active_black') ||
+                  text.startsWith('select rawsql_transfer.retire_active')
                 : point === 'processing'
                   ? text.startsWith('insert into rawsql_transfer.dirty_key_processing')
                   : point === 'finalization'

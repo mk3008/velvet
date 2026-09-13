@@ -3,14 +3,17 @@ import { randomUUID } from 'node:crypto';
 import { Client } from 'pg';
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import {
-  executeTransfer,
+  executeTransfer as executeTransferImpl,
   TransferExecutionError,
   type TransferExecutionClient,
   type TransferExecutionDefinition,
 } from '../../../src/features/execute-transfer/boundary.js';
 
 const enabled = process.env.ASHIBA_SKIP_DB_BACKED_TESTS !== '1';
-describe.skipIf(!enabled)('insert-only transfer on PostgreSQL', () => {
+const modes = describe.skipIf(!enabled).each(['row', 'routine'] as const);
+modes('insert-only transfer (%s)', (metadataMode) => {
+  const executeTransfer: typeof executeTransferImpl = (client, definitions, input) =>
+    executeTransferImpl(client, definitions, { ...input, metadataMode });
   let admin: Client;
   let db: Client;
   let created = false;
@@ -78,6 +81,12 @@ describe.skipIf(!enabled)('insert-only transfer on PostgreSQL', () => {
     const root = new URL('../../../db/ddl/', import.meta.url);
     const order = JSON.parse(await readFile(new URL('order.json', root), 'utf8')).order;
     for (const file of order) await db.query(await readFile(new URL(file, root), 'utf8'));
+    await db.query(
+      await readFile(
+        new URL('../../../db/runtime/execute-transfer-metadata.sql', import.meta.url),
+        'utf8',
+      ),
+    );
     await db.query(`
       create sequence public.accounting_customer_id_seq;
       create table public.customer_source(
@@ -195,7 +204,9 @@ describe.skipIf(!enabled)('insert-only transfer on PostgreSQL', () => {
     ]);
     expect(await mappings()).toHaveLength(1);
     expect(await active()).toEqual(initialActive);
-    expect((await db.query('select count(*)::int n from rawsql_transfer.lineage')).rows[0].n).toBe(1);
+    expect((await db.query('select count(*)::int n from rawsql_transfer.lineage')).rows[0].n).toBe(
+      1,
+    );
   });
 
   test('absent before materialization is no-op and later appearance needs a new Dirty Key', async () => {
@@ -227,7 +238,12 @@ describe.skipIf(!enabled)('insert-only transfer on PostgreSQL', () => {
     const result = await run();
     expect(result).toMatchObject({ inserted: 2, skipped: 1 });
     expect(await mappings()).toEqual([
-      { accounting_id: '1', source_system: 'corporate', external_id: 'C-001', label: 'corporate' },
+      {
+        accounting_id: '1',
+        source_system: 'corporate',
+        external_id: 'C-001',
+        label: 'corporate',
+      },
       { accounting_id: '2', source_system: 'consumer', external_id: 'C-001', label: 'first' },
     ]);
     expect((await processing(result.runId)).map((row) => row.processing_result)).toEqual([
@@ -241,7 +257,11 @@ describe.skipIf(!enabled)('insert-only transfer on PostgreSQL', () => {
     const cause = new Error('processing unavailable');
     const client: TransferExecutionClient = {
       async query(text, values) {
-        if (text.startsWith('insert into rawsql_transfer.dirty_key_processing')) throw cause;
+        if (
+          text.startsWith('insert into rawsql_transfer.dirty_key_processing') ||
+          text.startsWith('select rawsql_transfer.record_black')
+        )
+          throw cause;
         return db.query(text, values);
       },
     };
@@ -252,8 +272,11 @@ describe.skipIf(!enabled)('insert-only transfer on PostgreSQL', () => {
     expect(await active()).toEqual([]);
     expect((await db.query('select * from rawsql_transfer.lineage')).rows).toEqual([]);
     expect(
-      (await db.query('select run_status from rawsql_transfer.run where run_id = $1', [error.runId]))
-        .rows[0].run_status,
+      (
+        await db.query('select run_status from rawsql_transfer.run where run_id = $1', [
+          error.runId,
+        ])
+      ).rows[0].run_status,
     ).toBe('failed');
   });
 
@@ -298,8 +321,12 @@ describe.skipIf(!enabled)('insert-only transfer on PostgreSQL', () => {
     expect(result).toMatchObject({ inserted: 3, skipped: 0 });
     expect((await db.query('select count(*)::int n from public.customer_map')).rows[0].n).toBe(1);
     expect((await db.query('select count(*)::int n from public.mutable_target')).rows[0].n).toBe(1);
-    expect((await db.query('select count(*)::int n from public.immutable_target')).rows[0].n).toBe(1);
-    expect((await db.query('select count(*)::int n from rawsql_transfer.lineage')).rows[0].n).toBe(2);
+    expect((await db.query('select count(*)::int n from public.immutable_target')).rows[0].n).toBe(
+      1,
+    );
+    expect((await db.query('select count(*)::int n from rawsql_transfer.lineage')).rows[0].n).toBe(
+      2,
+    );
   });
 
   test('Phase 5 upgrade widens only the transfer-model route constraints', async () => {

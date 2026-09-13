@@ -3,13 +3,16 @@ import { randomUUID } from 'node:crypto';
 import { Client } from 'pg';
 import { beforeAll, afterAll, beforeEach, describe, expect, test } from 'vitest';
 import {
-  executeTransfer,
+  executeTransfer as executeTransferImpl,
   TransferExecutionError,
   type TransferExecutionDefinition,
 } from '../../../src/features/execute-transfer/boundary.js';
 
 const enabled = process.env.ASHIBA_SKIP_DB_BACKED_TESTS !== '1';
-describe.skipIf(!enabled)('immutable snapshot reevaluation on PostgreSQL', () => {
+const modes = describe.skipIf(!enabled).each(['row', 'routine'] as const);
+modes('immutable snapshot reevaluation (%s)', (metadataMode) => {
+  const executeTransfer: typeof executeTransferImpl = (client, definitions, input) =>
+    executeTransferImpl(client, definitions, { ...input, metadataMode });
   let admin: Client;
   let db: Client;
   let created = false;
@@ -74,6 +77,12 @@ describe.skipIf(!enabled)('immutable snapshot reevaluation on PostgreSQL', () =>
     const root = new URL('../../../db/ddl/', import.meta.url);
     const order = JSON.parse(await readFile(new URL('order.json', root), 'utf8')).order;
     for (const file of order) await db.query(await readFile(new URL(file, root), 'utf8'));
+    await db.query(
+      await readFile(
+        new URL('../../../db/runtime/execute-transfer-metadata.sql', import.meta.url),
+        'utf8',
+      ),
+    );
     await db.query(`create table public.source(id text primary key, version integer not null default 1,
       amount numeric, source_date date not null, memo text);
       create table public.destination(row_id text primary key, amount numeric, posting_date date not null,
@@ -597,7 +606,10 @@ describe.skipIf(!enabled)('immutable snapshot reevaluation on PostgreSQL', () =>
       await dirty();
       const marker = {
         red: 'insert into public.destination',
-        lineage: 'insert into rawsql_transfer.lineage',
+        lineage:
+          metadataMode === 'routine'
+            ? 'select rawsql_transfer.retire_active'
+            : 'insert into rawsql_transfer.lineage',
         processing: 'insert into rawsql_transfer.dirty_key_processing',
         finish: 'update rawsql_transfer.run set run_status =',
       }[stage]!;
