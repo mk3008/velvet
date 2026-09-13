@@ -8,7 +8,10 @@ import { executeSetPhase } from './set-phase/execute.js';
 
 type Row = Record<string, any>;
 export interface TransferExecutionClient {
-  query(text: string, values?: unknown[]): Promise<{ rows: Row[]; rowCount?: number | null; command?: string }>;
+  query(
+    text: string,
+    values?: unknown[],
+  ): Promise<{ rows: Row[]; rowCount?: number | null; command?: string }>;
 }
 /** Application-owned configuration, not per-run rows or a second SQL registry. */
 export interface TransferExecutionDefinition {
@@ -89,8 +92,7 @@ export async function executeTransfer(
   const definitionsForSetting = definitions.filter((d) => d.settingId === input.settingId);
   const definition = definitionsForSetting[0];
   const args = input.arguments ?? {};
-  if (!object(args))
-    throw new Error('Invalid execution definition or arguments');
+  if (!object(args)) throw new Error('Invalid execution definition or arguments');
   const query = async (statement: Sql, params: Record<string, unknown>) => {
     const prepared = bind(statement, params, 'indexed');
     return (await client.query(prepared.text, prepared.values)).rows;
@@ -102,10 +104,17 @@ export async function executeTransfer(
     // The Setting lock serializes runs of this Setting without locking Dirty Key intake.
     const [setting] = await query(queries.settingSql, { id: input.settingId });
     if (!setting?.is_enabled) throw new Error('Setting is missing or disabled');
-    const useSetPhase = setting.set_phase_definition !== null && setting.set_phase_definition !== undefined;
-    if (!useSetPhase && (definitionsForSetting.length !== 1 || !definition?.sourceSchema || !definition?.sourceTable))
+    const useSetPhase =
+      setting.set_phase_definition !== null && setting.set_phase_definition !== undefined;
+    if (
+      !useSetPhase &&
+      (definitionsForSetting.length !== 1 || !definition?.sourceSchema || !definition?.sourceTable)
+    )
       throw new Error('Exactly one valid execution definition is required for the Setting');
-    if (!useSetPhase && !isDeepStrictEqual(setting.source_key_definition, definition.sourceKeyDefinition))
+    if (
+      !useSetPhase &&
+      !isDeepStrictEqual(setting.source_key_definition, definition.sourceKeyDefinition)
+    )
       throw new Error('Execution definition does not match Setting source key');
     const keyColumns: string[] = setting.source_key_definition.keys.map((k: Row) => k.column);
     if (!keyColumns.length || new Set(keyColumns).size !== keyColumns.length)
@@ -157,7 +166,14 @@ export async function executeTransfer(
     if (!isDeepStrictEqual(currentSetting, setting) || !isDeepStrictEqual(currentLinks, links))
       throw new Error('Transfer configuration changed after Run creation');
     if (phase) {
-      const result = await executeSetPhase(client, phase, runId!, input.settingId, args, input.maxDirtyKeys);
+      const result = await executeSetPhase(
+        client,
+        phase,
+        runId!,
+        input.settingId,
+        args,
+        input.maxDirtyKeys,
+      );
       await query(queries.finishSql, { run: runId, status: 'succeeded', error: null });
       await client.query('commit');
       return { runId: runId!, ...result };

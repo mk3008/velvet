@@ -48,7 +48,12 @@ export const inputCheck = sql`select not exists(select 1 from pg_temp.velvet_pha
  or exists(select 1 from (values(i.active_key),(case when i.source_exists and i.occurrence=1 then i.black_key end)) k(value)
   where k.value is not null and case when jsonb_typeof(k.value)<>'object' then true else
    array(select k from jsonb_object_keys(k.value) k order by k collate "C")<>:keys::text[]
-   or exists(select 1 from jsonb_each(k.value) e where jsonb_typeof(e.value)<>'string') end)) valid`;
+   or exists(select 1 from jsonb_each(k.value) e where jsonb_typeof(e.value)<>'string') end))
+ and not exists(select 1 from rawsql_transfer.active_black a
+ cross join lateral (values(a.source_key_json,:sourceKeys::text[]),(a.destination_key_json,:keys::text[])) k(value,names)
+ where a.destination_link_id=:link and case when jsonb_typeof(k.value)<>'object' then true else
+  array(select n from jsonb_object_keys(k.value) n order by n collate "C")<>k.names
+  or exists(select 1 from jsonb_each(k.value) e where jsonb_typeof(e.value)<>'string') end) valid`;
 export const evaluationConstraint = sql`alter table pg_temp.velvet_link_evaluation add primary key(dirty_key_id)`;
 export const evaluationCheck = sql`select
  (select count(*) from pg_temp.velvet_link_evaluation)=(select count(*) from pg_temp.velvet_phase_input where occurrence=1)

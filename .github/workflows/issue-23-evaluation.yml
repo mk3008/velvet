@@ -1,11 +1,10 @@
 name: Issue 23 execution evaluation
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'experiments/issue-23/*.mjs'
       - 'experiments/issue-23/summarize.py'
-      - 'src/features/execute-transfer/**'
-      - 'db/runtime/**'
       - '.github/workflows/issue-23-evaluation.yml'
 permissions:
   contents: read

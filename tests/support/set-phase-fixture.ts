@@ -3,7 +3,10 @@ import { bind, sql } from '@mk3008/serene';
 import type { Client } from 'pg';
 import type { TransferExecutionDefinition } from '../../src/features/execute-transfer/boundary.js';
 
-export const reviewed = (text: string) => ({ text, sha256: createHash('sha256').update(text).digest('hex') });
+export const reviewed = (text: string) => ({
+  text,
+  sha256: createHash('sha256').update(text).digest('hex'),
+});
 export const sourceSql = `select id logical_id,amount,memo,:owner::text owner,
  nextval('public.product_allocation')::text allocation,
  nextval('public.product_key')::text key1,nextval('public.product_key')::text key2,
@@ -48,13 +51,15 @@ const rowCompare = `select to_jsonb(v)::text current_values,to_jsonb(d)::text ac
 const rowRed = `insert into public.product_destination
  select nextval('public.product_key')::text,logical_id,-amount,memo,allocation,role,owner,journal_key
  from public.product_destination where row_id=:row_id returning row_id`;
-export const definition = (settingId = '1'): TransferExecutionDefinition => ({ settingId,
- sourceSchema: 'public', sourceTable: 'product_source',
- sourceKeyDefinition: { keys: [{ column: 'logical_id', type: 'text' }] },
- resolveLogicalKey: k => ({ logical_id: k.id }),
+export const definition = (settingId = '1'): TransferExecutionDefinition => ({
+  settingId,
+  sourceSchema: 'public',
+  sourceTable: 'product_source',
+  sourceKeyDefinition: { keys: [{ column: 'logical_id', type: 'text' }] },
+  resolveLogicalKey: (k) => ({ logical_id: k.id }),
 });
 export async function install(db: Client) {
- await db.query(`create table public.product_source(id text primary key,amount numeric,memo text);
+  await db.query(`create table public.product_source(id text primary key,amount numeric,memo text);
  create sequence public.product_key; create sequence public.product_allocation;
  create table public.product_destination(row_id text primary key,logical_id text,amount numeric,memo text,
  allocation text,role text,owner text,journal_key text not null references public.product_destination(row_id));
@@ -94,52 +99,132 @@ export async function install(db: Client) {
 }
 
 export async function setup(db: Client, n = 5, links = 3) {
- await db.query(`truncate rawsql_transfer.setting,rawsql_transfer.destination_definition,rawsql_transfer.dirty_key,
+  await db.query(`truncate rawsql_transfer.setting,rawsql_transfer.destination_definition,rawsql_transfer.dirty_key,
  public.product_source,public.product_destination restart identity cascade;
  alter sequence public.product_key restart with 1;alter sequence public.product_allocation restart with 1;
  set velvet.fail_role='';set velvet.drop_write='';set velvet.rewrite_key=''`);
- const exec = async (s: ReturnType<typeof sql>, p: Record<string, unknown>) => { const b = bind(s,p,'indexed');return db.query(b.text,b.values); };
- await exec(sql`insert into public.product_source select i::text,100,repeat('m',128) from generate_series(1,:n::int) i`, {n});
- await exec(sql`insert into rawsql_transfer.destination_definition(destination_definition_id,destination_definition_name,
+  const exec = async (s: ReturnType<typeof sql>, p: Record<string, unknown>) => {
+    const b = bind(s, p, 'indexed');
+    return db.query(b.text, b.values);
+  };
+  await exec(
+    sql`insert into public.product_source select i::text,100,repeat('m',128) from generate_series(1,:n::int) i`,
+    { n },
+  );
+  await exec(
+    sql`insert into rawsql_transfer.destination_definition(destination_definition_id,destination_definition_name,
  destination_table_name,destination_columns,destination_key_columns,transfer_model,sign_inversion_columns,generated_red_transfer_sql_body)
  values(1,'product','public.product_destination',:columns::jsonb,array['row_id'],'immutable',array['amount'],:red)`,
- { columns: JSON.stringify({ columns: ['row_id','logical_id','amount','memo','allocation','role','owner','journal_key'].map(name => ({name,type:name==='amount'?'numeric':'text'})) }), red: rowRed });
- await exec(sql`insert into rawsql_transfer.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
- values(1,'product',:source,:hash,:keys::jsonb,'not_analyzed')`, { source: sourceSql, hash: reviewed(sourceSql).sha256, keys: JSON.stringify(definition().sourceKeyDefinition) });
- for (let role = 1; role <= links; role++) {
-  const mapping = {row_id:'key'+role,logical_id:'logical_id',amount:'amount',memo:'memo',allocation:'allocation',role:'role'+role,owner:'owner',journal_key:'key1'};
-  await exec(sql`insert into rawsql_transfer.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,
+    {
+      columns: JSON.stringify({
+        columns: [
+          'row_id',
+          'logical_id',
+          'amount',
+          'memo',
+          'allocation',
+          'role',
+          'owner',
+          'journal_key',
+        ].map((name) => ({ name, type: name === 'amount' ? 'numeric' : 'text' })),
+      }),
+      red: rowRed,
+    },
+  );
+  await exec(
+    sql`insert into rawsql_transfer.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
+ values(1,'product',:source,:hash,:keys::jsonb,'not_analyzed')`,
+    {
+      source: sourceSql,
+      hash: reviewed(sourceSql).sha256,
+      keys: JSON.stringify(definition().sourceKeyDefinition),
+    },
+  );
+  for (let role = 1; role <= links; role++) {
+    const mapping = {
+      row_id: 'key' + role,
+      logical_id: 'logical_id',
+      amount: 'amount',
+      memo: 'memo',
+      allocation: 'allocation',
+      role: 'role' + role,
+      owner: 'owner',
+      journal_key: 'key1',
+    };
+    await exec(
+      sql`insert into rawsql_transfer.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,
    execution_order,destination_key_mapping,mapping_definition,diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body)
    values(:id,1,1,:name,:role,:keys::jsonb,:mapping::jsonb,:excluded::jsonb,:insert,:compare)`,
-   {id:[20,10,30][role-1],name:'role'+role,role,keys:JSON.stringify({sourceKey:['logical_id'],destinationKey:[{name:'row_id',sourceColumn:'key'+role}]}),
-    mapping:JSON.stringify({columns:mapping}),excluded:JSON.stringify({columns:['row_id','allocation','journal_key',...(role>1?['memo']:[])]}),insert:rowInsert,compare:rowCompare});
- }
+      {
+        id: [20, 10, 30][role - 1],
+        name: 'role' + role,
+        role,
+        keys: JSON.stringify({
+          sourceKey: ['logical_id'],
+          destinationKey: [{ name: 'row_id', sourceColumn: 'key' + role }],
+        }),
+        mapping: JSON.stringify({ columns: mapping }),
+        excluded: JSON.stringify({
+          columns: ['row_id', 'allocation', 'journal_key', ...(role > 1 ? ['memo'] : [])],
+        }),
+        insert: rowInsert,
+        compare: rowCompare,
+      },
+    );
+  }
 }
 
 export async function enable(db: Client, cap = 1000) {
- const s = {version:1,revision:'fixture-reviewed-v1',independentKeys:true,maxDirtyKeys:cap,sourceSchema:'public',sourceTable:'product_source',
- sourceSqlSha256:reviewed(sourceSql).sha256,sourceIdentity:reviewed(sourceIdentity),dirtyIdentity:reviewed(dirtyIdentity)};
- const l = {version:1,revision:'fixture-reviewed-v1',evaluate:reviewed(evaluate),black:reviewed(black)};
- const d = {version:1,revision:'fixture-reviewed-v1',redProjection:reviewed(redProjection),red:reviewed(red),verify:reviewed(verify)};
- for (const [statement, value] of [
-  [sql`update rawsql_transfer.setting set set_phase_definition=:value::jsonb`,s],
-  [sql`update rawsql_transfer.destination_link set set_phase_definition=:value::jsonb`,l],
-  [sql`update rawsql_transfer.destination_definition set set_phase_definition=:value::jsonb`,d],
- ] as const) { const b=bind(statement,{value:JSON.stringify(value)},'indexed');await db.query(b.text,b.values); }
+  const s = {
+    version: 1,
+    revision: 'fixture-reviewed-v1',
+    independentKeys: true,
+    maxDirtyKeys: cap,
+    sourceSchema: 'public',
+    sourceTable: 'product_source',
+    sourceSqlSha256: reviewed(sourceSql).sha256,
+    sourceIdentity: reviewed(sourceIdentity),
+    dirtyIdentity: reviewed(dirtyIdentity),
+  };
+  const l = {
+    version: 1,
+    revision: 'fixture-reviewed-v1',
+    evaluate: reviewed(evaluate),
+    black: reviewed(black),
+  };
+  const d = {
+    version: 1,
+    revision: 'fixture-reviewed-v1',
+    redProjection: reviewed(redProjection),
+    red: reviewed(red),
+    verify: reviewed(verify),
+  };
+  for (const [statement, value] of [
+    [sql`update rawsql_transfer.setting set set_phase_definition=:value::jsonb`, s],
+    [sql`update rawsql_transfer.destination_link set set_phase_definition=:value::jsonb`, l],
+    [sql`update rawsql_transfer.destination_definition set set_phase_definition=:value::jsonb`, d],
+  ] as const) {
+    const b = bind(statement, { value: JSON.stringify(value) }, 'indexed');
+    await db.query(b.text, b.values);
+  }
 }
 export async function dirty(db: Client, id?: string) {
- const b = bind(sql`insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json)
- select 'public','product_source',jsonb_build_object('id',id) from public.product_source where :id::text is null or id=:id`,{id:id??null},'indexed');
- await db.query(b.text,b.values);
+  const b = bind(
+    sql`insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json)
+ select 'public','product_source',jsonb_build_object('id',id) from public.product_source where :id::text is null or id=:id`,
+    { id: id ?? null },
+    'indexed',
+  );
+  await db.query(b.text, b.values);
 }
 
 export async function snapshot(db: Client) {
- const result = await db.query(`select jsonb_build_object(
+  const result = await db.query(`select jsonb_build_object(
  'destination',(select jsonb_agg(to_jsonb(d)||jsonb_build_object('amount',d.amount::text) order by row_id) from public.product_destination d),
  'active',(select jsonb_agg(to_jsonb(d) order by active_black_id) from rawsql_transfer.active_black d),
  'work',(select jsonb_agg(to_jsonb(d) order by work_item_id) from rawsql_transfer.work_item d),
  'lineage',(select jsonb_agg(to_jsonb(d) order by lineage_id) from rawsql_transfer.lineage d),
  'processing',(select jsonb_agg(to_jsonb(d) order by dirty_key_processing_id) from rawsql_transfer.dirty_key_processing d),
  'dirty',(select jsonb_agg(to_jsonb(d) order by dirty_key_id) from rawsql_transfer.dirty_key d)) state`);
- return result.rows[0].state;
+  return result.rows[0].state;
 }

@@ -36,6 +36,7 @@ keys only under an explicit authored contract; retain legacy behavior for arbitr
 stored SQL. Keep SQL construction provenance separate from TEMP/permanent DDL review
 priority. A narrow reviewed composition exception must never become a generic raw
 fragment escape hatch. See Decision 0012 for the current candidate and boundaries.
+For DB-managed immutable phases, also follow Decision 0013: stored SQL hashes and revisions are deployment evidence, not Serene source identity or a semantic proof. Preserve exact existing keys when enabling a profile, validate actual INSERT results as well as receipts, and use the scoped Issue 25 deployment gate rather than rerunning the historical candidate tournament.
 
 Start at `docs/business-design/README.md` for current Business Design. Preserve existing source formats and follow their lifecycle and authority rules. Record material implementation assumptions and choices in `docs/decisions/`; do not treat records as human approval of unresolved business meaning.
 
