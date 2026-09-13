@@ -124,8 +124,8 @@ describe.skipIf(!enabled)('mutable snapshot lifecycle on PostgreSQL', () => {
       '{"columns":[{"name":"tenant","type":"text"},{"name":"row_id","type":"text"},{"name":"amount","type":"numeric"},{"name":"memo","type":"text"}]}',
       array['tenant','row_id'], 'mutable')`);
     await db.query(
-      `insert into rawsql_transfer.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition)
-      values (1,'source',$1,'trusted',$2)`,
+      `insert into rawsql_transfer.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
+      values (1,'source',$1,'trusted',$2,'not_analyzed')`,
       [sourceSql, definition.sourceKeyDefinition],
     );
     await db.query(
