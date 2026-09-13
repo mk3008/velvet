@@ -78,7 +78,7 @@ await withFixture(async()=>{
    await db.query('update public.scale_source set amount=12345678901234567890.123456789,memo=null where id=2');await dirty();await run();
    await db.query('update public.scale_source set amount=12345678901234567890.123456788 where id=2');await dirty();
    assert.equal((await run()).inserted,links,'Sub-JS-precision numeric change must transfer');
-   assert.equal((await db.query("select amount::text amount from public.scale_destination where logical_id='2' order by row_id::bigint desc limit 1")).rows[0].amount,'12345678901234567890.123456788');
+   assert.equal((await db.query("select d.amount::text amount from rawsql_transfer.active_black a join public.scale_destination d on d.row_id=a.destination_key_json->>'row_id' where d.logical_id='2' and d.role='1'")).rows[0].amount,'12345678901234567890.123456788');
    await dirty();assert.equal((await run()).inserted,0,'Exact unchanged numeric value must no-op');
    await dirty();await dirty();await run();
    await dirty();await db.query('delete from public.scale_source where id=1');await run();
