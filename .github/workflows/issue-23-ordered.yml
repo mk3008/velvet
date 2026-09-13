@@ -1,0 +1,56 @@
+name: Issue 23 structural candidate
+on:
+  pull_request:
+    paths:
+      - 'experiments/issue-23/ordered/**'
+      - '.github/workflows/issue-23-ordered.yml'
+permissions:
+  contents: read
+jobs:
+  evaluate:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [routine, ordered]
+        case: [{rows: 1000, links: 1}, {rows: 10000, links: 3}]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: velvet
+          POSTGRES_PASSWORD: velvet
+          POSTGRES_DB: velvet_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      ASHIBA_DB_URL: postgres://velvet:velvet@localhost:5432/velvet_test
+      ORDERED_MODE: ${{ matrix.mode }}
+      VELVET_ROWS: ${{ matrix.case.rows }}
+      VELVET_LINKS: ${{ matrix.case.links }}
+      ORDERED_RTT: 5
+      ORDERED_OUTPUT: tmp/ordered-results.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Sample shared database CPU and memory
+        run: |
+          mkdir -p tmp
+          docker stats --format '{{json .}}' > tmp/ordered-postgres.jsonl &
+      - run: node experiments/issue-23/ordered/evaluate.mjs > tmp/ordered.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ordered-${{ matrix.mode }}-${{ matrix.case.rows }}-${{ matrix.case.links }}
+          path: tmp/ordered*
