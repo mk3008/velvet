@@ -8,12 +8,12 @@ The existing work transaction looks up Active Black before requiring source valu
 
 Coalescing remains per run/link/logical key. Subsequent Dirty Keys record `duplicate_ignore`, including after cancellation removed Active Black. Black insertion counts remain Black-only. A later source reappearance follows initial insertion when no Active Black exists and its mapped destination key is fresh; immutable key conflicts still fail atomically. No schema change, SQL registry, mutable route or scheduler is introduced.
 
-## Unresolved Human Decision
+## Human decision: no source and no Active Black
 
-Source absent plus Active Black absent has no uniquely defined final Processing in the current Business Design. Transfer Target Decision defines no-active insertion candidates and equal-value no-op, but neither determines this combination. The process's skipped branch presupposes a classification; DDL support for `skipped / no_op` does not authorize one. Finalizing excludes that Dirty Key from later execution, whereas leaving it pending permits reevaluation, so this is a business decision.
+[Owner decision](https://github.com/mk3008/velvet/pull/8#issuecomment-5649561025) resolves the initial draft blocker: when both are absent, complete Processing as `skipped / no_op`, with no transfer, Active Black or Lineage writes. This includes deletion before initial Black and a new Dirty Key after cancellation. Finalized Dirty Keys are excluded from later execution. Source reappearance must register a new Dirty Key, which evaluates the then-current snapshot normally; event history is not replayed.
 
-Pending the owner's decision, this boundary raises an explicit `Human Decision required` error before transfer or final Processing. The existing work transaction rolls back and the Run records failure. This is a temporary fail-closed boundary, not an approved new lifecycle outcome. The draft must not be represented as completing all of Issue #7 until this decision is resolved.
+The existing skipped Work Item records `source_exists = false`, no active/evaluated destination key and both transfer flags false. Coalesced duplicates retain `duplicate_ignore`. No new status or schema is needed. The Transfer Target Decision concept records the approved boundary.
 
 ## Verification
 
-PostgreSQL integration tests cover Red-only trace and immutable history, source-SQL filtering, duplicate cancellation, currently permitted Red date, mixed lifecycle routes, reappearance and rollback at Red/Lineage/Processing/Run finalization. Existing Phase 1/2 tests remain regression gates. The undefined boundary test prevents accidental finalization while the decision is pending. Separate Alder review and full PostgreSQL-backed `pnpm verify` are required for review readiness.
+PostgreSQL integration tests cover Red-only trace and immutable history, source-SQL filtering, duplicate cancellation, currently permitted Red date, mixed lifecycle routes, reappearance and rollback at Red/Lineage/Processing/Run finalization. Existing Phase 1/2 tests remain regression gates. Boundary tests verify finalization, no writes, and reappearance requiring a new Dirty Key. Separate Alder review and full PostgreSQL-backed `pnpm verify` are required for review readiness.

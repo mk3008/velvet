@@ -636,11 +636,72 @@ describe.skipIf(!enabled)('immutable snapshot reevaluation on PostgreSQL', () =>
       expect(await active()).toEqual([]);
     },
   );
-  test('absent source without Active Black requires Human Decision and stays pending', async () => {
-    await db.query('delete from public.source');
-    await expect(run()).rejects.toThrow('Human Decision required');
-    expect(await rows()).toEqual([]);
-    expect(await active()).toEqual([]);
-    expect(await results()).toEqual([]);
-  });
+  test.each(['before first Black', 'after cancellation'])(
+    'absent source and Active Black complete no-op %s',
+    async (stage) => {
+      if (stage === 'after cancellation') {
+        await run();
+        await db.query('delete from public.source');
+        await dirty();
+        await run();
+      } else await db.query('delete from public.source');
+      const before = await rows();
+      const lineageBefore = (
+        await db.query('select * from rawsql_transfer.lineage order by lineage_id')
+      ).rows;
+      await dirty();
+      const completed = await run();
+      expect(completed).toMatchObject({
+        inserted: 0,
+        skipped: stage === 'after cancellation' ? 1 : 2,
+      });
+      expect(await rows()).toEqual(before);
+      expect(await active()).toEqual([]);
+      expect(
+        (await db.query('select * from rawsql_transfer.lineage order by lineage_id')).rows,
+      ).toEqual(lineageBefore);
+      expect(
+        (
+          await db.query(
+            `select processing_status, processing_result from rawsql_transfer.dirty_key_processing where run_id = $1 order by dirty_key_id`,
+            [completed.runId],
+          )
+        ).rows,
+      ).toEqual(
+        stage === 'after cancellation'
+          ? [{ processing_status: 'skipped', processing_result: 'no_op' }]
+          : [
+              { processing_status: 'skipped', processing_result: 'no_op' },
+              { processing_status: 'skipped', processing_result: 'duplicate_ignore' },
+            ],
+      );
+      expect(
+        (
+          await db.query(
+            `select source_exists, route_type, skip_reason, requires_red_transfer,
+      requires_black_insert_transfer, active_black_id, evaluated_destination_key_json
+      from rawsql_transfer.work_item where run_id = $1 and skip_reason = 'no_op'`,
+            [completed.runId],
+          )
+        ).rows,
+      ).toEqual([
+        {
+          source_exists: false,
+          route_type: 'skipped',
+          skip_reason: 'no_op',
+          requires_red_transfer: false,
+          requires_black_insert_transfer: false,
+          active_black_id: null,
+          evaluated_destination_key_json: null,
+        },
+      ]);
+      await db.query("insert into public.source values ('a',2,130,'2026-05-10','returned')");
+      // The finalized keys cannot cause a transfer, even when the snapshot changes.
+      expect(await run()).toMatchObject({ inserted: 0, skipped: 0 });
+      expect(await rows()).toEqual(before);
+      await dirty();
+      expect(await run()).toMatchObject({ inserted: 1, skipped: 0 });
+      expect((await active()).map((a) => a.destination_key_json)).toEqual([{ row_id: 'a-2' }]);
+    },
+  );
 });

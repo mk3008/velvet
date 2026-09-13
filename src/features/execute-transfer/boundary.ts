@@ -175,10 +175,6 @@ export async function executeTransfer(
               link: link.destination_link_id,
               key: item.key,
             });
-        if (!row && !active && !duplicate)
-          throw new Error(
-            'Human Decision required: source current row and Active Black are both absent',
-          );
         const mapped =
           duplicate || !row
             ? {}
@@ -189,7 +185,7 @@ export async function executeTransfer(
                   return [target, row[source as string]];
                 }),
               );
-        let noOp = false;
+        let noOp: boolean = !row && !active;
         if (active && row) {
           const excluded = link.diff_compare_excluded_columns?.columns ?? [];
           const allowed = link.destination_columns.columns.map((c: Row) => c.name);
