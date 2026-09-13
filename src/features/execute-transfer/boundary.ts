@@ -3,10 +3,15 @@ import { bind, type Sql } from '@mk3008/serene';
 import { isDeepStrictEqual } from 'node:util';
 import { bindStoredSql } from './trusted-sql.js';
 import * as queries from './queries.js';
+import { loadSetPhase } from './set-phase/config.js';
+import { executeSetPhase } from './set-phase/execute.js';
 
 type Row = Record<string, any>;
 export interface TransferExecutionClient {
-  query(text: string, values?: unknown[]): Promise<{ rows: Row[]; rowCount?: number | null }>;
+  query(
+    text: string,
+    values?: unknown[],
+  ): Promise<{ rows: Row[]; rowCount?: number | null; command?: string }>;
 }
 /** Application-owned configuration, not per-run rows or a second SQL registry. */
 export interface TransferExecutionDefinition {
@@ -85,12 +90,9 @@ export async function executeTransfer(
     throw new Error('maxDirtyKeys must be a positive safe integer');
   const routine = input.metadataMode === 'routine';
   const definitionsForSetting = definitions.filter((d) => d.settingId === input.settingId);
-  if (definitionsForSetting.length !== 1)
-    throw new Error('Exactly one execution definition is required for the Setting');
   const definition = definitionsForSetting[0];
   const args = input.arguments ?? {};
-  if (!object(args) || !definition.sourceSchema || !definition.sourceTable)
-    throw new Error('Invalid execution definition or arguments');
+  if (!object(args)) throw new Error('Invalid execution definition or arguments');
   const query = async (statement: Sql, params: Record<string, unknown>) => {
     const prepared = bind(statement, params, 'indexed');
     return (await client.query(prepared.text, prepared.values)).rows;
@@ -102,9 +104,19 @@ export async function executeTransfer(
     // The Setting lock serializes runs of this Setting without locking Dirty Key intake.
     const [setting] = await query(queries.settingSql, { id: input.settingId });
     if (!setting?.is_enabled) throw new Error('Setting is missing or disabled');
-    if (!isDeepStrictEqual(setting.source_key_definition, definition.sourceKeyDefinition))
+    const useSetPhase =
+      setting.set_phase_definition !== null && setting.set_phase_definition !== undefined;
+    if (
+      !useSetPhase &&
+      (definitionsForSetting.length !== 1 || !definition?.sourceSchema || !definition?.sourceTable)
+    )
+      throw new Error('Exactly one valid execution definition is required for the Setting');
+    if (
+      !useSetPhase &&
+      !isDeepStrictEqual(setting.source_key_definition, definition.sourceKeyDefinition)
+    )
       throw new Error('Execution definition does not match Setting source key');
-    const keyColumns = definition.sourceKeyDefinition.keys.map((k) => k.column);
+    const keyColumns: string[] = setting.source_key_definition.keys.map((k: Row) => k.column);
     if (!keyColumns.length || new Set(keyColumns).size !== keyColumns.length)
       throw new Error('Invalid source key definition');
     const links = (await query(queries.linksSql, { id: input.settingId })).filter(
@@ -114,7 +126,7 @@ export async function executeTransfer(
     for (const link of links) {
       if (link.transfer_model === 'mutable' && link.date_lower_bound_adjustments !== null)
         throw new Error('Mutable destinations cannot require posting-date lower-bound control');
-      if (!link.generated_insert_transfer_sql_body.trim())
+      if (!useSetPhase && !link.generated_insert_transfer_sql_body.trim())
         throw new Error('Destination Link has no stored Black Insert SQL');
       const mapping = link.mapping_definition?.columns;
       const allowed = link.destination_columns?.columns?.map((c: Row) => c.name);
@@ -137,9 +149,11 @@ export async function executeTransfer(
       )
         throw new Error('Invalid Destination Link mapping');
     }
-    [{ run_id: runId }] = await query(queries.runSql, {
+    const phase = useSetPhase ? loadSetPhase(setting, links) : undefined;
+    [{ run_id: runId }] = await query(phase ? queries.setPhaseRunSql : queries.runSql, {
       setting: input.settingId,
       args: JSON.stringify(args),
+      ...(phase ? { configuration: JSON.stringify(phase.evidence) } : {}),
     });
     await client.query('commit');
     runPersisted = true;
@@ -151,6 +165,19 @@ export async function executeTransfer(
     );
     if (!isDeepStrictEqual(currentSetting, setting) || !isDeepStrictEqual(currentLinks, links))
       throw new Error('Transfer configuration changed after Run creation');
+    if (phase) {
+      const result = await executeSetPhase(
+        client,
+        phase,
+        runId!,
+        input.settingId,
+        args,
+        input.maxDirtyKeys,
+      );
+      await query(queries.finishSql, { run: runId, status: 'succeeded', error: null });
+      await client.query('commit');
+      return { runId: runId!, ...result };
+    }
     const pending = await query(
       input.maxDirtyKeys === undefined ? queries.pendingSql : queries.boundedPendingSql,
       {

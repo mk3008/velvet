@@ -64,7 +64,9 @@
           }
         },
         "destination_key_columns": {
-          "sample": ["journal_id"]
+          "sample": [
+            "journal_id"
+          ]
         },
         "sequence_expression_definition": {
           "sample": {
@@ -75,7 +77,9 @@
           "sample": "immutable"
         },
         "sign_inversion_columns": {
-          "sample": ["amount"]
+          "sample": [
+            "amount"
+          ]
         },
         "date_lower_bound_adjustments": {
           "sample": {
@@ -83,7 +87,10 @@
               {
                 "destinationColumn": "journal_date",
                 "functionName": "fn_lower_limit_date",
-                "argumentColumns": ["shop_id", "journal_date"],
+                "argumentColumns": [
+                  "shop_id",
+                  "journal_date"
+                ],
                 "adjustmentNotice": {
                   "destinationColumn": "system_note",
                   "value": "date lower bound adjusted"
@@ -113,6 +120,12 @@
         },
         "note": {
           "sample": "managed by transfer setup"
+        },
+        "set_phase_definition": {
+          "sample": {},
+          "designNotes": [
+            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。"
+          ]
         }
       }
     },
@@ -173,6 +186,12 @@
         },
         "note": {
           "sample": "source SQL includes destination row keys explicitly"
+        },
+        "set_phase_definition": {
+          "sample": {},
+          "designNotes": [
+            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。"
+          ]
         }
       },
       "constraints": {
@@ -196,7 +215,9 @@
           ]
         },
         "uq_setting_destination_execution_order": {
-          "designNotes": ["同一 Transfer Setting 内の転送順序を一意にし、転送順の曖昧さを避ける。"]
+          "designNotes": [
+            "同一 Transfer Setting 内の転送順序を一意にし、転送順の曖昧さを避ける。"
+          ]
         },
         "uq_destination_link_setting_identity": {
           "designNotes": [
@@ -227,7 +248,9 @@
         },
         "destination_key_mapping": {
           "sample": {
-            "sourceKey": ["sales_id"],
+            "sourceKey": [
+              "sales_id"
+            ],
             "destinationKey": [
               {
                 "name": "journal_id",
@@ -252,7 +275,10 @@
         },
         "diff_compare_excluded_columns": {
           "sample": {
-            "columns": ["journal_id", "created_at"]
+            "columns": [
+              "journal_id",
+              "created_at"
+            ]
           }
         },
         "generated_insert_transfer_sql_body": {
@@ -286,14 +312,24 @@
           "designNotes": [
             "保存済みBlack Insertと同じ補正後の転送先値、およびActive Blackが指す既存行を返す開発者管理の読取SQL。比較除外と最終比較は転送実行側で適用する。"
           ]
+        },
+        "set_phase_definition": {
+          "sample": {},
+          "designNotes": [
+            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。"
+          ]
         }
       }
     },
     "rawsql_transfer.active_black": {
       "decision": "active_black は転送プロセス用の current-state table とし、履歴や転送先行からの逆引きは持たせない。",
       "reviewRisk": "identity-boundary",
-      "conceptRefs": ["active-black"],
-      "processRefs": ["transfer-execution"],
+      "conceptRefs": [
+        "active-black"
+      ],
+      "processRefs": [
+        "transfer-execution"
+      ],
       "tradeoff": [
         "Destination Link と source key から現在有効な黒伝を高速に見つけるため、source_key_hash をlookup補助値として保持する。",
         "転送先行からの追跡は lineage に寄せ、active_black には destination_key_hash を持たせない。"
@@ -338,7 +374,9 @@
           "sample": {
             "sales_id": 123
           },
-          "designNotes": ["この値は、Destination Link 文脈における転送元論理行の正本キーである。"]
+          "designNotes": [
+            "この値は、Destination Link 文脈における転送元論理行の正本キーである。"
+          ]
         },
         "source_key_hash": {
           "sample": "sha256:source-key-json",
@@ -369,7 +407,9 @@
       ],
       "constraints": {
         "idx_dirty_key_source_created_at": {
-          "designNotes": ["転送対象候補を発生元テーブルと登録順で読むための基本lookup経路である。"]
+          "designNotes": [
+            "転送対象候補を発生元テーブルと登録順で読むための基本lookup経路である。"
+          ]
         }
       },
       "columns": {
@@ -408,6 +448,12 @@
             "businessDate": "2026-05-01",
             "manualRun": true
           }
+        },
+        "execution_configuration": {
+          "sample": {},
+          "designNotes": [
+            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。"
+          ]
         }
       }
     },

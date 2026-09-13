@@ -62,6 +62,12 @@ Developers prepare the enabled Setting and Destination Links, including each lin
 
 Successful execution returns `{ runId, inserted, skipped }`. Run creation is committed first. Destination and processing changes, including Run success, commit atomically in a second transaction. On work or commit failure, that transaction is discarded and a separate transaction marks a still-running Run failed; already committed success is preserved if only the COMMIT response was lost. `TransferExecutionError` preserves the original `cause` and `runId`; secondary cleanup/recording failures are available in `recoveryErrors` and may leave the durable Run running. Recovery from process interruption between transactions is outside this phase. Configuration rejection before Run creation throws without a Run. Scheduling and general process-crash recovery remain outside this phase.
 
+## Bounded immutable set phases
+
+Settings can explicitly opt into the DB-managed immutable set-phase contract in [Decision 0013](docs/decisions/0013-product-set-phases.md). Apply the migration before deploying this runtime. A null Setting profile preserves the existing executor; an invalid non-null profile fails without fallback. With a valid profile, call `executeTransfer(client, [], { settingId, arguments })`; source/key resolution and reviewed complete phase SQL come from database masters. Optional `maxDirtyKeys` can lower the configured admission cap.
+
+See the decision for the supported text-key profile, Destination-owned Red SQL, review/hash/revision boundary and empty-input/independent-key obligations. The `Issue 25 deployment` workflow exercises production code. The older Issue 23 tournament remains manually runnable and is no longer triggered by routine runtime edits.
+
 ## Transfer Destination Definition
 
 The `rawsql_transfer.destination_definition` table stores:

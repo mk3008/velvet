@@ -3,7 +3,8 @@ import { sql } from '@mk3008/serene';
 export const settingSql = sql`select * from rawsql_transfer.setting where setting_id = :id for update`;
 export const linksSql = sql`select l.*, d.destination_table_name, d.destination_columns,
   d.destination_key_columns, d.transfer_model, d.sign_inversion_columns,
-  d.generated_red_transfer_sql_body, d.date_lower_bound_adjustments, d.sequence_expression_definition
+  d.generated_red_transfer_sql_body, d.date_lower_bound_adjustments, d.sequence_expression_definition,
+  d.set_phase_definition as destination_set_phase_definition
   from rawsql_transfer.destination_link l
   join rawsql_transfer.destination_definition d using (destination_definition_id)
   where l.setting_id = :id order by l.execution_order for share of l, d`;
@@ -18,6 +19,8 @@ export const pendingSql = sql`select dk.dirty_key_id, dk.source_key_json, l.dest
   order by dk.dirty_key_id, l.execution_order`;
 export const runSql = sql`insert into rawsql_transfer.run(setting_id, run_arguments, run_status, started_at)
   values (:setting, cast(:args as jsonb), 'running', current_timestamp) returning run_id`;
+export const setPhaseRunSql = sql`insert into rawsql_transfer.run(setting_id,run_arguments,run_status,started_at,execution_configuration)
+ values(:setting,:args::jsonb,'running',current_timestamp,:configuration::jsonb) returning run_id`;
 export const activeSql = sql`select active_black_id, destination_key_json from rawsql_transfer.active_black
   where destination_link_id = :link and source_key_json = cast(:key as jsonb) for update`;
 export const workSql = sql`insert into rawsql_transfer.work_item(
