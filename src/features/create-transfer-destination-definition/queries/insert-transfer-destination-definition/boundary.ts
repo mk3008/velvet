@@ -6,6 +6,7 @@ import { executeInsertTransferDestinationDefinitionQuery } from './query.js';
 const JsonObjectSchema = z.record(z.string(), z.unknown());
 const TextArraySchema = z.array(z.string().min(1));
 const RequiredTextArraySchema = TextArraySchema.min(1);
+const TransferModelSchema = z.enum(['immutable', 'mutable', 'insert_only']);
 
 const QueryParamsSchema = z.object({
   destination_definition_name: z.string().min(1),
@@ -14,7 +15,7 @@ const QueryParamsSchema = z.object({
   destination_columns: JsonObjectSchema,
   destination_key_columns: RequiredTextArraySchema,
   sequence_expression_definition: JsonObjectSchema.nullable(),
-  transfer_model: z.enum(['immutable', 'mutable']),
+  transfer_model: TransferModelSchema,
   sign_inversion_columns: TextArraySchema.nullable(),
   note: z.string().min(1).nullable()
 }).strict();
@@ -29,7 +30,7 @@ const RowSchema = z.object({
   destination_columns: JsonObjectSchema,
   destination_key_columns: RequiredTextArraySchema,
   sequence_expression_definition: JsonObjectSchema.nullable(),
-  transfer_model: z.enum(['immutable', 'mutable']),
+  transfer_model: TransferModelSchema,
   sign_inversion_columns: TextArraySchema.nullable(),
   generated_red_transfer_sql_body: z.string(),
   generated_red_transfer_sql_status: z.enum(['not_generated', 'success', 'failed']),
