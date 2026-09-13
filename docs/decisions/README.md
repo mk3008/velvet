@@ -8,3 +8,4 @@ A record of an implementation choice is not approval of unresolved business poli
 - [Phase 1 trusted execution](0002-phase1-trusted-execution.md)
 - [Phase 2 immutable reevaluation](0003-phase2-immutable-reevaluation.md)
 - [Phase 3 source disappearance](0004-phase3-source-disappearance.md)
+- [Phase 4 mutable snapshots](0005-phase4-mutable-snapshots.md)

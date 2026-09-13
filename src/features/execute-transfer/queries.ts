@@ -23,9 +23,11 @@ export const activeSql = sql`select active_black_id, destination_key_json from r
 export const workSql = sql`insert into rawsql_transfer.work_item(
   run_id, dirty_key_id, setting_id, destination_link_id, source_key_json, source_key_hash,
   source_exists, transfer_model, route_type, requires_black_insert_transfer, skip_reason,
-  active_black_id, evaluated_destination_key_json, requires_red_transfer)
+  active_black_id, evaluated_destination_key_json, requires_red_transfer,
+  requires_black_update_transfer, requires_physical_delete_transfer)
   values (:run, :dirty, :setting, :link, cast(:key as jsonb), :hash,
-  :sourceExists, 'immutable', :route, :insert, :skip, :active, cast(:evaluated as jsonb), :red) returning work_item_id`;
+  :sourceExists, :model, :route, :insert, :skip, :active, cast(:evaluated as jsonb), :red,
+  :update, :delete) returning work_item_id`;
 export const activeInsertSql = sql`insert into rawsql_transfer.active_black(
   destination_link_id, source_key_json, source_key_hash, destination_key_json)
   values (:link, cast(:key as jsonb), :hash, cast(:destination as jsonb))`;
