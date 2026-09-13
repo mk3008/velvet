@@ -105,6 +105,7 @@ for (const links of [1, 3]) {
   await f.dirty(db);
   const start = performance.now(),
     runs = [];
+  let remainingTail = 0;
   let arrivals = 0,
     stop = false;
   const producer = new Client({ connectionString: process.env.ASHIBA_DB_URL });
@@ -127,7 +128,15 @@ for (const links of [1, 3]) {
           'select count(*)::int n from rawsql_transfer.dirty_key d where exists(select 1 from rawsql_transfer.destination_link l where not exists(select 1 from rawsql_transfer.dirty_key_processing p where p.dirty_key_id=d.dirty_key_id and p.destination_link_id=l.destination_link_id))',
         )
       ).rows[0].n;
-      if (!remaining) break;
+      remainingTail = remaining;
+      // Continuous intake need not be empty between Runs. Recovery means the original
+      // backlog is complete and only one invocation's new intake remains.
+      const originalRemaining = (
+        await db.query(
+          'select count(*)::int n from rawsql_transfer.dirty_key d where d.dirty_key_id<=10000 and exists(select 1 from rawsql_transfer.destination_link l where not exists(select 1 from rawsql_transfer.dirty_key_processing p where p.dirty_key_id=d.dirty_key_id and p.destination_link_id=l.destination_link_id))',
+        )
+      ).rows[0].n;
+      if (!originalRemaining && remaining <= Math.ceil(current.seconds * 2) + 1) break;
       if (performance.now() - start > 180000) throw new Error('180s recovery envelope exceeded');
     }
   } finally {
@@ -141,6 +150,7 @@ for (const links of [1, 3]) {
     links,
     sourceRows: 10000,
     arrivals,
+    remainingTail,
     seconds: (performance.now() - start) / 1000,
     runs,
     database: await stats(),
