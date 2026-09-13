@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { Client } from 'pg';
 import { sql, bind } from '@mk3008/serene';
 import { executeTransfer, TransferExecutionError } from '../../dist/src/features/execute-transfer/boundary.js';
+import { pathToFileURL } from 'node:url';
 import { PerformanceObserver } from 'node:perf_hooks';
 import { setTimeout as delay } from 'node:timers/promises';
 
@@ -75,7 +76,7 @@ const state = async () => (await db.query(`select jsonb_build_object(
  'processing',(select jsonb_agg(to_jsonb(p) order by dirty_key_processing_id) from rawsql_transfer.dirty_key_processing p),
  'dirty',(select jsonb_agg(to_jsonb(k) order by dirty_key_id) from rawsql_transfer.dirty_key k),
  'success',(select jsonb_agg(to_jsonb(r) order by run_id) from rawsql_transfer.run r where run_status='succeeded'))::text snapshot`)).rows[0].snapshot;
-async function measure(n, links, scenario, expectedChanged, fail = false) {
+async function measure(n, links, scenario, expectedChanged, fail = false, settingId = '1') {
   const counts = {}, timings = {};
   let calls=0, sqlBytes=0, parameterBytes=0, resultBytes=0, sourceEvaluations=0, maxParameterBytes=0;
   const allocationBefore = (await db.query('select last_value,is_called from public.scale_allocation')).rows[0];
@@ -85,6 +86,8 @@ async function measure(n, links, scenario, expectedChanged, fail = false) {
   const sample=()=>{const m=process.memoryUsage();for(const key of Object.keys(m))peak[key]=Math.max(peak[key],m[key]);};
   const timer=setInterval(sample,10);timer.unref();
   const cpuStart=process.cpuUsage(), gcStart={gcMs,gcCount};
+  await db.query('select pg_stat_force_next_flush()');
+  await db.query('select pg_stat_clear_snapshot()');
   const dbBefore=(await db.query('select * from pg_stat_database where datname=current_database()')).rows[0];
   const walBefore=(await db.query('select pg_current_wal_insert_lsn() lsn')).rows[0].lsn;
   const start = performance.now();
@@ -104,7 +107,7 @@ async function measure(n, links, scenario, expectedChanged, fail = false) {
       if(workStart && workMs===undefined && (text==='commit'||text==='rollback')) workMs=performance.now()-workStart; }
   }};
   let result;
-  try { result=await executeTransfer(client,[definition],{settingId:'1', metadataMode:mode, maxDirtyKeys:maximum}); assert.equal(fail,false); }
+  try { result=await executeTransfer(client,[{...definition,settingId}],{settingId, metadataMode:mode, maxDirtyKeys:maximum}); assert.equal(fail,false); }
   catch(error) {
     if(!fail) throw error;
     assert(error instanceof TransferExecutionError); assert.match(error.cause.message,/scale downstream failure/);
@@ -123,19 +126,22 @@ async function measure(n, links, scenario, expectedChanged, fail = false) {
     assert.equal(await state(),before);
     assert.equal((await execute(sql`select run_status from rawsql_transfer.run where run_id=:run`,{run:result.runId})).rows[0].run_status,'failed');
   } else {
-    assert.equal(result.inserted,expectedChanged); assert.equal(result.skipped,n*links-expectedChanged);
+    if(expectedChanged!==null) assert.equal(result.inserted,expectedChanged);
+    if(n!==null && expectedChanged!==null) assert.equal(result.skipped,n*links-expectedChanged);
     const outcomes=(await execute(sql`select processing_result,count(*)::int n from rawsql_transfer.dirty_key_processing where run_id=:run group by processing_result`,{run:result.runId})).rows;
-    assert.equal(outcomes.reduce((s,r)=>s+r.n,0),n*links);
+    assert.equal(outcomes.reduce((s,r)=>s+r.n,0),result.inserted+result.skipped);
+    if(n!==null) assert.equal(result.inserted+result.skipped,n*links);
     result.outcomes=outcomes;
   }
   const allocationAfter=Number((await db.query('select last_value from public.scale_allocation')).rows[0].last_value);
   const rowAfter=Number((await db.query('select last_value from public.scale_row')).rows[0].last_value);
-  const record={n,links,scenario,elapsedMs,workMs,calls,memoryStart,peak,appCpuMicros,gc:{ms:gcMs-gcStart.gcMs,count:gcCount-gcStart.gcCount},databaseDelta,walBytes,sqlBytes,parameterBytes,resultBytes,maxParameterBytes,sourceEvaluations,
+  const record={n,links,settingId,scenario,elapsedMs,workMs,calls,memoryStart,peak,appCpuMicros,gc:{ms:gcMs-gcStart.gcMs,count:gcCount-gcStart.gcCount},databaseDelta,walBytes,sqlBytes,parameterBytes,resultBytes,maxParameterBytes,sourceEvaluations,
     allocationConsumed:allocationAfter-(allocationBefore.is_called?Number(allocationBefore.last_value):0),
     rowIdsConsumed:rowAfter-(sequenceBefore.is_called?Number(sequenceBefore.last_value):0),counts,timings,result};
   report.trials.push(record); console.log(JSON.stringify(record));
   return record;
 }
+export async function withFixture(action) {
 await admin.connect();
 try {
   // Database name is exclusively an internally generated UUID identifier; lifecycle DDL exception.
@@ -154,6 +160,28 @@ try {
       if current_setting('velvet.scale_fail',true)=new.role then raise exception 'scale downstream failure'; end if;
       return new; end $$;
     create trigger scale_guard before insert on public.scale_destination for each row execute function public.scale_guard()`);
+  await action();
+  observer.disconnect();
+  report.completed=true;
+} finally {
+  try {
+    await writeFile(process.env.VELVET_BENCH_OUTPUT ?? 'tmp/issue-23-results.json',JSON.stringify(report,null,2)+'\n');
+  } finally {
+    try {
+      await db?.end();
+    } finally {
+      try { await admin.query('drop database if exists '+database); } finally { await admin.end(); }
+    }
+  }
+}
+
+}
+export {setup, dirty, measure, execute, report, definition};
+export const databaseClient=()=>db;
+
+if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href) {
+  if(maximum!==undefined) throw new Error("Use recovery.mjs for bounded measurements");
+  await withFixture(async()=>{
   for(let repetition=0;repetition<2;repetition++) for(const n of [size]) for(const links of [linkCount]) {
     await setup(n,links); await dirty(); await measure(n,links,'initial',n*links);
     await dirty(); await measure(n,links,'all_no_op',0);
@@ -168,16 +196,6 @@ try {
       await measure(n,links,'retry',n*links);
     }
   }
-  observer.disconnect();
-  report.completed=true;
-} finally {
-  try {
-    await writeFile(process.env.VELVET_BENCH_OUTPUT ?? 'tmp/issue-23-results.json',JSON.stringify(report,null,2)+'\n');
-  } finally {
-    try {
-      await db?.end();
-    } finally {
-      try { await admin.query('drop database if exists '+database); } finally { await admin.end(); }
-    }
-  }
+
+  });
 }
