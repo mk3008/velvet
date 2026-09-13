@@ -276,6 +276,8 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
 
   test('Phase 5 upgrade widens only the transfer-model route constraints', async () => {
     await db.query(`
+      truncate rawsql_transfer.setting, rawsql_transfer.destination_definition,
+        rawsql_transfer.dirty_key restart identity cascade;
       alter table rawsql_transfer.destination_definition drop constraint chk_transfer_destination_transfer_model;
       alter table rawsql_transfer.destination_definition add constraint chk_transfer_destination_transfer_model
         check (transfer_model in ('immutable','mutable'));
