@@ -69,7 +69,8 @@ const snapshot=async()=> (await db.query(`select jsonb_build_object(
  'work',(select jsonb_agg(to_jsonb(d) order by work_item_id) from rawsql_transfer.work_item d),
  'lineage',(select jsonb_agg(to_jsonb(d) order by lineage_id) from rawsql_transfer.lineage d),
  'processing',(select jsonb_agg(to_jsonb(d) order by dirty_key_processing_id) from rawsql_transfer.dirty_key_processing d))::text value`)).rows[0].value;
-async function measured(scenario,{maximum,expected,fail=false,latency=rtt,loseCommit=false}={}){
+async function measured(scenario,{maximum,expected,fail=false,latency=rtt,loseCommit=false,database=db}={}){
+ const db=database;
  await db.query('select pg_stat_force_next_flush()');await db.query('select pg_stat_clear_snapshot()');
  const dbBefore=(await db.query('select * from pg_stat_database where datname=current_database()')).rows[0];
  const walBefore=(await db.query('select pg_current_wal_insert_lsn() lsn')).rows[0].lsn;

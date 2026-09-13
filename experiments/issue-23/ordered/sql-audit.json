@@ -1,0 +1,734 @@
+{
+  "files": [
+    "experiments/issue-23/ordered/evaluate.mjs",
+    "experiments/issue-23/ordered/recovery.mjs"
+  ],
+  "skipped": [],
+  "findings": [
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 22,
+      "column": 58,
+      "boundary": "serene",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 22,
+      "column": 105,
+      "boundary": "driver-candidate",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 24,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "configure",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 24,
+      "column": 17,
+      "boundary": "serene",
+      "function": "configure",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 25,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "configure",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 25,
+      "column": 17,
+      "boundary": "serene",
+      "function": "configure",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_UPDATE_WITHOUT_WHERE",
+          "detail": "Review suggested: UPDATE has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 26,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "configure",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 26,
+      "column": 17,
+      "boundary": "serene",
+      "function": "configure",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 30,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 32,
+      "column": 25,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 33,
+      "column": 28,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 49,
+      "column": 26,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 50,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 50,
+      "column": 53,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 51,
+      "column": 27,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 52,
+      "column": 26,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 53,
+      "column": 24,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 53,
+      "column": 37,
+      "boundary": "serene",
+      "function": "ordered",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 54,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 55,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 58,
+      "column": 13,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 60,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 60,
+      "column": 38,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 60,
+      "column": 100,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 61,
+      "column": 46,
+      "boundary": "driver-candidate",
+      "function": "ordered",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 65,
+      "column": 33,
+      "boundary": "driver-candidate",
+      "function": "snapshot",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 74,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 74,
+      "column": 60,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 75,
+      "column": 24,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 76,
+      "column": 25,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 82,
+      "column": 22,
+      "boundary": "driver-candidate",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 87,
+      "column": 8,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 87,
+      "column": 60,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 88,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 90,
+      "column": 31,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 90,
+      "column": 40,
+      "boundary": "serene",
+      "function": "measured",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 93,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 93,
+      "column": 32,
+      "boundary": "serene",
+      "function": "measured",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 97,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": "measured",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 105,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 106,
+      "column": 26,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 111,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 114,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 116,
+      "column": 24,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 122,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 128,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 130,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 136,
+      "column": 25,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 138,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 139,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 139,
+      "column": 18,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 140,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 143,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 145,
+      "column": 23,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/evaluate.mjs",
+      "line": 145,
+      "column": 32,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 7,
+      "column": 20,
+      "boundary": "driver-candidate",
+      "function": "recover",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 13,
+      "column": 58,
+      "boundary": "serene",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 13,
+      "column": 105,
+      "boundary": "driver-candidate",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 14,
+      "column": 43,
+      "boundary": "driver-candidate",
+      "function": "pending",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 14,
+      "column": 58,
+      "boundary": "serene",
+      "function": "pending",
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 18,
+      "column": 77,
+      "boundary": "driver-candidate",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 22,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "recover",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 24,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 26,
+      "column": 80,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 30,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "recover",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 31,
+      "column": 45,
+      "boundary": "driver-candidate",
+      "function": "recover",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 32,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "recover",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 40,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 40,
+      "column": 25,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "experiments/issue-23/ordered/recovery.mjs",
+      "line": 57,
+      "column": 28,
+      "boundary": "driver-candidate",
+      "function": "recover",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    }
+  ],
+  "scope": "file-local candidate inventory; not exhaustive driver discovery"
+}
