@@ -10,7 +10,7 @@ import {
 } from '../../../src/features/execute-transfer/boundary.js';
 
 const enabled = process.env.ASHIBA_SKIP_DB_BACKED_TESTS !== '1';
-describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
+describe.skipIf(!enabled)('insert-only transfer on PostgreSQL', () => {
   let admin: Client;
   let db: Client;
   let created = false;
@@ -30,10 +30,16 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
       external_id: key.id,
     }),
   };
-  const sourceSql = `select source_system, external_id, label, amount
-    from public.customer_source where visible`;
-  const insertSql = `insert into public.customer_map(source_system, external_id, label)
-    values (:source_system, :external_id, :label) returning accounting_id`;
+  // Use the same existing first-transfer convention as other Destinations: source SQL exposes
+  // the destination key value and ordinary mapping/Insert SQL consumes it.
+  const sourceSql = `select
+      nextval('public.accounting_customer_id_seq')::bigint as accounting_id,
+      source_system, external_id, label, amount
+    from public.customer_source
+    where visible
+    order by source_system desc, external_id`;
+  const insertSql = `insert into public.customer_map(accounting_id, source_system, external_id, label)
+    values (:accounting_id, :source_system, :external_id, :label) returning accounting_id`;
   const run = (client: TransferExecutionClient = db) =>
     executeTransfer(client, [definition], { settingId: '1' });
   const dirty = (system = 'consumer', id = 'C-001') =>
@@ -73,6 +79,7 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
     const order = JSON.parse(await readFile(new URL('order.json', root), 'utf8')).order;
     for (const file of order) await db.query(await readFile(new URL(file, root), 'utf8'));
     await db.query(`
+      create sequence public.accounting_customer_id_seq;
       create table public.customer_source(
         source_system text not null,
         external_id text not null,
@@ -82,7 +89,7 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
         primary key(source_system, external_id)
       );
       create table public.customer_map(
-        accounting_id integer generated always as identity primary key,
+        accounting_id bigint primary key,
         source_system text not null,
         external_id text not null,
         label text,
@@ -101,13 +108,14 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
     await db.query(`
       truncate rawsql_transfer.setting, rawsql_transfer.destination_definition,
         rawsql_transfer.dirty_key, public.customer_source, public.customer_map restart identity cascade;
+      alter sequence public.accounting_customer_id_seq restart with 1;
       insert into rawsql_transfer.destination_definition(
         destination_definition_id, destination_definition_name, destination_table_name,
         destination_columns, destination_key_columns, sequence_expression_definition, transfer_model)
       values (
         1, 'customer-map', 'public.customer_map',
-        '{"columns":[{"name":"accounting_id","type":"integer"},{"name":"source_system","type":"text"},{"name":"external_id","type":"text"},{"name":"label","type":"text"}]}',
-        array['accounting_id'], '{"accounting_id":"generated identity"}', 'insert_only'
+        '{"columns":[{"name":"accounting_id","type":"bigint"},{"name":"source_system","type":"text"},{"name":"external_id","type":"text"},{"name":"label","type":"text"}]}',
+        array['accounting_id'], '{"accounting_id":"nextval(''public.accounting_customer_id_seq'')"}', 'insert_only'
       );
     `);
     await db.query(
@@ -123,8 +131,8 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
         execution_order, destination_key_mapping, mapping_definition,
         generated_insert_transfer_sql_body)
        values (1, 1, 1, 'customer-map', 1,
-        '{"sourceKey":["source_system","external_id"],"destinationKey":[{"name":"accounting_id"}]}',
-        '{"columns":{"source_system":"source_system","external_id":"external_id","label":"label"}}', $1)`,
+        '{"sourceKey":["source_system","external_id"],"destinationKey":[{"name":"accounting_id","sourceColumn":"accounting_id"}]}',
+        '{"columns":{"accounting_id":"accounting_id","source_system":"source_system","external_id":"external_id","label":"label"}}', $1)`,
       [insertSql],
     );
     await db.query(
@@ -134,11 +142,11 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
     await dirty();
   });
 
-  test('materializes a destination-owned id once and ignores later source changes and disappearance', async () => {
+  test('first materialization uses ordinary Black Insert, Active Black and Lineage', async () => {
     const first = await run();
     expect(first).toMatchObject({ inserted: 1, skipped: 0 });
     expect(await mappings()).toEqual([
-      { accounting_id: 1, source_system: 'consumer', external_id: 'C-001', label: 'first' },
+      { accounting_id: '1', source_system: 'consumer', external_id: 'C-001', label: 'first' },
     ]);
     const initialActive = await active();
     expect(initialActive).toHaveLength(1);
@@ -147,7 +155,24 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
       external_id: 'C-001',
     });
     expect(initialActive[0].destination_key_json).toEqual({ accounting_id: 1 });
-    expect((await db.query('select * from rawsql_transfer.lineage')).rows).toEqual([]);
+    const lineage = (await db.query('select * from rawsql_transfer.lineage')).rows;
+    expect(lineage).toHaveLength(1);
+    expect(lineage[0].destination_key_json).toEqual({ accounting_id: 1 });
+    expect(await processing(first.runId)).toEqual([
+      { processing_status: 'succeeded', processing_result: 'black_insert' },
+    ]);
+  });
+
+  test('repeat/change/disappearance short-circuit to no-op without replacing the first row', async () => {
+    await run();
+    const initialActive = await active();
+
+    await dirty();
+    const repeated = await run();
+    expect(repeated).toMatchObject({ inserted: 0, skipped: 1 });
+    expect(await processing(repeated.runId)).toEqual([
+      { processing_status: 'skipped', processing_result: 'no_op' },
+    ]);
 
     await db.query("update public.customer_source set label = 'changed', amount = 99");
     await dirty();
@@ -157,7 +182,7 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
       { processing_status: 'skipped', processing_result: 'no_op' },
     ]);
     expect(await mappings()).toEqual([
-      { accounting_id: 1, source_system: 'consumer', external_id: 'C-001', label: 'first' },
+      { accounting_id: '1', source_system: 'consumer', external_id: 'C-001', label: 'first' },
     ]);
     expect(await active()).toEqual(initialActive);
 
@@ -170,6 +195,7 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
     ]);
     expect(await mappings()).toHaveLength(1);
     expect(await active()).toEqual(initialActive);
+    expect((await db.query('select count(*)::int n from rawsql_transfer.lineage')).rows[0].n).toBe(1);
   });
 
   test('absent before materialization is no-op and later appearance needs a new Dirty Key', async () => {
@@ -187,11 +213,11 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
     await dirty();
     expect(await run()).toMatchObject({ inserted: 1, skipped: 0 });
     expect(await mappings()).toEqual([
-      { accounting_id: 1, source_system: 'consumer', external_id: 'C-001', label: 'appeared' },
+      { accounting_id: '1', source_system: 'consumer', external_id: 'C-001', label: 'appeared' },
     ]);
   });
 
-  test('coalesces repeated Dirty Keys and supports colliding external ids across source systems', async () => {
+  test('coalesces repeated Dirty Keys and keeps composite source identities distinct', async () => {
     await dirty();
     await db.query(
       `insert into public.customer_source(source_system, external_id, label)
@@ -201,8 +227,8 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
     const result = await run();
     expect(result).toMatchObject({ inserted: 2, skipped: 1 });
     expect(await mappings()).toEqual([
-      { accounting_id: 1, source_system: 'consumer', external_id: 'C-001', label: 'first' },
-      { accounting_id: 2, source_system: 'corporate', external_id: 'C-001', label: 'corporate' },
+      { accounting_id: '1', source_system: 'consumer', external_id: 'C-001', label: 'first' },
+      { accounting_id: '2', source_system: 'corporate', external_id: 'C-001', label: 'corporate' },
     ]);
     expect((await processing(result.runId)).map((row) => row.processing_result)).toEqual([
       'black_insert',
@@ -211,7 +237,7 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
     ]);
   });
 
-  test('failure after mapping insertion rolls back the row and Active Black and records failed Run', async () => {
+  test('failure during ordinary first-transfer work rolls back materialization and records failed Run', async () => {
     const cause = new Error('processing unavailable');
     const client: TransferExecutionClient = {
       async query(text, values) {
@@ -224,6 +250,7 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
     expect(error.cause).toBe(cause);
     expect(await mappings()).toEqual([]);
     expect(await active()).toEqual([]);
+    expect((await db.query('select * from rawsql_transfer.lineage')).rows).toEqual([]);
     expect(
       (await db.query('select run_status from rawsql_transfer.run where run_id = $1', [error.runId]))
         .rows[0].run_status,
@@ -240,6 +267,7 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
         source_system text, external_id text, amount numeric,
         primary key(source_system, external_id)
       );
+      truncate public.mutable_target, public.immutable_target;
       insert into rawsql_transfer.destination_definition(
         destination_definition_id, destination_definition_name, destination_table_name,
         destination_columns, destination_key_columns, transfer_model, sign_inversion_columns)
@@ -271,7 +299,7 @@ describe.skipIf(!enabled)('insert-only identity mapping on PostgreSQL', () => {
     expect((await db.query('select count(*)::int n from public.customer_map')).rows[0].n).toBe(1);
     expect((await db.query('select count(*)::int n from public.mutable_target')).rows[0].n).toBe(1);
     expect((await db.query('select count(*)::int n from public.immutable_target')).rows[0].n).toBe(1);
-    expect((await db.query('select count(*)::int n from rawsql_transfer.lineage')).rows[0].n).toBe(1);
+    expect((await db.query('select count(*)::int n from rawsql_transfer.lineage')).rows[0].n).toBe(2);
   });
 
   test('Phase 5 upgrade widens only the transfer-model route constraints', async () => {
