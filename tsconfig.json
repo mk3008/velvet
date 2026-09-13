@@ -7,8 +7,6 @@
     "baseUrl": ".",
     "paths": {
       "#features/*": ["src/features/*"],
-      "#libraries/*": ["src/libraries/*"],
-      "#adapters/*": ["src/adapters/*"],
       "#tests/*": ["tests/*"]
     },
     "strict": true,

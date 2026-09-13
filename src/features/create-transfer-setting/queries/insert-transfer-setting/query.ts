@@ -1,5 +1,5 @@
-import { queryMany, type FeatureQuerySource } from '#features/_shared/featureQueryExecutor.js';
-import type { FeatureQueryExecutor } from '#features/_shared/featureQueryExecutor.js';
+import type { QuerySource } from '#features/_shared/query-executor.js';
+import type { QueryExecutor } from '#features/_shared/query-executor.js';
 import { sql } from '@mk3008/serene';
 
 export const insertTransferSettingSql = sql`insert into rawsql_transfer.setting(
@@ -33,7 +33,7 @@ returning
     , updated_at
     , note;
 `;
-export const insertTransferSettingQuery: FeatureQuerySource<InsertTransferSettingQueryParams, InsertTransferSettingQueryResult> = {
+export const insertTransferSettingQuery: QuerySource<InsertTransferSettingQueryParams, InsertTransferSettingQueryResult> = {
   id: 'insert-transfer-setting',
   path: 'src/features/create-transfer-setting/queries/insert-transfer-setting/query.ts',
   sql: insertTransferSettingSql,
@@ -71,8 +71,8 @@ export interface InsertTransferSettingQueryResult {
 }
 
 export async function executeInsertTransferSettingQuery(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   params: InsertTransferSettingQueryParams
 ): Promise<InsertTransferSettingQueryResult[]> {
-  return queryMany(executor, insertTransferSettingQuery, params);
+  return executor.query(insertTransferSettingQuery, params);
 }

@@ -1,5 +1,5 @@
-import { queryMany, type FeatureQuerySource } from '#features/_shared/featureQueryExecutor.js';
-import type { FeatureQueryExecutor } from '#features/_shared/featureQueryExecutor.js';
+import type { QuerySource } from '#features/_shared/query-executor.js';
+import type { QueryExecutor } from '#features/_shared/query-executor.js';
 import { sql } from '@mk3008/serene';
 
 export const insertTransferDestinationDefinitionSql = sql`insert into rawsql_transfer.destination_definition(
@@ -40,7 +40,7 @@ returning
     , updated_at
     , note;
 `;
-export const insertTransferDestinationDefinitionQuery: FeatureQuerySource<InsertTransferDestinationDefinitionQueryParams, InsertTransferDestinationDefinitionQueryResult> = {
+export const insertTransferDestinationDefinitionQuery: QuerySource<InsertTransferDestinationDefinitionQueryParams, InsertTransferDestinationDefinitionQueryResult> = {
   id: 'insert-transfer-destination-definition',
   path: 'src/features/create-transfer-destination-definition/queries/insert-transfer-destination-definition/query.ts',
   sql: insertTransferDestinationDefinitionSql,
@@ -77,8 +77,8 @@ export interface InsertTransferDestinationDefinitionQueryResult {
 }
 
 export async function executeInsertTransferDestinationDefinitionQuery(
-  executor: FeatureQueryExecutor,
+  executor: QueryExecutor,
   params: InsertTransferDestinationDefinitionQueryParams
 ): Promise<InsertTransferDestinationDefinitionQueryResult[]> {
-  return queryMany(executor, insertTransferDestinationDefinitionQuery, params);
+  return executor.query(insertTransferDestinationDefinitionQuery, params);
 }

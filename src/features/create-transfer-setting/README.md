@@ -2,11 +2,11 @@
 
 Creates one `setting` row and one or more `destination_link` rows.
 
-This feature is intentionally scoped to the create use case. Do not reshape it into a table-level `transfer-settings` CRUD feature.
+This operation registers a Transfer Setting and its Destination Links; it does not implement update or delete operations.
 
 ## Input
 
-The public feature boundary accepts `CreateTransferSettingInput` with camelCase fields:
+The public entrypoint accepts `CreateTransferSettingInput` with camelCase fields:
 
 - `name`
 - `description`
@@ -46,9 +46,9 @@ Unknown destination definitions fail the operation before any setting row is ins
 
 ## SQL
 
-The feature owns three query boundaries:
+Registration executes three queries:
 
-- `queries/resolve-transfer-destination-definitions/`
+- `queries/resolve-transfer-destination-definitions.ts`
 - `queries/insert-transfer-setting/`
 - `queries/insert-transfer-setting-destination-definition/`
 
