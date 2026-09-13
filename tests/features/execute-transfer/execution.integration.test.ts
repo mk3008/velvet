@@ -287,6 +287,32 @@ describe.skipIf(!enabled).each(['row', 'routine'] as const)(
         expect((await db.query('select count(*) from ' + table)).rows[0].count).toBe('0');
       }
     });
+    test('a database failure inside metadata recording rolls back destination and all earlier metadata', async () => {
+      await db.query(`create function public.reject_processing() returns trigger language plpgsql as $$
+        begin raise exception 'database processing rejected'; end $$;
+        create trigger reject_processing before insert on rawsql_transfer.dirty_key_processing
+        for each row execute function public.reject_processing()`);
+      try {
+        const error = await run().catch((error) => error);
+        expect(error).toBeInstanceOf(TransferExecutionError);
+        expect(error.cause.message).toBe('database processing rejected');
+        for (const table of [
+          'public.phase1_destination',
+          'rawsql_transfer.active_black',
+          'rawsql_transfer.lineage',
+          'rawsql_transfer.work_item',
+          'rawsql_transfer.dirty_key_processing',
+        ])
+          expect((await db.query('select count(*) from ' + table)).rows[0].count).toBe('0');
+        expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
+          { run_status: 'failed' },
+        ]);
+      } finally {
+        await db.query(
+          'drop trigger reject_processing on rawsql_transfer.dirty_key_processing;drop function public.reject_processing()',
+        );
+      }
+    });
     test('Run is committed before destination work and a deferred FK failure retains failed Run', async () => {
       await db.query('create table public.phase1_allowed_amount(amount integer primary key)');
       await db.query(

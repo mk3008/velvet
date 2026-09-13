@@ -607,7 +607,10 @@ describe.skipIf(!enabled).each(['row', 'routine'] as const)(
         await dirty();
         const marker = {
           red: 'insert into public.destination',
-          lineage: 'insert into rawsql_transfer.lineage',
+          lineage:
+            metadataMode === 'routine'
+              ? 'select rawsql_transfer.retire_active'
+              : 'insert into rawsql_transfer.lineage',
           processing: 'insert into rawsql_transfer.dirty_key_processing',
           finish: 'update rawsql_transfer.run set run_status =',
         }[stage]!;

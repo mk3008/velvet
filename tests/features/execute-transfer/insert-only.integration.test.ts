@@ -258,7 +258,11 @@ describe.skipIf(!enabled).each(['row', 'routine'] as const)(
       const cause = new Error('processing unavailable');
       const client: TransferExecutionClient = {
         async query(text, values) {
-          if (text.startsWith('insert into rawsql_transfer.dirty_key_processing')) throw cause;
+          if (
+            text.startsWith('insert into rawsql_transfer.dirty_key_processing') ||
+            text.startsWith('select rawsql_transfer.record_black')
+          )
+            throw cause;
           return db.query(text, values);
         },
       };

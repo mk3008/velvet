@@ -21,8 +21,9 @@ await withFixture(async()=>{
   const neighbor=new Client({connectionString:url.toString()});
   const other=new Client({connectionString:url.toString()});
   const monitor=new Client({connectionString:url.toString()});
-  await Promise.all([producer.connect(),neighbor.connect(),other.connect(),monitor.connect()]);
-  let stop=false, producerTask, neighborTask, monitorTask, phase='idle';
+
+  let stop=false, producerTask, neighborTask, monitorTask, phase='idle', backgroundError, primaryError;
+  const background=fn=>fn().catch(error=>{backgroundError ??= error;stop=true;});
   const neighborSamples=[], activity=[];
   let arrivals=0, arrivalId=backlog;
   const enqueue=async(count)=>{
@@ -51,8 +52,10 @@ await withFixture(async()=>{
     }
   };
   try{
+    const connected=await Promise.allSettled([producer.connect(),neighbor.connect(),other.connect(),monitor.connect()]);
+    const rejected=connected.find(r=>r.status==='rejected');if(rejected)throw rejected.reason;
     await db.query('create table public.neighbor(id integer primary key,value bigint);insert into public.neighbor values(1,0)');
-    neighborTask=neighbors();monitorTask=activityLoop();
+    neighborTask=background(neighbors);monitorTask=background(activityLoop);
     await delay(2000); // Unrelated workload without transfer pressure, not a serverless invocation.
     phase='outage';await enqueue(backlog);
     await db.query("set velvet.scale_fail='3'");
@@ -68,13 +71,13 @@ await withFixture(async()=>{
       select destination_link_id+3,2,destination_definition_id,destination_link_name,execution_order,destination_key_mapping,mapping_definition,
         diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body from rawsql_transfer.destination_link where setting_id=1`);
     phase='recovery';
-    producerTask=(async()=>{
+    producerTask=background(async()=>{
       while(!stop){await delay(1000/arrivalPerSecond);if(stop)break;
         arrivalId=arrivalId%sourceRows+1;
         await producer.query(`insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json)
           values('public','scale_source',jsonb_build_object('id',$1::text))`,[String(arrivalId)]);arrivals++;
       }
-    })();
+    });
     const otherRuns=[];
     const otherClient={async query(text,values){if(Number(process.env.VELVET_RTT_MS))await delay(Number(process.env.VELVET_RTT_MS));return other.query(text,values);}};
     const catchupStart=performance.now();
@@ -83,8 +86,10 @@ await withFixture(async()=>{
       // A bounded independent Setting progresses concurrently; no global mutex.
       const independent=(async()=>{const t=performance.now();const result=await executeTransfer(otherClient,[{...definition,settingId:'2'}],{settingId:'2',metadataMode:'routine',maxDirtyKeys:cap});
         const ms=performance.now()-t;assert(ms<safetyMs);otherRuns.push({ms,...result});})();
-      const trial=await measure(null,3,'catchup',null);
-      await independent;
+      const settled=await Promise.allSettled([measure(null,3,'catchup',null),independent]);
+      const rejected=settled.find(r=>r.status==='rejected');if(rejected)throw rejected.reason;
+      const trial=settled[0].value;
+      if(backgroundError)throw backgroundError;
       assert(trial.elapsedMs<safetyMs);
       assert(trial.result.inserted+trial.result.skipped<=cap*3);
       report.recovery.timeline.push({before,after:await pending(),arrivals,ms:trial.elapsedMs,processedPairs:trial.result.inserted+trial.result.skipped});
@@ -103,16 +108,24 @@ await withFixture(async()=>{
     report.recovery.grossKeysPerSecond=(backlog+caughtUpArrivals-caughtUpRemaining)/(catchupMs/1000);
     report.recovery.otherRuns=otherRuns;
     report.recovery.remaining=await pending();
+    phase='correction';
+    await db.query('update public.scale_source set amount=140');
+    await enqueue(cap);
+    const correction=await measure(null,3,'bounded_correction',null);
+    assert(correction.elapsedMs<safetyMs);
+    report.recovery.maxTestedAdmittedKeys=cap;
+    if(backgroundError)throw backgroundError;
     report.recovery.completed=true;
-  }finally{
+  }catch(error){primaryError=error;throw error;}finally{
     stop=true;
     await Promise.allSettled([producerTask,neighborTask,monitorTask].filter(Boolean));
     report.recovery.arrivals=arrivals;
-    for(const name of ['idle','outage','recovery','steady']){
+    for(const name of ['idle','outage','recovery','steady','correction']){
       const samples=neighborSamples.filter(s=>s.phase===name).map(s=>s.ms).sort((a,b)=>a-b);
       report.recovery.neighbor[name]={n:samples.length,medianMs:samples[Math.floor(samples.length*.5)],p95Ms:samples[Math.floor(samples.length*.95)],maxMs:samples.at(-1)};
     }
     report.recovery.activity=activity;
     await Promise.all([producer.end(),neighbor.end(),other.end(),monitor.end()]);
+    if(backgroundError && !primaryError)throw backgroundError;
   }
 });

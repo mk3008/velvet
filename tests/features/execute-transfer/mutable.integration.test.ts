@@ -450,7 +450,8 @@ describe.skipIf(!enabled).each(['row', 'routine'] as const)(
                 ? text.startsWith(operation + ' public.destination') ||
                   (text.startsWith('delete from public.destination') && operation === 'delete')
                 : point === 'retirement'
-                  ? text.startsWith('delete from rawsql_transfer.active_black')
+                  ? text.startsWith('delete from rawsql_transfer.active_black') ||
+                    text.startsWith('select rawsql_transfer.retire_active')
                   : point === 'processing'
                     ? text.startsWith('insert into rawsql_transfer.dirty_key_processing')
                     : point === 'finalization'

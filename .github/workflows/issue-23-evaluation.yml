@@ -62,6 +62,7 @@ jobs:
       fail-fast: false
       matrix:
         rtt: [1, 5]
+        cap: [50, 250]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     services:
@@ -78,7 +79,7 @@ jobs:
     env:
       ASHIBA_DB_URL: postgres://velvet:velvet@localhost:5432/velvet_test
       VELVET_MODE: routine
-      VELVET_MAX_DIRTY: 50
+      VELVET_MAX_DIRTY: ${{ matrix.cap }}
       VELVET_RTT_MS: ${{ matrix.rtt }}
       VELVET_BENCH_OUTPUT: tmp/issue-23-results.json
     steps:
@@ -100,5 +101,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: issue-23-recovery-${{ matrix.rtt }}
+          name: issue-23-recovery-${{ matrix.rtt }}-${{ matrix.cap }}
           path: tmp/issue-23-*

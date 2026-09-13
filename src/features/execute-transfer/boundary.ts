@@ -155,7 +155,7 @@ export async function executeTransfer(
       input.maxDirtyKeys === undefined ? queries.pendingSql : queries.boundedPendingSql,
       {
         setting: input.settingId,
-        maximum: input.maxDirtyKeys ?? null,
+        ...(input.maxDirtyKeys === undefined ? {} : { maximum: input.maxDirtyKeys }),
         schema: definition.sourceSchema,
         table: definition.sourceTable,
       },
