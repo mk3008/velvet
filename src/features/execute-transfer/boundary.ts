@@ -97,11 +97,10 @@ export async function executeTransfer(
     if (!links.length) throw new Error('Setting has no enabled Destination Link');
     for (const link of links) {
       const insertOnly = link.transfer_model === 'insert_only';
-      if (
-        (link.transfer_model === 'mutable' || insertOnly) &&
-        link.date_lower_bound_adjustments !== null
-      )
-        throw new Error('Mutable and insert-only destinations cannot require posting-date lower-bound control');
+      if (link.transfer_model === 'mutable' && link.date_lower_bound_adjustments !== null)
+        throw new Error('Mutable destinations cannot require posting-date lower-bound control');
+      if (insertOnly && link.date_lower_bound_adjustments !== null)
+        throw new Error('Insert-only destinations cannot require posting-date lower-bound control');
       if (!link.generated_insert_transfer_sql_body.trim())
         throw new Error('Destination Link has no stored Black Insert SQL');
       const mapping = link.mapping_definition?.columns;
