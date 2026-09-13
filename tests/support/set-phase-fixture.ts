@@ -67,9 +67,11 @@ export async function install(db: Client) {
  create function public.product_values(k text,id text,a numeric,m text,alloc text,r text,o text)
  returns table(row_id text,logical_id text,amount numeric,memo text,allocation text,role text,owner text,journal_key text)
  language sql stable as $$ select k,id,a,m,alloc,r,o,
- case when r='1' then k else (select d.row_id from rawsql_transfer.active_black b
+ case when r='1' then k else (select d.row_id from rawsql_transfer.destination_link l
+ join rawsql_transfer.active_black b on b.destination_link_id=l.destination_link_id
+  and b.source_key_json=jsonb_build_object('logical_id',id)
  join public.product_destination d on d.row_id=b.destination_key_json->>'row_id'
- where d.owner=o and d.logical_id=id and d.role='1') end $$;
+ where l.setting_id=o::bigint and l.execution_order=1 and d.owner=o and d.logical_id=id and d.role='1') end $$;
  create function public.product_guard() returns trigger language plpgsql as $$
  declare w record;
  begin
