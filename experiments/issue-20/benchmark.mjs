@@ -4,7 +4,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { Client } from 'pg';
 import { sql, bind } from '@mk3008/serene';
-import { executeTransfer, TransferExecutionError } from '../../dist/features/execute-transfer/boundary.js';
+import { executeTransfer, TransferExecutionError } from '../../dist/src/features/execute-transfer/boundary.js';
 import { runTransportProbe } from './transport.mjs';
 
 if (!process.env.ASHIBA_DB_URL) throw new Error('ASHIBA_DB_URL must allow creation of an isolated database');
