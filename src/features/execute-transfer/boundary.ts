@@ -84,6 +84,7 @@ export async function executeTransfer(
   let runPersisted = false;
   await client.query('begin');
   try {
+    // The Setting lock serializes runs of this Setting without locking Dirty Key intake.
     const [setting] = await query(queries.settingSql, { id: input.settingId });
     if (!setting?.is_enabled) throw new Error('Setting is missing or disabled');
     if (!isDeepStrictEqual(setting.source_key_definition, definition.sourceKeyDefinition))
@@ -96,34 +97,13 @@ export async function executeTransfer(
     );
     if (!links.length) throw new Error('Setting has no enabled Destination Link');
     for (const link of links) {
-      const insertOnly = link.transfer_model === 'insert_only';
       if (link.transfer_model === 'mutable' && link.date_lower_bound_adjustments !== null)
         throw new Error('Mutable destinations cannot require posting-date lower-bound control');
-      if (insertOnly && link.date_lower_bound_adjustments !== null)
-        throw new Error('Insert-only destinations cannot require posting-date lower-bound control');
       if (!link.generated_insert_transfer_sql_body.trim())
         throw new Error('Destination Link has no stored Black Insert SQL');
       const mapping = link.mapping_definition?.columns;
       const allowed = link.destination_columns?.columns?.map((c: Row) => c.name);
       const keys = link.destination_key_mapping;
-      const invalidDestinationKey =
-        Array.isArray(keys?.destinationKey) &&
-        keys.destinationKey.some((k: Row) => {
-          if (!object(k) || typeof k.name !== 'string' || !k.name) return true;
-          if (insertOnly) {
-            if (k.sourceColumn === undefined) return Object.hasOwn(mapping ?? {}, k.name);
-            return (
-              typeof k.sourceColumn !== 'string' ||
-              !k.sourceColumn ||
-              mapping?.[k.name] !== k.sourceColumn
-            );
-          }
-          return (
-            typeof k.sourceColumn !== 'string' ||
-            !k.sourceColumn ||
-            mapping?.[k.name] !== k.sourceColumn
-          );
-        });
       if (
         !object(mapping) ||
         !Object.keys(mapping).length ||
@@ -138,7 +118,7 @@ export async function executeTransfer(
           keys.destinationKey.map((k: Row) => k.name).sort(),
           [...link.destination_key_columns].sort(),
         ) ||
-        invalidDestinationKey
+        keys.destinationKey.some((k: Row) => mapping[k.name] !== k.sourceColumn)
       )
         throw new Error('Invalid Destination Link mapping');
     }
@@ -149,6 +129,7 @@ export async function executeTransfer(
     await client.query('commit');
     runPersisted = true;
     await client.query('begin');
+    // Reacquire configuration locks: another Run may have completed between transactions.
     const [currentSetting] = await query(queries.settingSql, { id: input.settingId });
     const currentLinks = (await query(queries.linksSql, { id: input.settingId })).filter(
       (l) => l.is_enabled,
@@ -160,6 +141,7 @@ export async function executeTransfer(
       schema: definition.sourceSchema,
       table: definition.sourceTable,
     });
+    // Freeze the explicit logical identity before looking at source current values.
     const work = pending.map((item): Row & { key: string } => {
       const key = definition.resolveLogicalKey(Object.freeze({ ...item.source_key_json }));
       if (!object(key) || !isDeepStrictEqual(Object.keys(key).sort(), [...keyColumns].sort()))
@@ -168,6 +150,7 @@ export async function executeTransfer(
       return { ...item, key: keyText(key) };
     });
     {
+      // Explicit exception: execute the developer-owned DB source, never a mirrored literal.
       const source = work.length
         ? await client.query(...storedArguments(setting.source_sql_body, args))
         : { rows: [] };
@@ -196,7 +179,7 @@ export async function executeTransfer(
               key: item.key,
             });
         const mapped =
-          duplicate || !row || (insertOnly && active)
+          duplicate || !row
             ? {}
             : Object.fromEntries(
                 Object.entries(link.mapping_definition.columns).map(([target, source]) => {
@@ -207,6 +190,7 @@ export async function executeTransfer(
               );
         let noOp: boolean = (!row && !active) || (insertOnly && !!active);
         if (active && row && !insertOnly) {
+          // Mutable identity is stable, including when key columns are excluded from comparison.
           if (
             mutable &&
             !isDeepStrictEqual(
@@ -355,30 +339,21 @@ export async function executeTransfer(
           }
           if (row && (!mutable || !active)) {
             const prepared = bindStoredSql(link.generated_insert_transfer_sql_body, mapped);
+            // Every mapped column must actually be bound by the stored insertion statement.
             if (Object.keys(mapped).some((name) => !prepared.names.includes(name)))
               throw new Error('Stored Insert SQL does not consume mapping');
             const result = await client.query(prepared.text, prepared.values);
             if (result.rows?.length !== 1 || result.rowCount !== 1)
               throw new Error('Black Insert must return exactly one destination row');
             const destination = projection(result.rows[0], link.destination_key_columns);
-            if (insertOnly) {
-              for (const key of link.destination_key_mapping.destinationKey) {
-                if (
-                  typeof key.sourceColumn === 'string' &&
-                  !isDeepStrictEqual(destination[key.name], row[key.sourceColumn])
-                )
-                  throw new Error('Inserted destination key does not match mapping');
-              }
-            } else {
-              const expected = Object.fromEntries(
-                link.destination_key_mapping.destinationKey.map((k: Row) => [
-                  k.name,
-                  row[k.sourceColumn],
-                ]),
-              );
-              if (!isDeepStrictEqual(destination, expected))
-                throw new Error('Inserted destination key does not match mapping');
-            }
+            const expected = Object.fromEntries(
+              link.destination_key_mapping.destinationKey.map((k: Row) => [
+                k.name,
+                row[k.sourceColumn],
+              ]),
+            );
+            if (!isDeepStrictEqual(destination, expected))
+              throw new Error('Inserted destination key does not match mapping');
             const destinationText = keyText(destination);
             await query(queries.activeInsertSql, {
               link: common.link,
@@ -386,7 +361,7 @@ export async function executeTransfer(
               hash: common.hash,
               destination: destinationText,
             });
-            if (immutable)
+            if (!mutable)
               await query(queries.lineageSql, {
                 run: common.run,
                 setting: common.setting,
@@ -413,11 +388,9 @@ export async function executeTransfer(
                 ? row
                   ? 'black_update'
                   : 'physical_delete'
-                : immutable
-                  ? row
-                    ? 'red_then_black_insert'
-                    : 'red'
-                  : 'no_op'
+                : row
+                  ? 'red_then_black_insert'
+                  : 'red'
               : 'black_insert'),
         });
       }
