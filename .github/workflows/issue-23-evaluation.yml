@@ -2,7 +2,8 @@ name: Issue 23 execution evaluation
 on:
   pull_request:
     paths:
-      - 'experiments/issue-23/**'
+      - 'experiments/issue-23/*.mjs'
+      - 'experiments/issue-23/summarize.py'
       - 'src/features/execute-transfer/**'
       - 'db/runtime/**'
       - '.github/workflows/issue-23-evaluation.yml'
@@ -51,6 +52,9 @@ jobs:
           mkdir -p tmp
           docker stats --format '{{json .}}' > tmp/issue-23-postgres-stats.jsonl &
       - run: mkdir -p tmp && node experiments/issue-23/benchmark.mjs > tmp/issue-23-benchmark.log
+      - name: Publish measurement summary to job log
+        if: always()
+        run: python experiments/issue-23/summarize.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -98,6 +102,9 @@ jobs:
           mkdir -p tmp
           docker stats --format '{{json .}}' > tmp/issue-23-postgres-stats.jsonl &
       - run: mkdir -p tmp && node experiments/issue-23/recovery.mjs > tmp/issue-23-benchmark.log
+      - name: Publish measurement summary to job log
+        if: always()
+        run: python experiments/issue-23/summarize.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
