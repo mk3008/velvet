@@ -89,6 +89,9 @@ create table rawsql_transfer.destination_definition (
 
   , constraint chk_transfer_destination_generated_red_transfer_sql_status
     check (generated_red_transfer_sql_status in ('not_generated', 'success', 'failed'))
+  , set_phase_definition jsonb null
+  , constraint chk_destination_definition_set_phase_definition_object check (set_phase_definition is null or jsonb_typeof(set_phase_definition) = 'object')
+
 );
 
 comment on table rawsql_transfer.destination_definition is
@@ -141,3 +144,5 @@ comment on column rawsql_transfer.destination_definition.updated_at is
 
 comment on column rawsql_transfer.destination_definition.note is
   '備考。実装・運用上の補足を記録する。';
+
+comment on column rawsql_transfer.destination_definition.set_phase_definition is '集合phaseの転送先側契約。Red採番・投影、Red INSERT、書込検証の完成SQL、SHA-256、review revision。';

@@ -31,6 +31,9 @@ create table rawsql_transfer.destination_link (
   constraint uq_setting_destination_link_name unique (setting_id, destination_link_name),
   constraint uq_setting_destination_execution_order unique (setting_id, execution_order),
   constraint uq_destination_link_setting_identity unique (setting_id, destination_link_id)
+  , set_phase_definition jsonb null
+  , constraint chk_destination_link_set_phase_definition_object check (set_phase_definition is null or jsonb_typeof(set_phase_definition) = 'object')
+
 );
 
 create index idx_destination_link_setting on rawsql_transfer.destination_link (setting_id);
@@ -74,3 +77,5 @@ comment on column rawsql_transfer.destination_link.updated_at is '更新日時�
 comment on column rawsql_transfer.destination_link.note is '備考。実装・運用上の補足を記録する。';
 
 comment on column rawsql_transfer.destination_link.generated_reassessment_sql_body is '再評価SQL。現在snapshotの補正後転送先値と既存黒伝の保存値を、それぞれcurrent_valuesとactive_valuesのJSON objectを表すtextとして1行返す。既存黒伝キーはvelvet_active_destination_keyで受ける。';
+
+comment on column rawsql_transfer.destination_link.set_phase_definition is '集合phaseのLink側契約。評価SELECTとBlack INSERTの完成SQL、SHA-256、review revision。';

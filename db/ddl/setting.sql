@@ -35,6 +35,9 @@ create table rawsql_transfer.setting (
 
   , constraint chk_setting_source_sql_analysis_status
     check (source_sql_analysis_status in ('not_analyzed', 'success', 'failed'))
+  , set_phase_definition jsonb null
+  , constraint chk_setting_set_phase_definition_object check (set_phase_definition is null or jsonb_typeof(set_phase_definition) = 'object')
+
 );
 
 comment on table rawsql_transfer.setting is
@@ -81,3 +84,5 @@ comment on column rawsql_transfer.setting.updated_at is
 
 comment on column rawsql_transfer.setting.note is
   '備考。実装・運用上の補足を記録する。';
+
+comment on column rawsql_transfer.setting.set_phase_definition is '集合phaseの明示opt-in。version、review revision、上限件数、転送元identityの完成SQLとSHA-256。NULLは従来経路。';

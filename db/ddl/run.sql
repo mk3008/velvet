@@ -30,6 +30,9 @@ create table rawsql_transfer.run (
 
   , constraint uq_run_setting_identity
     unique (run_id, setting_id)
+  , execution_configuration jsonb null
+  , constraint chk_run_execution_configuration_object check (execution_configuration is null or jsonb_typeof(execution_configuration) = 'object')
+
 );
 
 create index idx_run_setting_created_at
@@ -84,3 +87,5 @@ comment on column rawsql_transfer.run.updated_at is
 
 comment on column rawsql_transfer.run.note is
   '備考。運用上の補足を記録する。';
+
+comment on column rawsql_transfer.run.execution_configuration is '集合phaseで使用したロック済みmaster設定の固定記録。完成SQL、hash、revisionを保持する。従来経路ではNULL。';
