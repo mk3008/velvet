@@ -8,6 +8,8 @@ export function materializeSource(statement, parameters = {}) {
   // Conservative subset: even semicolons inside literals/comments are unsupported.
   if (body.sourceText.includes(';')) throw new Error('TEMP source must have no semicolon');
   return {
+    // pg_temp is PostgreSQL's special alias for this session's temporary schema.
+    // TEMP creation permits this fixed alias; no arbitrary schema name is accepted.
     text: 'CREATE TEMPORARY TABLE pg_temp.velvet_source_snapshot ON COMMIT DROP AS\n' + body.text + '\n',
     values: body.values,
   };

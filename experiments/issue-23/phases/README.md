@@ -63,6 +63,15 @@ no configurable prefix/suffix/schema/name. The complete SELECT is authored in
 semicolon prohibition also rejects semicolons inside strings/comments. It does not
 claim to prove read-only SQL or parse SQL grammar. No runtime AST is used.
 
+`pg_temp` is PostgreSQL's special alias for the current session's temporary schema.
+`CREATE TEMPORARY TABLE pg_temp...` is permitted; this does not permit arbitrary
+schema-qualified TEMP creation. The source snapshot, pending and decision relations
+use only this fixed alias. PostgreSQL's [CREATE TABLE regression cases](https://github.com/postgres/postgres/blob/master/src/test/regress/expected/create_table.out)
+explicitly distinguish `pg_temp.doubly_temp` (allowed) from `public.temp_to_perm`
+(rejected). The existing `materialize.test.mjs` exercises the exact wrapper on
+PostgreSQL, including bound values, commit/rollback cleanup and connection reuse;
+the phase evaluation also executes the pending and decision CTAS statements.
+
 This is an explicit local construction exception permitted by the review, not a
 new Serene identity or general `unsafeRaw` API. Upstream 0.4 inventory remains
 unchanged: unresolved flows and any concatenation finding remain visible for manual
