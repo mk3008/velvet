@@ -49,12 +49,15 @@ flowchart TD
   SkipTransfer -->|"転送が必要"| TransferModelBranch
   TransferModelBranch -->|"immutable model"| RedTransfer
   RedTransfer --> BlackTransferInsert
+  TransferModelBranch -->|"insert_only model"| BlackTransferInsert
   BlackTransferInsert --> RecordResult
   TransferModelBranch -->|"mutable model"| PhysicalDeleteTransfer
   PhysicalDeleteTransfer --> BlackTransferUpsert
   BlackTransferUpsert --> RecordResult
   RecordResult --> Done
 ```
+
+`insert_only model` は Active Black がすでに存在する場合、Transfer Target Decision で `no-op` となるため Transfer Model Branch へ進まない。未作成の場合だけ、既存の `Black Transfer - insert` をそのまま使用する。
 
 ## Create Transfer Run detail
 
