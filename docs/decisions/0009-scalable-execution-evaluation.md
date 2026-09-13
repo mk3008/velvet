@@ -1,5 +1,7 @@
 # Scalable execution strategy evaluation
 
+> Experiment priority and stopping disposition are superseded by [Decision 0011](0011-structural-execution-priority.md). Measurements below are retained as historical intermediate evidence.
+
 ## Decision and scope
 
 Issue #20 evaluates execution, not new Business Design. Following the owner's [serverless review request](https://github.com/mk3008/velvet/pull/22#issuecomment-5653125860) and rereading the updated [Issue #20](https://github.com/mk3008/velvet/issues/20), retain the current executor **only as the correctness baseline in this analysis PR**. The existing row-oriented protocol is **not accepted for the target serverless workload**: 150,012–360,012 serial DB calls at 10,000 rows × 3 links are an unresolved deployment problem.

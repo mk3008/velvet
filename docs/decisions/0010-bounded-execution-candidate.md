@@ -1,5 +1,7 @@
 # Bounded execution candidate
 
+> Experiment priority and stopping disposition are superseded by [Decision 0011](0011-structural-execution-priority.md). Measurements below are retained as historical intermediate evidence.
+
 Issue #23. This is an opt-in candidate, not production adoption. Business authority remains the existing Business Design and Decisions 0002–0009. No source SQL rewriting, deferred allocation or new business policy is introduced.
 
 ## Choice

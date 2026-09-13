@@ -139,3 +139,25 @@ begin
  end loop;
  return next;
 end $$;
+
+-- Test oracle only; disabled during performance/recovery samples.
+create table public.ordered_write_observation(
+ position bigint generated always as identity,logical_id text,role text,amount numeric,row_id text,
+ work_count bigint,processing_count bigint,active_count bigint,lineage_count bigint);
+create function public.ordered_observe() returns trigger language plpgsql as $$
+begin
+ if current_setting('velvet.ordered_oracle',true)='on' then
+  insert into public.ordered_write_observation(logical_id,role,amount,row_id,work_count,processing_count,active_count,lineage_count)
+  select new.logical_id,new.role,new.amount,new.row_id,
+   (select count(*) from rawsql_transfer.work_item),(select count(*) from rawsql_transfer.dirty_key_processing),
+   (select count(*) from rawsql_transfer.active_black),(select count(*) from rawsql_transfer.lineage);
+ end if;
+ return new;
+end $$;
+create trigger ordered_observe before insert on public.scale_destination for each row execute function public.ordered_observe();
+create or replace function public.scale_guard() returns trigger language plpgsql as $$ begin
+ if current_setting('velvet.scale_fail',true)=new.role and
+  (coalesce(current_setting('velvet.scale_fail_id',true),'')='' or current_setting('velvet.scale_fail_id',true)=new.logical_id)
+ then raise exception 'scale downstream failure';end if;
+ return new;
+end $$;

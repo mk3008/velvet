@@ -1,5 +1,7 @@
 # Issue #23 execution candidate evaluation
 
+The routine result is intermediate, not sufficient resolution of request amplification. See the [structural candidate](ordered/README.md) and [revised priority/stopping decision](../../docs/decisions/0011-structural-execution-priority.md).
+
 See [Decision 0010](../../docs/decisions/0010-bounded-execution-candidate.md). The candidate is opt-in. Install `db/runtime/execute-transfer-metadata.sql` explicitly after canonical DDL, then select `metadataMode: 'routine'`; use `maxDirtyKeys` for bounded admission. These routines perform ordinary owned SQL sequentially; they do not transform stored source/destination SQL.
 
 ## Reproduce
