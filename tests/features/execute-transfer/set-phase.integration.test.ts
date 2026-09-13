@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { Client } from 'pg';
 import { beforeAll, afterAll, beforeEach, describe, expect, test } from 'vitest';
 import { executeTransfer } from '../../../src/features/execute-transfer/boundary.js';
@@ -20,6 +20,40 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')('DB-managed imm
  });
  afterAll(async()=>{await db?.end();await admin?.query('drop database if exists '+database+' with (force)');await admin?.end();});
  beforeEach(async()=>{await f.setup(db);await f.enable(db);});
+ test('differential row/set history across duplicate, precise numeric, NULL and absent source routes',async()=>{
+  const normalize=(state:any)=>{
+   const work=new Map((state.work??[]).map((w:any)=>[w.work_item_id,`${w.run_id}/${w.dirty_key_id}/${w.destination_link_id}`]));
+   const dest=new Map((state.lineage??[]).map((l:any)=>[l.destination_key_json.row_id,`${work.get(l.work_item_id)}/${l.transfer_operation}`]));
+   const active=new Map((state.active??[]).map((a:any)=>[a.active_black_id,dest.get(a.destination_key_json.row_id)]));
+   const key=(k:any)=>{if(k?.row_id){expect(dest.has(k.row_id)).toBe(true);k.row_id=dest.get(k.row_id);}};
+   for(const rows of Object.values(state) as any[][]) for(const row of rows??[]){
+    for(const prefix of ['source','destination'])if(row[prefix+'_key_hash']){
+     const k=row[prefix+'_key_json'];expect(row[prefix+'_key_hash']).toBe(createHash('sha256').update(JSON.stringify(k,Object.keys(k).sort())).digest('hex'));delete row[prefix+'_key_hash'];
+    }
+    if(row.work_item_id!==undefined){expect(work.has(row.work_item_id)).toBe(true);row.work_item_id=work.get(row.work_item_id);}
+    if(row.active_black_id!=null){expect(active.has(row.active_black_id)).toBe(true);row.active_black_id=active.get(row.active_black_id);}
+    for(const c of ['row_id','journal_key'])if(row[c]){expect(dest.has(row[c])).toBe(true);row[c]=dest.get(row[c]);}
+    key(row.source_key_json);key(row.destination_key_json);key(row.evaluated_destination_key_json);
+    for(const c of ['lineage_id','dirty_key_processing_id','created_at','updated_at','processed_at','detected_at'])delete row[c];
+   }
+   for(const rows of Object.values(state) as any[][])rows?.sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
+   return state;
+  };
+  const collect=async(set:boolean)=>{
+   await f.setup(db,3);if(set)await f.enable(db);
+   const execute=()=>executeTransfer(db,set?[]:[f.definition()],{settingId:'1',arguments:{owner:'1'}});
+   const states:any[]=[];
+   const step=async()=>{await execute();states.push(normalize(await f.snapshot(db)));};
+   await f.dirty(db);await f.dirty(db,'1');await step();
+   await f.dirty(db);await step();
+   await db.query("update product_source set memo='new' where id='1'");await f.dirty(db,'1');await step();
+   await db.query('update product_source set amount=100.000000000000000000001');await f.dirty(db);await step();
+   await f.dirty(db,'1');await db.query("delete from product_source where id='1'");await step();
+   await db.query("insert into product_source values('1',null,null)");await f.dirty(db,'1');await step();
+   await f.dirty(db);await step();return states;
+  };
+  expect(await collect(true)).toEqual(await collect(false));
+ });
  test('ordered real writes, no-op, asymmetric exclusions, correction, disappearance and reappearance',async()=>{
   await db.query("set velvet.observe='on'");
   await f.dirty(db);expect((await run()).inserted).toBe(15);
@@ -66,6 +100,17 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')('DB-managed imm
  });
  test('explicit misconfiguration never falls back to row SQL',async()=>{
   await f.dirty(db);await db.query('update rawsql_transfer.destination_link set set_phase_definition=null where destination_link_id=10');
+  await expect(run()).rejects.toThrow();expect((await db.query('select count(*)::int n from product_destination')).rows[0].n).toBe(0);
+ });
+ test.each([{}, {columns:null}])('rejects malformed explicit exclusion metadata %j',async(exclusions)=>{
+  await f.dirty(db);await db.query('update rawsql_transfer.destination_link set diff_compare_excluded_columns=$1::jsonb',[JSON.stringify(exclusions)]);
+  await expect(run()).rejects.toThrow();
+ });
+ test.each(['hash','identity','numeric'])('rejects broken stored SQL/key contract: %s',async(mode)=>{
+  await f.dirty(db);
+  if(mode==='hash')await db.query("update rawsql_transfer.setting set source_sql_body=source_sql_body||' '");
+  if(mode==='identity')await db.query("update rawsql_transfer.setting set set_phase_definition=jsonb_set(set_phase_definition,'{dirtyIdentity}',$1::jsonb)",[JSON.stringify(f.reviewed("select dirty_key_id,jsonb_build_object('logical_id',source_key_json->'id') source_key from pg_temp.velvet_pending_keys where false"))]);
+  if(mode==='numeric')await db.query("update rawsql_transfer.dirty_key set source_key_json=jsonb_build_object('id',1)");
   await expect(run()).rejects.toThrow();expect((await db.query('select count(*)::int n from product_destination')).rows[0].n).toBe(0);
  });
  test('lost successful COMMIT response remains durable and retry does no work',async()=>{

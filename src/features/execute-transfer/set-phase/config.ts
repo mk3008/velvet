@@ -45,7 +45,7 @@ export function loadSetPhase(setting: Master, links: Master[]) {
     const keys = columns(link.destination_key_columns);
     if (keys.some(k => !allowed.includes(k) || link.destination_columns.columns.find((c: Master) => c.name === k)?.type !== 'text'))
       throw new Error('Set-phase v1 requires canonical text destination keys');
-    const excluded = link.diff_compare_excluded_columns?.columns ?? [];
+    const excluded = link.diff_compare_excluded_columns === null ? [] : link.diff_compare_excluded_columns?.columns;
     if (!Array.isArray(excluded) || excluded.some((c: unknown) => typeof c !== 'string' || !allowed.includes(c)))
       throw new Error('Invalid set-phase comparison exclusions');
     accept(config.evaluate); accept(config.black); accept(destination.redProjection);
