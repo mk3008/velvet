@@ -154,10 +154,10 @@ describe.skipIf(!enabled)('insert-only transfer on PostgreSQL', () => {
       source_system: 'consumer',
       external_id: 'C-001',
     });
-    expect(initialActive[0].destination_key_json).toEqual({ accounting_id: 1 });
+    expect(initialActive[0].destination_key_json).toEqual({ accounting_id: '1' });
     const lineage = (await db.query('select * from rawsql_transfer.lineage')).rows;
     expect(lineage).toHaveLength(1);
-    expect(lineage[0].destination_key_json).toEqual({ accounting_id: 1 });
+    expect(lineage[0].destination_key_json).toEqual({ accounting_id: '1' });
     expect(await processing(first.runId)).toEqual([
       { processing_status: 'succeeded', processing_result: 'black_insert' },
     ]);
@@ -227,8 +227,8 @@ describe.skipIf(!enabled)('insert-only transfer on PostgreSQL', () => {
     const result = await run();
     expect(result).toMatchObject({ inserted: 2, skipped: 1 });
     expect(await mappings()).toEqual([
-      { accounting_id: '1', source_system: 'consumer', external_id: 'C-001', label: 'first' },
-      { accounting_id: '2', source_system: 'corporate', external_id: 'C-001', label: 'corporate' },
+      { accounting_id: '1', source_system: 'corporate', external_id: 'C-001', label: 'corporate' },
+      { accounting_id: '2', source_system: 'consumer', external_id: 'C-001', label: 'first' },
     ]);
     expect((await processing(result.runId)).map((row) => row.processing_result)).toEqual([
       'black_insert',
