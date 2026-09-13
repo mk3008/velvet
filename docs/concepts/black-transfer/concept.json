@@ -69,6 +69,16 @@
         ]
       },
       {
+        "id": "black-insert-transfer-insert-only-model",
+        "displayName": "insert_only transfer model の初回転送は Black Insert Transfer として表現される",
+        "polarity": "positive",
+        "type": "essence",
+        "text": "`insert_only transfer model` で転送元の現在行が存在し Active Black が存在しない場合、既存の Black Insert Transfer と同じ表現で黒伝を追加する。",
+        "evidence": [
+          "spec:black-transfer"
+        ]
+      },
+      {
         "id": "black-insert-transfer-update-mutable-model",
         "displayName": "mutable transfer model では、Black Transfer は状況に応じて Black Insert Transfer または Black Update Transfer として表現される",
         "polarity": "positive",
@@ -114,11 +124,11 @@
         ]
       },
       {
-        "id": "black-transfer-lineage-create-immutable-model-active",
-        "displayName": "immutable transfer model の Black Transfer が成功すると、Active Black に加えて Lineage も作成される",
+        "id": "black-transfer-lineage-create-non-mutable-model-active",
+        "displayName": "immutable または insert_only の Black Insert が成功すると、Active Black に加えて Lineage も作成される",
         "polarity": "positive",
         "type": "essence",
-        "text": "`immutable transfer model` の Black Transfer が成功すると、`Active Black` に加えて `Lineage` も作成される。",
+        "text": "`immutable transfer model` または `insert_only transfer model` の Black Insert が成功すると、`Active Black` に加えて `Lineage` も作成される。",
         "evidence": [
           "spec:black-transfer"
         ]
@@ -174,11 +184,11 @@
         ]
       },
       {
-        "id": "black-transfer-lineage-create-immutable-model",
-        "displayName": "immutable transfer model では成功時に Lineage を作成できるように",
+        "id": "black-transfer-lineage-create-non-mutable-model",
+        "displayName": "immutable と insert_only の Black Insert では成功時に Lineage を作成できるように",
         "polarity": "positive",
         "type": "responsibility",
-        "text": "Black Transfer は、`immutable transfer model` では成功時に `Lineage` を作成できるようにする。",
+        "text": "Black Transfer は、`immutable transfer model` と `insert_only transfer model` の Black Insert では成功時に `Lineage` を作成できるようにする。",
         "evidence": [
           "spec:black-transfer"
         ]
@@ -303,6 +313,16 @@
         ]
       },
       {
+        "id": "black-insert-transfer-insert-only-model-2",
+        "displayName": "insert_only transfer model の未作成候補では Black Insert Transfer として黒伝を追加",
+        "polarity": "positive",
+        "type": "invariant",
+        "text": "`insert_only transfer model` で Active Black がない追加転送候補では、Black Transfer は Black Insert Transfer として黒伝を追加する。Active Black がある場合は Transfer Target Decision が no-op とする。",
+        "evidence": [
+          "spec:black-transfer"
+        ]
+      },
+      {
         "id": "black-insert-transfer-mutable-model-active",
         "displayName": "mutable transfer model では、Active Black がない場合は Black Insert Transfer として黒伝を追加",
         "polarity": "positive",
@@ -358,11 +378,11 @@
         ]
       },
       {
-        "id": "black-transfer-lineage-create-immutable-model-2",
-        "displayName": "immutable transfer model では、Black Transfer の成功時に Lineage が作成される。",
+        "id": "black-transfer-lineage-create-non-mutable-model-2",
+        "displayName": "immutable または insert_only の Black Insert 成功時に Lineage が作成される。",
         "polarity": "positive",
         "type": "invariant",
-        "text": "`immutable transfer model` では、Black Transfer の成功時に `Lineage` が作成される。",
+        "text": "`immutable transfer model` または `insert_only transfer model` の Black Insert では、成功時に `Lineage` が作成される。",
         "evidence": [
           "spec:black-transfer"
         ]
@@ -395,7 +415,7 @@
         "displayName": "Depends on Transfer Model",
         "polarity": "negative",
         "type": "rationale",
-        "text": "Black Transfer Depends on Transfer Model: Black Transfer は、transfer model によって転送先への反映方法が変わる。 `immutable transfer model` では、転送先行を直接更新しないため、Black Transfer は Black Insert Transfer として新しい黒伝を追加する。 `mutable transfer model` では、転送先行を直接更新できるため、Black Transfer は Black Insert Transfer または Black Update Transfer として表現される。どちらを選ぶかの判定正本は `Transfer Target Decision` が所有する。",
+        "text": "Black Transfer Depends on Transfer Model: Black Transfer は、transfer model によって転送先への反映方法が変わる。 `immutable transfer model` では Black Insert Transfer として新しい黒伝を追加する。 `insert_only transfer model` では Active Black がない初回だけ同じ Black Insert Transfer を使い、作成済みなら Transfer Target Decision が no-op とする。 `mutable transfer model` では Black Insert Transfer または Black Update Transfer として表現される。判定正本は `Transfer Target Decision` が所有する。",
         "evidence": [
           "spec:black-transfer"
         ],
@@ -424,17 +444,17 @@
         "displayName": "Successful Black Transfer Creates Active Black",
         "polarity": "negative",
         "type": "rationale",
-        "text": "Successful Black Transfer Creates Active Black: Black Transfer が成功すると、転送先に黒伝が存在する。 その黒伝がまだ取り消されていない場合、`Active Black` として扱われる。 `mutable transfer model` では、転送成功時に `Active Black` を記録できる必要がある。 `immutable transfer model` でも、転送成功時に `Active Black` を記録できる必要がある。",
+        "text": "Successful Black Transfer Creates Active Black: Black Transfer が成功すると、転送先に黒伝が存在する。 その黒伝がまだ取り消されていない場合、`Active Black` として扱われる。 `mutable transfer model`、`immutable transfer model`、`insert_only transfer model` の初回 Black Insert は、いずれも転送成功時に `Active Black` を記録できる必要がある。",
         "evidence": [
           "spec:black-transfer"
         ]
       },
       {
         "id": "black-transfer-lineage-physical-delete-destination-row-source",
-        "displayName": "Immutable Black Transfer Also Creates Lineage",
+        "displayName": "Non-mutable Black Insert Also Creates Lineage",
         "polarity": "negative",
         "type": "rationale",
-        "text": "Immutable Black Transfer Also Creates Lineage: `immutable transfer model` では、転送先行を履歴として積み増す。 そのため、Black Transfer が成功した場合、転送元データソースの論理行と黒伝の対応を `Lineage` として追跡できる必要がある。 `mutable transfer model` では、転送先行を直接更新または `Physical Delete Transfer` で削除するため、この文書で定義する `Lineage` は作成しない。",
+        "text": "Non-mutable Black Insert Also Creates Lineage: `immutable transfer model` と `insert_only transfer model` の Black Insert では、生成した転送先行と転送元データソースの論理行の対応を `Lineage` として追跡する。`mutable transfer model` では、転送先行を直接更新または `Physical Delete Transfer` で削除するため、この文書で定義する `Lineage` は作成しない。",
         "evidence": [
           "spec:black-transfer"
         ],
@@ -476,10 +496,10 @@
     {
       "to": "lineage",
       "kind": "records",
-      "reason": "immutable transfer model では、成功した Black Transfer が転送元データ行と黒伝の対応を Lineage として記録する。",
+      "reason": "immutable または insert_only の Black Insert では、成功した Black Transfer が転送元データ行と黒伝の対応を Lineage として記録する。",
       "supportedBy": [
-        "black-transfer-lineage-create-immutable-model",
-        "black-transfer-lineage-create-immutable-model-2",
+        "black-transfer-lineage-create-non-mutable-model",
+        "black-transfer-lineage-create-non-mutable-model-2",
         "lineage-create-mutable-transfer-model"
       ],
       "evidence": [

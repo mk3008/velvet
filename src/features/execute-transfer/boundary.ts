@@ -167,6 +167,8 @@ export async function executeTransfer(
       for (const item of work) {
         const link = links.find((l) => l.destination_link_id === item.destination_link_id)!;
         const mutable = link.transfer_model === 'mutable';
+        const immutable = link.transfer_model === 'immutable';
+        const insertOnly = link.transfer_model === 'insert_only';
         const row = current.get(item.key);
         const context = JSON.stringify([link.destination_link_id, item.key]);
         const duplicate = completed.has(context);
@@ -186,8 +188,8 @@ export async function executeTransfer(
                   return [target, row[source as string]];
                 }),
               );
-        let noOp: boolean = !row && !active;
-        if (active && row) {
+        let noOp: boolean = (!row && !active) || (insertOnly && !!active);
+        if (active && row && !insertOnly) {
           // Mutable identity is stable, including when key columns are excluded from comparison.
           if (
             mutable &&
@@ -255,7 +257,7 @@ export async function executeTransfer(
           skip,
           active: active?.active_black_id ?? null,
           evaluated: active ? keyText(active.destination_key_json) : null,
-          red: !mutable && !!active && !skip,
+          red: immutable && !!active && !skip,
         });
         if (!skip) {
           if (active && mutable) {
@@ -297,7 +299,7 @@ export async function executeTransfer(
               if (removed.length !== 1) throw new Error('Active Black retirement failed');
             }
           }
-          if (active && !mutable) {
+          if (active && immutable) {
             if (!link.generated_red_transfer_sql_body.trim())
               throw new Error('Destination has no stored Red Transfer SQL');
             const prepared = bindStoredSql(

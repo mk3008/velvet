@@ -40,7 +40,7 @@ create table rawsql_transfer.destination_definition (
     )
 
   , constraint chk_transfer_destination_transfer_model
-    check (transfer_model in ('immutable', 'mutable'))
+    check (transfer_model in ('immutable', 'mutable', 'insert_only'))
 
   , constraint chk_transfer_destination_columns_object
     check (jsonb_typeof(destination_columns) = 'object')
@@ -116,7 +116,7 @@ comment on column rawsql_transfer.destination_definition.sequence_expression_def
   '採番式定義。採番列と採番式をJSONBで保持する。';
 
 comment on column rawsql_transfer.destination_definition.transfer_model is
-  '転送モデル。許可値は immutable, mutable。immutable は更新時に元黒の赤伝転送後に新黒を追加し、削除時に元黒の赤伝転送を行う。mutable は更新時に直接UPDATEし、削除時に物理DELETEする。';
+  '転送モデル。immutable は訂正・取消を赤伝で履歴化し、mutable は現在snapshotへUPDATE/DELETE同期し、insert_only は初回追加後のsource変更・削除を同期しない。';
 
 comment on column rawsql_transfer.destination_definition.sign_inversion_columns is
   '符号反転列。赤伝生成時に符号を反転する数値列名を配列で保持する。';

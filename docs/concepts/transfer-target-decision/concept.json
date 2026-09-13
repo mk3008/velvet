@@ -98,6 +98,30 @@
         "evidence": ["spec:transfer-target-decision"]
       },
       {
+        "id": "insert-only-no-active-black-is-insert-candidate",
+        "displayName": "insert_only で未作成なら追加転送候補",
+        "polarity": "positive",
+        "type": "responsibility",
+        "text": "insert_only transfer model で転送元の現在行が存在し、有効黒伝がなければ、一度だけ Black Insert する追加転送候補として扱う。",
+        "evidence": ["spec:transfer-target-decision"]
+      },
+      {
+        "id": "insert-only-active-black-is-no-op",
+        "displayName": "insert_only で有効黒伝があれば転送不要",
+        "polarity": "negative",
+        "type": "responsibility",
+        "text": "insert_only transfer model で有効黒伝が存在する場合は、転送元の現在行の存在や値変更にかかわらず、差分比較を行わず skipped / no_op とする。",
+        "evidence": ["spec:transfer-target-decision"]
+      },
+      {
+        "id": "insert-only-no-source-no-active-black-is-no-op",
+        "displayName": "insert_only で転送元と有効黒伝がなければ転送不要",
+        "polarity": "negative",
+        "type": "responsibility",
+        "text": "insert_only transfer model で転送元の現在行と有効黒伝が両方存在しない場合は skipped / no_op とし、後で転送元が現れた場合は新しい Dirty Key で再評価する。",
+        "evidence": ["spec:transfer-target-decision"]
+      },
+      {
         "id": "ignored-columns-only-is-no-transfer",
         "displayName": "比較対象外列だけが変わっている場合は転送不要",
         "polarity": "negative",
@@ -155,6 +179,13 @@
       "evidence": ["spec:transfer-target-decision"]
     },
     {
+      "from": "insert-only-active-black-is-no-op",
+      "to": "insert-only-no-active-black-is-insert-candidate",
+      "kind": "bounds",
+      "reason": "insert_only は未作成時だけ追加し、作成済みの有効黒伝があれば差分評価せず転送不要になるため。",
+      "evidence": ["spec:transfer-target-decision"]
+    },
+    {
       "from": "ignored-columns-only-is-no-transfer",
       "to": "red-candidate-needs-column-evaluation",
       "kind": "constrains",
@@ -180,12 +211,14 @@
     {
       "to": "active-black",
       "kind": "uses",
-      "reason": "有効黒伝の有無が追加、赤伝転送候補、更新転送候補の判定材料になるため。",
+      "reason": "有効黒伝の有無が追加、赤伝転送、更新転送、またはinsert_onlyの作成済みno-op判定材料になるため。",
       "supportedBy": [
         "immutable-no-active-black-is-insert-candidate",
         "immutable-active-black-is-red-candidate",
         "mutable-no-active-black-is-insert-candidate",
-        "mutable-active-black-is-update-candidate"
+        "mutable-active-black-is-update-candidate",
+        "insert-only-no-active-black-is-insert-candidate",
+        "insert-only-active-black-is-no-op"
       ],
       "evidence": ["spec:transfer-target-decision"]
     },
@@ -226,7 +259,8 @@
         "immutable-no-active-black-is-insert-candidate",
         "mutable-no-active-black-is-insert-candidate",
         "mutable-active-black-is-update-candidate",
-        "update-candidate-needs-column-evaluation"
+        "update-candidate-needs-column-evaluation",
+        "insert-only-no-active-black-is-insert-candidate"
       ],
       "evidence": ["spec:transfer-target-decision"]
     },

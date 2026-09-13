@@ -7,7 +7,7 @@ import {
   type InsertTransferDestinationDefinitionQueryResult,
 } from './queries/insert-transfer-destination-definition/boundary.js';
 
-const TRANSFER_MODELS = ['immutable', 'mutable'] as const;
+const TRANSFER_MODELS = ['immutable', 'mutable', 'insert_only'] as const;
 
 const DestinationColumnSchema = z
   .object({
