@@ -42,3 +42,14 @@ without waiting for an upstream release or claiming its API has shipped.
 Stop at a sufficiently good supported profile after semantic/dependency/failure
 checks and one bounded recovery environment. Do not restart an optimum benchmark
 search. Production compatibility and provider/resource budgets remain separate.
+
+## Measured disposition
+
+[The phase evaluation](../../experiments/issue-23/phases/results.md) passes the
+supported-profile gates: 31/63 fixed client calls for one/three Links, exact numeric
+and causal visibility checks, full rollback/lost-COMMIT checks, and 10,000-key recovery
+in 42.7/62.1 seconds across two CI observations. The largest bounded Run was 11.4
+seconds or less. Select the bounded profile as a reasonable candidate. Unbounded
+corrections took 78–111 seconds and fail the illustrative 45-second work allowance;
+neighbor latency varied significantly. Neither universal compatibility nor production
+resource acceptance is implied. This ends the current candidate search.

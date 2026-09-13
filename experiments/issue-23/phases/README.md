@@ -3,6 +3,7 @@
 Responds to [the new review](https://github.com/mk3008/velvet/pull/24#pullrequestreview-5192120827).
 This supersedes the ordered worker as the direction of investigation. It is an
 explicit immutable profile candidate, not a transparent replacement for stored SQL.
+The [measured result](results.md) selects the bounded profile and records its limits.
 
 `work.mjs` contains complete, ordinary SQL statements. Node loops over configured
 Links, never source/Dirty Key rows. PostgreSQL executes `INSERT ... SELECT`, joined

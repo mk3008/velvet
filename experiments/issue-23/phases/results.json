@@ -1,0 +1,422 @@
+[
+  {
+    "commit": "27379a1214ce75ceef4abc738c5b82e77fbfd3af",
+    "mode": "ordered",
+    "size": 1000,
+    "links": 1,
+    "completed": true,
+    "differentialState": "passed",
+    "identityFailure": "passed",
+    "engine": "set-based-phases",
+    "nodePeakRSSBytes": 75272192,
+    "routes": {
+      "initial": {
+        "observations": 2,
+        "ms": [
+          251.73386000000005,
+          246.94862500000045
+        ],
+        "meanMs": 249.34124250000025,
+        "calls": [
+          31
+        ],
+        "maxRSSBytes": 74690560,
+        "walBytes": [
+          4029688,
+          4025488
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 28,
+            "blks_hit": 162276,
+            "tup_inserted": 5144,
+            "tup_updated": 5,
+            "tup_deleted": 143,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 28,
+            "blks_hit": 162075,
+            "tup_inserted": 5144,
+            "tup_updated": 5,
+            "tup_deleted": 143,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "all_no_op": {
+        "observations": 2,
+        "ms": [
+          758.910378,
+          760.4312709999995
+        ],
+        "meanMs": 759.6708244999998,
+        "calls": [
+          31
+        ],
+        "maxRSSBytes": 74637312,
+        "walBytes": [
+          1835032,
+          1832104
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 119522,
+            "tup_inserted": 2144,
+            "tup_updated": 5,
+            "tup_deleted": 143,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 0,
+            "blks_hit": 119468,
+            "tup_inserted": 2144,
+            "tup_updated": 5,
+            "tup_deleted": 143,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "mostly_no_op": {
+        "observations": 2,
+        "ms": [
+          758.168183,
+          753.6175929999999
+        ],
+        "meanMs": 755.892888,
+        "calls": [
+          31
+        ],
+        "maxRSSBytes": 74285056,
+        "walBytes": [
+          1925416,
+          1924528
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 128130,
+            "tup_inserted": 2194,
+            "tup_updated": 25,
+            "tup_deleted": 153,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 0,
+            "blks_hit": 128130,
+            "tup_inserted": 2194,
+            "tup_updated": 25,
+            "tup_deleted": 153,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "correction": {
+        "observations": 2,
+        "ms": [
+          1373.9211300000002,
+          1350.041201
+        ],
+        "meanMs": 1361.9811655,
+        "calls": [
+          31
+        ],
+        "maxRSSBytes": 74285056,
+        "walBytes": [
+          8734048,
+          8735360
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 1406091,
+            "tup_inserted": 7144,
+            "tup_updated": 2985,
+            "tup_deleted": 1143,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 0,
+            "blks_hit": 1406091,
+            "tup_inserted": 7144,
+            "tup_updated": 2985,
+            "tup_deleted": 1143,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      }
+    },
+    "container": {
+      "observationsIncludingRefreshes": 50,
+      "maxCPUPercent": 106.25,
+      "maxMemoryBytes": 80415293.44
+    }
+  },
+  {
+    "commit": "27379a1214ce75ceef4abc738c5b82e77fbfd3af",
+    "mode": "ordered",
+    "size": 10000,
+    "links": 3,
+    "completed": true,
+    "differentialState": "passed",
+    "identityFailure": "passed",
+    "engine": "set-based-phases",
+    "nodePeakRSSBytes": 79794176,
+    "routes": {
+      "initial": {
+        "observations": 2,
+        "ms": [
+          13577.59708,
+          6699.889967000025
+        ],
+        "meanMs": 10138.743523500012,
+        "calls": [
+          63
+        ],
+        "maxRSSBytes": 79794176,
+        "walBytes": [
+          118048480,
+          121300080
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 28,
+            "blks_hit": 8249211,
+            "tup_inserted": 150248,
+            "tup_updated": 7,
+            "tup_deleted": 247,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 50,
+            "blks_hit": 5043988,
+            "tup_inserted": 150248,
+            "tup_updated": 7,
+            "tup_deleted": 247,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "all_no_op": {
+        "observations": 2,
+        "ms": [
+          4087.092292000001,
+          3830.944623999996
+        ],
+        "meanMs": 3959.0184579999986,
+        "calls": [
+          63
+        ],
+        "maxRSSBytes": 70684672,
+        "walBytes": [
+          53621440,
+          56236440
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 0,
+            "blks_hit": 3393069,
+            "tup_inserted": 60248,
+            "tup_updated": 7,
+            "tup_deleted": 247,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 4,
+            "blks_hit": 3283274,
+            "tup_inserted": 60248,
+            "tup_updated": 7,
+            "tup_deleted": 247,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "mostly_no_op": {
+        "observations": 2,
+        "ms": [
+          56300.96015500001,
+          3650.3611110000056
+        ],
+        "meanMs": 29975.660633000007,
+        "calls": [
+          63
+        ],
+        "maxRSSBytes": 70987776,
+        "walBytes": [
+          56318872,
+          56126808
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 176,
+            "blks_hit": 3816430,
+            "tup_inserted": 61876,
+            "tup_updated": 754,
+            "tup_deleted": 548,
+            "temp_files": 1,
+            "temp_bytes": 2433024,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 27,
+            "blks_hit": 3374022,
+            "tup_inserted": 61748,
+            "tup_updated": 607,
+            "tup_deleted": 547,
+            "temp_files": 0,
+            "temp_bytes": 0,
+            "deadlocks": 0
+          }
+        ]
+      },
+      "correction": {
+        "observations": 2,
+        "ms": [
+          78410.235387,
+          80158.87248599998
+        ],
+        "meanMs": 79284.55393649999,
+        "calls": [
+          63
+        ],
+        "maxRSSBytes": 71249920,
+        "walBytes": [
+          261301840,
+          266738432
+        ],
+        "databaseDelta": [
+          {
+            "blks_read": 11488,
+            "blks_hit": 11937581,
+            "tup_inserted": 210256,
+            "tup_updated": 89450,
+            "tup_deleted": 30255,
+            "temp_files": 4,
+            "temp_bytes": 14342431,
+            "deadlocks": 0
+          },
+          {
+            "blks_read": 24292,
+            "blks_hit": 11780352,
+            "tup_inserted": 210289,
+            "tup_updated": 89543,
+            "tup_deleted": 30276,
+            "temp_files": 6,
+            "temp_bytes": 20586743,
+            "deadlocks": 0
+          }
+        ]
+      }
+    },
+    "recovery": {
+      "primaryStartsOnFreshConnection": true,
+      "backlog": 10000,
+      "cap": 1000,
+      "targetArrivalPerSecond": 2,
+      "rtt": 5,
+      "completed": true,
+      "catchupMs": 42662.536035999976,
+      "arrivalsDuringCatchup": 82,
+      "remaining": 1,
+      "otherRemaining": 1,
+      "grossKeysPerSecond": 236.29631373749882,
+      "arrivals": 113,
+      "primaryRunMs": [
+        1335.1428480000177,
+        912.8315219999931,
+        2633.9914200000057,
+        2370.8170380000083,
+        4406.675963999995,
+        1592.065671999997,
+        1597.7881650000345,
+        4159.954672000022,
+        4183.421181000012,
+        1619.1963689999538,
+        4124.330714999989,
+        458.3130699999747,
+        461.38409999996657,
+        429.0734389999998,
+        429.2957409999799,
+        413.0973290000111,
+        419.42685100005474,
+        8032.998135000002
+      ],
+      "otherRunMs": [
+        1798.1623059999838,
+        3591.5643109999946,
+        6798.803175000008,
+        1702.2532830000273,
+        4238.067731999967,
+        4203.049294999975,
+        1612.5097230000538,
+        1575.0545740000089,
+        4253.17836400005,
+        1570.2703319999855,
+        458.8737770000007
+      ],
+      "neighbor": {
+        "idle": {
+          "n": 35,
+          "medianMs": 1.0357209999929182,
+          "p95Ms": 90.7219449999975,
+          "maxMs": 157.21125900000334
+        },
+        "outage": {
+          "n": 61,
+          "medianMs": 0.8059300000022631,
+          "p95Ms": 1.8813439999939874,
+          "maxMs": 33.338544999976875
+        },
+        "recovery": {
+          "n": 1603,
+          "medianMs": 0.8179390000295825,
+          "p95Ms": 39.464099999982864,
+          "maxMs": 268.4668309999979
+        },
+        "steady": {
+          "n": 286,
+          "medianMs": 0.7689080000272952,
+          "p95Ms": 44.81508600001689,
+          "maxMs": 130.70786500000395
+        },
+        "correction": {
+          "n": 313,
+          "medianMs": 0.7516639999812469,
+          "p95Ms": 32.874975999991875,
+          "maxMs": 201.16236000001663
+        }
+      },
+      "lockWaitObservations": 0
+    },
+    "container": {
+      "observationsIncludingRefreshes": 1268,
+      "maxCPUPercent": 186.99,
+      "maxMemoryBytes": 288043827.2
+    }
+  }
+]
