@@ -6,103 +6,71 @@
     "status": "defined"
   },
   "definition": {
-    "summary": "転送元identityから転送先identityへの対応を一度だけ作成し、その後の転送元変更・削除へ同期しない転送モデル",
+    "summary": "初回は既存の Black Insert を行い、作成済みなら後続 Dirty Key で差分判定せず no-op とする転送モデル",
     "statements": [
       {
-        "id": "insert-only-materializes-once",
-        "displayName": "一度だけ対応を作成する",
+        "id": "insert-only-first-transfer-is-normal-black-insert",
+        "displayName": "初回は通常の Black Insert を使う",
         "polarity": "positive",
         "type": "essence",
-        "text": "Insert-Only Transfer は、転送元の logical source identity に対する転送先行が未作成の場合に一度だけ Black Insert し、作成済みなら再転送しない。",
+        "text": "Insert-Only Transfer は、転送元の現在行が存在し Active Black が存在しない場合、既存の初回 Black Insert と同じ mapping、stored SQL、destination key validation、Active Black、Lineage、transaction、processing の契約を使う。",
         "evidence": ["spec:insert-only-transfer"]
       },
       {
-        "id": "insert-only-decouples-identity",
-        "displayName": "転送元キー構造から転送先identityを分離する",
-        "polarity": "positive",
-        "type": "essence",
-        "text": "Insert-Only Transfer は、文字列・数値・複合キーなど転送元システム固有の identity を、転送先が所有する安定した identity へ対応付ける用途に使える。",
-        "evidence": ["spec:insert-only-transfer"]
-      },
-      {
-        "id": "insert-only-active-means-materialized",
-        "displayName": "Active Black は作成済み対応を示す",
-        "polarity": "positive",
-        "type": "responsibility",
-        "text": "Insert-Only Transfer では、Active Black の存在はその Destination Link と logical source identity の対応がすでに materialize 済みであることを示す。",
-        "evidence": ["spec:insert-only-transfer"]
-      },
-      {
-        "id": "insert-only-active-short-circuits",
-        "displayName": "作成済みなら差分比較しない",
+        "id": "insert-only-active-black-short-circuits",
+        "displayName": "作成済みなら差分判定しない",
         "polarity": "negative",
         "type": "invariant",
-        "text": "Insert-Only Transfer では Active Black が存在する場合、転送元の現在値が存在するか、または値が変更されているかにかかわらず、再評価SQLや差分比較を行わず no-op とする。",
+        "text": "Insert-Only Transfer で Active Black が存在する場合、転送元の現在値が存在するか、値が変更されているかにかかわらず reassessment と差分比較を行わず skipped / no_op とする。",
         "evidence": ["spec:insert-only-transfer"]
       },
       {
-        "id": "insert-only-no-update-delete-red",
-        "displayName": "更新・削除・赤伝を行わない",
+        "id": "insert-only-does-not-synchronize-after-first-transfer",
+        "displayName": "初回転送後は同期しない",
         "polarity": "negative",
         "type": "invariant",
-        "text": "Insert-Only Transfer は、作成済み転送先行に対して Black Update、Physical Delete、Red Transfer を行わない。転送元行が後から消えても転送先行と Active Black を維持する。",
+        "text": "Insert-Only Transfer は、作成済み転送先行に対して Red Transfer、Black Update、Physical Delete を行わない。転送元行が後から消えても転送先行と Active Black を維持する。",
         "evidence": ["spec:insert-only-transfer"]
       },
       {
         "id": "insert-only-absent-without-active-is-no-op",
-        "displayName": "未作成かつ転送元なしはno-op",
+        "displayName": "未作成かつ転送元なしは no-op",
         "polarity": "negative",
         "type": "invariant",
-        "text": "Insert-Only Transfer で転送元の現在行と Active Black が両方存在しない場合は no-op とし、後で転送元が現れた場合は新しく登録された Dirty Key によって再評価する。",
+        "text": "Insert-Only Transfer で転送元の現在行と Active Black が両方存在しない場合は、既存の skipped / no_op とする。後で転送元が現れた場合は新しい Dirty Key で再評価する。",
         "evidence": ["spec:insert-only-transfer"]
       },
       {
-        "id": "insert-only-destination-owned-key",
-        "displayName": "転送先がキーを採番してよい",
-        "polarity": "positive",
-        "type": "responsibility",
-        "text": "Insert-Only Transfer の転送先キーは転送元列から取得してもよいし、転送先または Black Insert SQL が採番してもよい。転送先が採番した場合は Black Insert の返却キーを正本として Active Black に記録する。",
-        "evidence": ["spec:insert-only-transfer"]
-      },
-      {
-        "id": "insert-only-no-lineage",
-        "displayName": "immutable Lineageを作成しない",
-        "polarity": "negative",
-        "type": "invariant",
-        "text": "Insert-Only Transfer は immutable transfer model の履歴表現ではないため、Black Insert 時に immutable Lineage を作成しない。",
-        "evidence": ["spec:insert-only-transfer"]
-      },
-      {
-        "id": "insert-only-no-schema-prescription",
-        "displayName": "キー変換表の物理構造を規定しない",
+        "id": "insert-only-keeps-existing-key-contract",
+        "displayName": "既存のキー契約を変えない",
         "polarity": "negative",
         "type": "boundary",
-        "text": "Insert-Only Transfer は顧客・店舗・請求者番号などのキー変換用途を支援するが、キー変換表の物理DDLや共通列構造を規定しない。",
+        "text": "Insert-Only Transfer は destination_key_mapping、mapping_definition、source SQL、stored Insert SQL、Destination の採番情報に特別な契約を追加しない。文字列・数値・複合キーなどの転送元 identity は既存の logical source key と mapping の契約で扱う。",
         "evidence": ["spec:insert-only-transfer"]
       },
       {
-        "id": "insert-only-no-id-reuse-resolution",
-        "displayName": "外部ID再利用を解決しない",
+        "id": "insert-only-mapping-table-is-application-owned",
+        "displayName": "変換表の物理構造はアプリケーション所有",
         "polarity": "negative",
         "type": "boundary",
-        "text": "転送元システムが同じ logical source identity を別の実体へ再利用した場合の統合・付け替えは Insert-Only Transfer の責務ではなく、既存対応を自動で別identityへ付け替えない。",
+        "text": "Insert-Only Transfer は顧客・店舗・請求者・請求書などの identity 変換表に利用できるが、その物理 DDL や後続 SQL からの参照方法を規定しない。",
         "evidence": ["spec:insert-only-transfer"]
       }
     ]
   },
   "internalLinks": [
     {
-      "from": "insert-only-active-means-materialized",
-      "to": "insert-only-active-short-circuits",
-      "kind": "supports",
-      "reason": "Active Black が作成済み対応を示すため、その後のDirty Keyでは差分判定が不要になる。",
+      "from": "insert-only-first-transfer-is-normal-black-insert",
+      "to": "insert-only-active-black-short-circuits",
+      "kind": "bounds",
+      "reason": "初回 materialization 後は Active Black の存在だけで再転送不要と判断できるため。",
       "evidence": ["spec:insert-only-transfer"]
     },
     {
-      "from": "insert-only-materializes-once",
-      "to": "insert-only-no-update-delete-red",
-      "kind": "constrains",
-      "reason": "一度作成した対応を転送元の後続変更へ同期しないモデルであるため。",
+      "from": "insert-only-active-black-short-circuits",
+      "to": "insert-only-does-not-synchronize-after-first-transfer",
+      "kind": "supports",
+      "reason": "差分判定へ進まないため、更新・削除・赤伝の後続処理も実行しない。",
       "evidence": ["spec:insert-only-transfer"]
     }
   ],
@@ -110,29 +78,35 @@
     {
       "to": "active-black",
       "kind": "uses",
-      "reason": "logical source identity の対応がすでに materialize 済みかを判定し、返却された destination key を保持するため。",
-      "supportedBy": ["insert-only-active-means-materialized", "insert-only-destination-owned-key"],
+      "reason": "初回転送済みかを判断し、2回目以降を no-op にするため。",
+      "supportedBy": ["insert-only-active-black-short-circuits"],
       "evidence": ["spec:insert-only-transfer"]
     },
     {
       "to": "black-transfer",
       "kind": "uses",
-      "reason": "未作成の対応を Black Insert として一度だけ追加するため。",
-      "supportedBy": ["insert-only-materializes-once"],
+      "reason": "初回 materialization は既存の Black Insert をそのまま利用するため。",
+      "supportedBy": ["insert-only-first-transfer-is-normal-black-insert"],
       "evidence": ["spec:insert-only-transfer"]
     },
     {
       "to": "dirty-key",
       "kind": "uses",
-      "reason": "Dirty Key をイベントではなく現在状態を確認するトリガとして受け取るため。",
-      "supportedBy": ["insert-only-active-short-circuits", "insert-only-absent-without-active-is-no-op"],
+      "reason": "Dirty Key を現在状態の再評価トリガとして受け取り、作成済みなら no-op とするため。",
+      "supportedBy": [
+        "insert-only-active-black-short-circuits",
+        "insert-only-absent-without-active-is-no-op"
+      ],
       "evidence": ["spec:insert-only-transfer"]
     },
     {
-      "to": "destination",
+      "to": "destination-link",
       "kind": "uses",
-      "reason": "転送先が所有するキーと保存モデルを利用して対応行を作成するため。",
-      "supportedBy": ["insert-only-decouples-identity", "insert-only-destination-owned-key"],
+      "reason": "初回転送では既存の mapping と destination key mapping をそのまま使用するため。",
+      "supportedBy": [
+        "insert-only-first-transfer-is-normal-black-insert",
+        "insert-only-keeps-existing-key-contract"
+      ],
       "evidence": ["spec:insert-only-transfer"]
     }
   ],
@@ -147,11 +121,11 @@
     "coverage": {
       "definition": {
         "status": "complete",
-        "reason": "一度だけmaterializeする意味、source変更・削除への非同期、destination-owned key、no-op境界を定義済み。"
+        "reason": "初回 Black Insert の再利用と Active Black 後の no-op という最小差分を定義済み。"
       },
       "relationships": {
         "status": "complete",
-        "reason": "Active Black、Black Transfer、Dirty Key、Destinationとの主要関係を定義済み。"
+        "reason": "Active Black、Black Transfer、Dirty Key、Destination Linkとの関係を定義済み。"
       }
     },
     "openIssues": []
