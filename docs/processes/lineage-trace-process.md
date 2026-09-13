@@ -10,9 +10,9 @@ Concept Spec は概念の意味、責務、非責務、不変条件を定義す�
 この文書は Concept Spec 本文を再定義しない。
 照会 SQL、画面、API、監査ログ実装は定義しない。
 
-`Lineage` は `immutable transfer model` の転送時に存在する概念である。
+`Lineage` は `immutable transfer model` の転送と `insert_only transfer model` の Black Insert の結果を追跡する概念である。
 この文書の trace 対象は、`Lineage` が存在する `destination table` の行に限る。
-`mutable transfer model` の追跡は、`Lineage` ではなく処理ログ、監査ログ、または別の追跡概念で扱う。
+`mutable transfer model` の処理結果は、[Dirty Key Processing](../concepts/dirty-key-processing/concept.json) により、Transfer Run / Transfer Setting / Destination Link / Work Item の文脈で追跡する。これは Dirty Key がどう処理されたかの追跡であり、更新・削除前の destination row の値履歴を保証するものではない。
 
 ## Process Map Rule Reference
 

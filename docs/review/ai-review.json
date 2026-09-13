@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "target": "@mk3008/velvet",
   "reviewKind": "concept-spec-review",
-  "status": "needs-review",
+  "status": "resolved",
   "findings": [
     {
       "id": "transfer-duplicate-control-candidate",
@@ -42,50 +42,125 @@
     },
     {
       "id": "transfer-work-item-lineage-candidate",
-      "status": "open",
+      "status": "resolved",
       "severity": "medium",
       "category": "relationship-clarity",
-      "title": "転送作業対象から Lineage への candidate 関係が判断材料とずれている",
-      "summary": "concept relationship では転送作業対象が Lineage に依存する可能性があるが、転送作業対象の判断材料は transfer model、転送元現在値、Active Black、重複判定として説明されている。Lineage を判断材料にするのか、Active Black や Dirty Key Processing 経由で十分なのかが未確定に見える。",
+      "title": "Work Item の判断材料ではない Lineage candidate 関係を解消",
+      "summary": "現行 Business Design では、Work Item は Dirty Key、Transfer Setting / Destination Link、転送元現在値、Active Black、transfer model と重複判定の文脈を運び、Transfer Target Decision が転送要否を決める。Lineage は転送結果の由来追跡であり、現在値・現在有効な黒・次の転送対象を決める責務を持たない。Process / DFD もこの入出力境界を示すため、Work Item -> Lineage の human-provided-candidate 関係を削除した。実装が参照していないことだけを根拠にはしていない。",
       "evidence": [
-        {
-          "path": "docs/concepts/concept-relationship.json",
-          "line": 441,
-          "note": "転送作業対象 -> Lineage が human-provided-candidate として記録されている。"
-        },
         {
           "path": "docs/concepts/work-item/concept.json",
-          "line": 103,
-          "note": "転送作業対象の判断材料は transfer model、転送元現在値の有無、Active Black の有無、重複判定として説明されている。"
-        }
-      ],
-      "recommendation": "Lineage を転送作業対象の判断材料にするなら、Work Item Spec と Process Map input に上げる。そうでないなら candidate 関係を削除するか、Active Black / Dirty Key Processing 側の責務として整理する。"
-    },
-    {
-      "id": "transfer-mutable-traceability-gap",
-      "status": "open",
-      "severity": "low",
-      "category": "coverage-gap",
-      "title": "mutable transfer model の追跡・監査が別概念として未確定",
-      "summary": "Lineage は immutable transfer model に限定され、mutable transfer model の追跡は処理ログ、監査ログ、または別の追跡概念として扱うと説明されている。一方で Transfer Execution は mutable の更新・削除を扱うため、mutable の追跡を将来扱うなら候補概念か明示的な out-of-scope が必要になる。",
-      "evidence": [
+          "line": 69,
+          "note": "判断に必要な文脈を規定。処理済み除外は Dirty Key Processing が提供する。"
+        },
         {
-          "path": "docs/processes/lineage-trace-process.md",
-          "line": 13,
-          "note": "Lineage trace is limited to immutable transfer model rows."
+          "path": "docs/concepts/transfer-target-decision/concept.json",
+          "line": 9,
+          "note": "転送対象判定の入力は現在値、有効黒伝、転送モデル、列の値評価。"
         },
         {
           "path": "docs/concepts/lineage/concept.json",
-          "line": 122,
-          "note": "mutable transfer model is treated as not having Lineage."
+          "line": 176,
+          "note": "Lineage は次の転送対象を決定せず、由来追跡を担う。"
         },
         {
-          "path": "docs/concepts/transfer-execution/concept.json",
-          "line": 73,
-          "note": "Transfer Execution handles Black Update Transfer and Physical Delete Transfer for mutable transfer model."
+          "path": "docs/processes/transfer-execution-process.md",
+          "line": 74,
+          "note": "Prepare / Apply Decision は Lineage を入力とせず、転送後に Lineage / Processing を記録する。"
+        },
+        {
+          "path": "docs/dfd/change-detection-dirty-key-registration.md",
+          "line": 97,
+          "note": "DFD は Lineage を転送成果物、Processing / Active Black / Work Item を作業状態として区別する。"
+        },
+        {
+          "path": "docs/concepts/concept-relationship.json",
+          "line": 409,
+          "note": "Work Item の既存関係を保持し、Lineage への candidate depends-on のみ削除。"
+        },
+        {
+          "path": "src/features/execute-transfer/queries.ts",
+          "line": 10,
+          "note": "処理済み除外は Processing、現在有効な黒は activeSql で取得する。"
+        },
+        {
+          "path": "src/features/execute-transfer/boundary.ts",
+          "line": 171,
+          "note": "Phase 1–5 の判断は現在行、Active Black、transfer model、比較と重複判定を使い、Lineage は転送成功時の出力。"
         }
       ],
-      "recommendation": "mutable の追跡をこの package の責務に含めるなら、候補 Concept または Process Map を追加する。含めないなら、Scope または Lineage/Transfer Execution 側で out-of-scope として明示する。"
+      "recommendation": "現行仕様に沿って resolved。Lineage を判断入力へ昇格する必要はなく、Concept の責務および Phase 1–5 runtime behavior は変更しない。"
+    },
+    {
+      "id": "transfer-mutable-traceability-gap",
+      "status": "resolved",
+      "severity": "low",
+      "category": "coverage-gap",
+      "title": "mutable の処理追跡は既存 Dirty Key Processing の責務で充足",
+      "summary": "Dirty Key Processing は Run / Setting / Destination Link / Work Item の文脈と追加・更新・赤伝・削除・無視の処理結果を記録し、監査・デバッグで Dirty Key がどう扱われたかを追跡する既存 Concept である。mutable の処理追跡に別概念は不要。Lineage を持たないことは destination row を直接 UPDATE / DELETE する現在仕様と整合する。Scope の run/work/current-state/history metadata 所有は、更新・削除前の destination row の全値履歴を保証する要求ではない。今回確認した現行仕様にその追加業務要求はなく、新しい audit log / mutable lineage や Human Decision は作らない。",
+      "evidence": [
+        {
+          "path": "docs/concepts/dirty-key-processing/concept.json",
+          "line": 159,
+          "note": "追加・更新・赤伝追加・削除・無視と実行文脈を記録し、監査・デバッグに使う既存責務。"
+        },
+        {
+          "path": "docs/concepts/lineage/concept.json",
+          "line": 294,
+          "note": "immutable / insert_only の由来追跡と mutable の非保持を明記。"
+        },
+        {
+          "path": "docs/scope/SYSTEM_SCOPE.md",
+          "line": 43,
+          "note": "実行 metadata は所有範囲。destination table の業務意味は外部責務。全値履歴の追加要件はない。"
+        },
+        {
+          "path": "docs/processes/transfer-execution-process.md",
+          "line": 166,
+          "note": "Run と Work Item の文脈から Processing を記録する。"
+        },
+        {
+          "path": "docs/processes/lineage-trace-process.md",
+          "line": 15,
+          "note": "既存 Processing による処理追跡を参照し、destination row 値履歴との違いを明示。insert_only の既存 Lineage 対象も反映。"
+        },
+        {
+          "path": "db/ddl/dirty_key_processing.sql",
+          "line": 1,
+          "note": "Run / Work Item / Setting / Link の FK と processing_result 制約により文脈と結果を保持。"
+        },
+        {
+          "path": "db/ddl/work_item.sql",
+          "line": 8,
+          "note": "評価時の destination key は Active Black 退役後も保持する。値スナップショット全体ではない。"
+        },
+        {
+          "path": "docs/decisions/0005-phase4-mutable-snapshots.md",
+          "line": 22,
+          "note": "mutable の処理結果と既存の原子性・失敗記録契約。失敗した work は rollback し、Run failure を別記録する。"
+        },
+        {
+          "path": "src/features/execute-transfer/boundary.ts",
+          "line": 380,
+          "note": "成功・skip 結果を文脈付きで保存。mutable は Lineage を追加しない。失敗時の Work Item / Processing は rollback 対象で、全試行の監査ログとは異なる。"
+        },
+        {
+          "path": "tests/features/execute-transfer/mutable.integration.test.ts",
+          "line": 145,
+          "note": "mutable lifecycle と混在・重複テストは insert / update / delete / no-op / duplicate_ignore、評価キー保持、Lineage 非生成を検証。"
+        },
+        {
+          "path": "tests/features/execute-transfer/execution.integration.test.ts",
+          "line": 79,
+          "note": "Phase 1 の成功時由来追跡と失敗時の独立 Run 記録を検証。"
+        },
+        {
+          "path": "tests/features/execute-transfer/insert-only.integration.test.ts",
+          "line": 145,
+          "note": "Phase 5 の既存 Black Insert / Lineage と後続 no-op 契約を検証。"
+        }
+      ],
+      "recommendation": "既存の処理追跡責務に照らして resolved。Lineage Trace Process の曖昧な「別の追跡概念」を Dirty Key Processing への参照に置き換える。処理追跡を destination row の値履歴や全失敗試行の永続化保証へ拡張しない。"
     }
   ]
 }

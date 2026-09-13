@@ -448,13 +448,6 @@
       "reason": "Dirty Key は変更検知履歴であり、Work Item は転送対象判定へ渡される固定化された作業対象である。"
     },
     {
-      "from": "work-item",
-      "to": "lineage",
-      "kind": "depends-on",
-      "certainty": "human-provided-candidate",
-      "reason": "Work Item は重複、再転送、削除相当の判断で Lineage の影響を受けることがある。"
-    },
-    {
       "from": "duplicate-control",
       "to": "transfer-target-decision",
       "kind": "uses",
