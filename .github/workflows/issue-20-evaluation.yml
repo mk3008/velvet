@@ -1,0 +1,43 @@
+name: Issue 20 execution evaluation
+on:
+  pull_request:
+    paths:
+      - 'experiments/issue-20/**'
+      - '.github/workflows/issue-20-evaluation.yml'
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: velvet
+          POSTGRES_PASSWORD: velvet
+          POSTGRES_DB: velvet_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      ASHIBA_DB_URL: postgres://velvet:velvet@localhost:5432/velvet_test
+      VELVET_BENCH_OUTPUT: tmp/issue-20-results.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: mkdir -p tmp && node experiments/issue-20/benchmark.mjs > tmp/issue-20-benchmark.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue-20-evaluation
+          path: tmp/issue-20-*
