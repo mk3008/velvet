@@ -412,15 +412,7 @@ async function executeRowTransfer({
               withLineage: false,
             });
           } else {
-            await query(queries.releaseActiveReferencesSql, {
-              active: active.active_black_id,
-              link: common.link,
-            });
-            const removed = await query(queries.activeDeleteSql, {
-              active: active.active_black_id,
-              link: common.link,
-            });
-            if (removed.length !== 1) throw new Error('Active Black retirement failed');
+            await retireRowActive(query, active.active_black_id, common.link);
           }
         }
       }
@@ -458,15 +450,7 @@ async function executeRowTransfer({
             withLineage: true,
           });
         } else {
-          await query(queries.releaseActiveReferencesSql, {
-            active: active.active_black_id,
-            link: common.link,
-          });
-          const removed = await query(queries.activeDeleteSql, {
-            active: active.active_black_id,
-            link: common.link,
-          });
-          if (removed.length !== 1) throw new Error('Active Black retirement failed');
+          await retireRowActive(query, active.active_black_id, common.link);
           await query(queries.redLineageSql, redFields);
         }
       }
@@ -527,6 +511,17 @@ async function executeRowTransfer({
     if (!processingRecorded) await query(queries.processingSql, { ...resultFields, work: workId });
   }
   return { inserted, skipped };
+}
+
+/** Retires one Active Black in row mode; callers retain model and Lineage ordering. */
+async function retireRowActive(
+  query: (statement: Sql, params: Record<string, unknown>) => Promise<Row[]>,
+  activeId: unknown,
+  linkId: unknown,
+): Promise<void> {
+  await query(queries.releaseActiveReferencesSql, { active: activeId, link: linkId });
+  const removed = await query(queries.activeDeleteSql, { active: activeId, link: linkId });
+  if (removed.length !== 1) throw new Error('Active Black retirement failed');
 }
 
 function storedArguments(text: string, params: Record<string, unknown>): [string, unknown[]] {

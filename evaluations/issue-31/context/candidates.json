@@ -1,13 +1,7 @@
 {
-  "schemaVersion": 1,
   "baseline": "4b895265d8262fafd7a95221a344a7de8c93841e",
-  "scope": "Issue 31 final extension; candidate dispositions are separate from implementation/verification status.",
-  "lastEvidenceEvent": "PR32:5664632667",
   "candidates": [
     {
-      "id": "model-fragmentation",
-      "status": "REJECT",
-      "problem": "Model-specific edits are interleaved with shared row work.",
       "contract": "Separate full mutable/immutable/insert-only lifecycles and separate metadata owners; top-level Run remains common.",
       "evidence": [
         "docs/decisions/0005-phase4-mutable-snapshots.md",
@@ -15,51 +9,88 @@
         "src/features/execute-transfer/boundary.ts",
         "8bb20a223bdf8a66c2cd8d6a4830dbfb4791c647"
       ],
-      "sufficiency": "Current shared first insertion, duplicate and metadata obligations make this particular broad ownership split costlier without a present independent lifecycle requirement.",
+      "id": "model-fragmentation",
+      "implementationStatus": "not_selected",
       "missingContext": [],
-      "unmeasured": "No implementation or developer-time benchmark; not needed to identify this candidate's distributed shared obligations.",
+      "problem": "Model-specific edits are interleaved with shared row work.",
       "reopenCondition": "An approved model change makes work/admission/metadata semantics independently necessary, or a concrete revised contract removes distributed shared ownership. A narrow common-orchestrator seam is a different candidate.",
-      "implementationStatus": "not_selected"
+      "status": "REJECT",
+      "sufficiency": "Current shared first insertion, duplicate and metadata obligations make this particular broad ownership split costlier without a present independent lifecycle requirement.",
+      "unmeasured": "No implementation or developer-time benchmark; not needed to identify this candidate's distributed shared obligations."
     },
     {
-      "id": "model-operation-seam",
-      "status": "DEFER",
-      "problem": "Local mutable/immutable stored-operation validation changes may require inspecting unrelated row work.",
-      "contract": "A2: one internal module for mutable UPDATE/DELETE and immutable Red execution/receipt validation, caller owns no-op, comparison, Work, retirement, Lineage, common Black, Processing and Run. B2 variant: only mutable DML in a private same-file function. Neither is broad fragmentation.",
+      "contract": "A2: one internal module containing mutable UPDATE/DELETE and immutable Red destination execution/receipt validation. Caller retains comparison, Work, retirement, Lineage, common Black, Processing, counts and Run.",
       "evidence": [
         "docs/decisions/0005-phase4-mutable-snapshots.md",
         "src/features/execute-transfer/boundary.ts",
         "tests/features/execute-transfer/mutable.integration.test.ts",
         "fbfe73e5cd493b893b39d4a60c68c70fae28870c"
       ],
-      "sufficiency": "Enough to specify behavior and a feasible comparison; not enough to decide net maintenance benefit of either seam. Their unchanged caller guards/flags and new interface may offset local focus.",
+      "id": "model-operation-module",
+      "implementationStatus": "not_started",
       "missingContext": [
         {
-          "id": "M1",
-          "state": "comparison_not_performed",
-          "question": "For the stated seam, does one real locator or malformed-return change/reproduction remove unrelated implementation/fixture obligations without expanding the interface or moving prerequisite timing?",
           "attempt": "Retrieved current body, model history, stable-identity Decision and malformed-return/fault tests. These establish the task and constraints but compare neither proposed seam against keep.",
+          "id": "M1-module",
+          "question": "For the A2 module seam, does one real locator or malformed-return change/reproduction remove unrelated implementation/fixture obligations without expanding the interface or moving prerequisite timing?",
           "smallestNextObservation": "Review-only interface/body sketch and replay of one existing mutable locator/returned-key task on B2 and that exact candidate; record touched units, inputs, caller facts, fixture capabilities, ordered effects and unchanged gates.",
+          "state": "comparison_not_performed",
           "supplier": "Implementation/review agent; no new business decision required."
         }
       ],
-      "reopenCondition": "New evidence specifically addresses M1: a completed scoped comparison, or a concrete mutable/Red validation change or incident demonstrating unrelated caller/fixture burden. Path/keyword match alone is insufficient; new task evidence reopens evaluation, not automatic ADOPT.",
+      "problem": "Local mutable/immutable stored-operation validation changes may require inspecting unrelated row work.",
+      "remainingAfterReopen": "Safety/meaning checks remain; historical correctness coverage or a green CI alone does not answer M1-module.",
+      "reopenCondition": "New evidence specifically addresses M1-module: a completed scoped comparison, or a concrete mutable/Red validation change or incident demonstrating unrelated caller/fixture burden. Path/keyword match alone is insufficient; new task evidence reopens evaluation, not automatic ADOPT.",
+      "seenEvidence": [
+        "B2-source-and-test-inventory",
+        "fbfe73e5cd493b893b39d4a60c68c70fae28870c"
+      ],
+      "status": "DEFER",
+      "sufficiency": "Enough to specify behavior and a feasible comparison; not enough to decide net maintenance benefit of either seam. Their unchanged caller guards/flags and new interface may offset local focus.",
       "watchScope": [
         "src/features/execute-transfer/",
         "tests/features/execute-transfer/",
         "docs/decisions/0005-phase4-mutable-snapshots.md"
       ],
+      "variant": "A2 internal module"
+    },
+    {
+      "contract": "B2: private same-file mutable UPDATE/DELETE preparation/execution/receipt function; caller retains pre-reassessment identity guard, Work, retirement, Processing, counts and Run. No internal export assumed; independent direct tests may require an extra interface.",
+      "evidence": [
+        "docs/decisions/0005-phase4-mutable-snapshots.md",
+        "src/features/execute-transfer/boundary.ts",
+        "tests/features/execute-transfer/mutable.integration.test.ts",
+        "fbfe73e5cd493b893b39d4a60c68c70fae28870c"
+      ],
+      "id": "mutable-dml-function",
+      "implementationStatus": "not_started",
+      "missingContext": [
+        {
+          "attempt": "Retrieved current body, model history, stable-identity Decision and malformed-return/fault tests. These establish the task and constraints but compare neither proposed seam against keep.",
+          "id": "M1-mutable",
+          "question": "For the B2 same-file mutable function seam, does one real locator or malformed-return change/reproduction remove unrelated implementation/fixture obligations without expanding the interface or moving prerequisite timing?",
+          "smallestNextObservation": "Review-only interface/body sketch and replay of one existing mutable locator/returned-key task on B2 and that exact candidate; record touched units, inputs, caller facts, fixture capabilities, ordered effects and unchanged gates.",
+          "state": "comparison_not_performed",
+          "supplier": "Implementation/review agent; no new business decision required."
+        }
+      ],
+      "problem": "Local mutable/immutable stored-operation validation changes may require inspecting unrelated row work.",
+      "remainingAfterReopen": "Safety/meaning checks remain; historical correctness coverage or a green CI alone does not answer M1-mutable.",
+      "reopenCondition": "New evidence specifically addresses M1-mutable: a completed scoped comparison, or a concrete mutable/Red validation change or incident demonstrating unrelated caller/fixture burden. Path/keyword match alone is insufficient; new task evidence reopens evaluation, not automatic ADOPT.",
       "seenEvidence": [
         "B2-source-and-test-inventory",
         "fbfe73e5cd493b893b39d4a60c68c70fae28870c"
       ],
-      "implementationStatus": "not_started",
-      "remainingAfterReopen": "Safety/meaning checks remain; historical correctness coverage or a green CI alone does not answer M1."
+      "status": "DEFER",
+      "sufficiency": "Enough to specify behavior and a feasible comparison; not enough to decide net maintenance benefit of either seam. Their unchanged caller guards/flags and new interface may offset local focus.",
+      "watchScope": [
+        "src/features/execute-transfer/",
+        "tests/features/execute-transfer/",
+        "docs/decisions/0005-phase4-mutable-snapshots.md"
+      ],
+      "variant": "B2 same-file function"
     },
     {
-      "id": "row-retirement-helper",
-      "status": "ADOPT",
-      "problem": "Two row-mode branches maintain the same release/delete/exactly-one retirement obligation.",
       "contract": "Private same-file retireRowActive(query, activeId, linkId); only fixed release SQL, delete SQL, exactly-one result. Caller retains routine branch and Lineage; no transactions or model decisions.",
       "evidence": [
         "src/features/execute-transfer/boundary.ts",
@@ -67,26 +98,34 @@
         "db/runtime/execute-transfer-metadata.sql",
         "docs/decisions/0010-bounded-execution-candidate.md"
       ],
-      "sufficiency": "The identical FK-sensitive protocol has two source owners; a three-input helper replaces one duplicate without changing SQL/ordering. Source-level benefit and cost support adoption, separately from gates.",
-      "missingContext": [],
-      "reopenCondition": "The two call sites need different retirement order/cardinality, helper inputs grow into mutable context, or traces/regressions differ.",
+      "id": "row-retirement-helper",
       "implementationStatus": "planned",
+      "missingContext": [],
+      "problem": "Two row-mode branches maintain the same release/delete/exactly-one retirement obligation.",
+      "reopenCondition": "The two call sites need different retirement order/cardinality, helper inputs grow into mutable context, or traces/regressions differ.",
+      "status": "ADOPT",
+      "sufficiency": "The identical FK-sensitive protocol has two source owners; a three-input helper replaces one duplicate without changing SQL/ordering. Source-level benefit and cost support adoption, separately from gates.",
       "verificationStatus": "not_run_on_candidate"
     },
     {
-      "id": "context-disposition-rule",
-      "status": "ADOPT",
-      "problem": "Rule v2 groups speculative evidence and sufficient cost objections into Keep, losing the distinction exposed by the model question.",
       "contract": "One canonical rule for ADOPT/REJECT/DEFER, candidate-specific retrieval and missing/reopen evidence, short existing AGENTS/Decision pointers.",
       "evidence": [
         "evaluations/issue-31/rule.md",
         "PR32:5664424824",
         "PR32:5664632667"
       ],
-      "sufficiency": "Actual rule text and prior insufficient candidate comparison establish the ambiguity; no runtime metric is required to distinguish knowledge states.",
+      "id": "context-disposition-rule",
+      "implementationStatus": "planned",
       "missingContext": [],
+      "problem": "Rule v2 groups speculative evidence and sufficient cost objections into Keep, losing the distinction exposed by the model question.",
       "reopenCondition": "Normal use produces gratuitous records, fails to distinguish labels or treats a touched path as sufficient new evidence.",
-      "implementationStatus": "planned"
+      "status": "ADOPT",
+      "sufficiency": "Actual rule text and prior insufficient candidate comparison establish the ambiguity; no runtime metric is required to distinguish knowledge states."
     }
-  ]
+  ],
+  "lastEvidenceEvent": "PR32:5664632667",
+  "schemaVersion": 2,
+  "scope": "Issue 31 final extension; candidate dispositions are separate from implementation/verification status.",
+  "recordRevision": "split variant scopes after independent reopen critique",
+  "assessmentState": "Current source-backed records; simulated queue is only in reopen-ledger.json."
 }
