@@ -13,45 +13,56 @@ cost also need to be explicit. [Evaluation](../../evaluations/issue-33/README.md
 retains the frozen protocol, nine context cases, two independent applications,
 four source-comprehension runs, source/scripted comparisons and limits.
 
-## Procedure
+## Current structural judgment: KISS for maintenance
 
-Keep v3's candidate-specific context collection, ten-axis quality/cost comparison,
-invariant ownership and semantic reopening. Apply these distinctions using short
-ordinary reasoning, not a mandatory record/template or score:
+This section is the current ordinary-task rule. It consolidates Decision 0015's
+context/invariant principles and this decision's value/timing/evidence distinctions;
+the linked v1-v4 experiment rules remain frozen historical evidence. The
+[maintainer requirements](../../evaluations/issue-33/maintainer-requirements.md)
+supply observations and hypotheses, not a requirement to improve every activity.
 
-1. **Value/disposition:** ADOPT when the concrete maintenance benefit exceeds
-   structure, inspection and verification costs; REJECT when the scoped comparison
-   favors keep; DEFER for a named decision-changing unknown. Understanding code,
-   SQL, tests and design is a maintenance task too. For a navigation claim, walk
-   through the actual before/after task: which details can remain unopened, which
-   caller facts remain and which hops/arguments are added. A new name alone is
-   not evidence. A source walkthrough can suffice; agent studies are optional.
-2. **Evidence effort:** establish meaning, ordering, side effects and rollback
-   scope first. For a local reversible candidate with an explicit small seam and
-   strong relevant verification, a source comparison or bounded branch trial may
-   cost less than further proof of benefit. State the hypothesis and stop/revert
-   condition. Wider interfaces, uncertain effects, weak coverage or expensive
-   reversal require the comparison that can settle those risks. A same-file
-   recovery change may need more evidence than a simple new module. Source
-   rollback does not undo deployed effects. Do not demand a benchmark or replay
-   study by default, or trade safety for cheap experimentation.
-3. **Execution:** decide from current scope, urgency, diff/causal isolation and
-   feasible gates. A justified change may be ADOPT + not_started during an
-   unrelated urgent repair or release freeze. Dedicated cleanup/stabilization
-   may make it timely; the phase name itself is not authorization. Ordinary
-   feature work can include a relevant bounded improvement. In urgent work,
-   include only structural changes necessary for the repair/verification.
-4. **State:** keep a review-only trial distinct from runtime implementation and
-   verification. An existing trial needs evaluation, not reconstruction. REJECT
-   has no planned execution; waiting belongs to a chosen but untimely action.
-   A specified invariant with pending tests can leave an established-value ADOPT
-   blocked on readiness; an undefined effect/interface that can reverse value
-   requires DEFER. On a timing trigger, reuse current evidence; reassess changed
-   code/assumptions. Preserve existing authorization and PostgreSQL/SQL gates.
+KISS means making a safe maintenance judgment, change and verification simpler.
+For the same requirements, avoid unnecessary concepts, boundaries, indirection,
+search alternatives and verification obligations. File/function/LOC counts are
+cost clues, not the objective. Necessary complexity stays explicit.
 
-These are supported distinctions, not a fixed incident/feature/release lookup
-table. Both agents identified wording ambiguities; the above clarifies them.
-That final wording was reviewed, not independently re-scored as another experiment.
+- Start with a concrete maintenance question and its authoritative meaning.
+  Consider the relevant task: comprehension, feature fit, impact, incident diagnosis,
+  test selection, review, recovery or reuse of a prior decision. Retrieve existing
+  context first; state the claim to settle, necessary pre/postconditions, effects,
+  invariant/recovery owner and applicable evidence. Stop when these support that
+  claim; disclose unresolved dependencies rather than implying uninspected guarantees.
+- Compare keep with a plausible change. Explain what no longer needs to be considered
+  together, which check becomes local, or which ambiguous search becomes direct.
+  Moving text, naming alone or shorter appearance is insufficient. Count remaining
+  caller facts, hidden dependencies, new interfaces/hops, duplicated meaning and
+  verification/maintenance costs. Use current Astra tooling and an actual walkthrough;
+  preserve human-readable why/invariant explanations and a causally clear diff.
+  Improved navigation can suffice without fewer fixtures, but is not proof of fewer
+  semantic obligations. Different tools may change the balance.
+- Match evidence effort to downside and reversibility. A concrete source walkthrough
+  and applicable existing checks can suffice for a low-risk local change; no routine
+  benchmark, agent tournament or exhaustive scorecard is required. For wider or
+  uncertain effects, collect only the observation that could change the decision.
+  Keep semantic confidence and existing PostgreSQL/SQL/Alder gates; source revert
+  cannot undo deployed effects. Judge the actual candidate diff, not its intended name.
+- Separate value from timing and readiness. ADOPT requires supported net benefit;
+  REJECT favors keep; DEFER names a decision-changing unknown. Cheap reversal alone
+  is not benefit. Implement an ADOPT now when authorized, causally isolated and gates
+  feasible; use ADOPT + not_started with a concrete trigger when value is established
+  but timing/scope prevents execution. Unproven value is not ADOPT merely because a
+  wider architecture seems promising. Safety readiness can block an otherwise valued
+  change; an unresolved effect that could reverse value needs further assessment.
+- Record the choice, main reason/cost and any missing evidence or reopen trigger in
+  short prose. Reuse unchanged evidence; revisit changed assumptions. Stop at a
+  supported scoped result. No recurring audit, mandatory template, prescribed file
+  shape or decomposition direction follows. Business meaning, external consequences
+  and scope authorization retain their existing ownership.
+
+The ten quality axes in earlier experiments are prompts available when useful,
+not a fixed checklist for every task. This consolidated wording has a bounded
+[current-code application](../../evaluations/issue-33/kiss-application.md), not a
+new independent agent-performance result.
 
 ## Scoped implementation and tradeoff
 

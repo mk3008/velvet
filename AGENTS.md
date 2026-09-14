@@ -60,16 +60,11 @@ The owner does not prescribe a named architecture, recursive feature framework, 
 
 The standing human implementation requirements are Alder review, Raw SQL Rules, Serene as the standard SQL construction/binding path, and PostgreSQL as the target runtime/database. Other cross-cutting choices (including ORM use, adapter shape, CLI/Web surface and coding style) are AI-owned, based on current requirements and concrete benefit; there is no separate technology exception policy.
 
-After feature work, inspect newly observed maintenance costs or reopened
-structural concerns using [Decision 0015](docs/decisions/0015-observable-refactoring-boundaries.md)
-and its linked rule. Compare relevant quality benefits with added structure and
-inspection costs; preserve invariant/recovery ownership. Use the rule's ADOPT/REJECT/DEFER distinction and record missing evidence for concrete
-unresolved candidates. On relevant new task evidence, consult the linked candidate
-record's reopen question and avoid repeating unchanged evidence; file size alone is
-insufficient. No recurring audit is required.
-
-For structural decisions, also apply [Decision 0016](docs/decisions/0016-proportional-refactoring-decisions.md):
-separate value, execution timing and proportionate evidence effort. A concrete
-navigation walkthrough may suffice for a reversible local trial; names alone do
-not. Preserve safety gates and causal isolation, and use its linked current A2/B2
-records rather than treating Issue 31's historical DEFER labels as current.
+After feature work or on a reopened structural concern, apply the current short
+judgment rule in [Decision 0016](docs/decisions/0016-proportional-refactoring-decisions.md).
+KISS concerns simpler safe maintenance, not file/function counts. Compare concrete
+benefit with added reasoning and verification costs; separate value, execution
+timing and evidence effort. Preserve invariant/recovery ownership and existing gates.
+Decision 0015 and the linked experiment rules retain historical evidence; they do
+not add a second checklist. Reuse current candidate records on relevant new evidence;
+no recurring structural audit is required.

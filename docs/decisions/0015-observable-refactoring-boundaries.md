@@ -142,6 +142,7 @@ scheduled watcher. No new audit framework, mandatory exhaustive record or Alder 
 
 ## Subsequent proportional decision study
 
-[Decision 0016](0016-proportional-refactoring-decisions.md) refines evidence effort
-and execution timing. Its current A2/B2 record supersedes those historical labels
+[Decision 0016](0016-proportional-refactoring-decisions.md) now contains the
+consolidated current structural judgment rule, including KISS, evidence effort
+and execution timing. The procedures above describe their historical evaluations. Its current A2/B2 record supersedes those historical labels
 above; Issue 31 artifacts remain unchanged as the evidence of their own baseline.

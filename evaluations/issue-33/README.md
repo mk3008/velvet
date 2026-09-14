@@ -161,3 +161,11 @@ It separates observed reading behavior, current tool capabilities and untested
 requirements across investigation, change, verification, recovery and authority
 tracking. Three ranked candidate directions are proposals only; no further layout
 or agent comparison was performed. Existing dispositions and rules are unchanged.
+
+## Follow-up: consolidated KISS rule applied to current code
+
+[The current application](kiss-application.md) follows comment 5672110986: Decision
+0016 consolidates the ordinary-task rule, with maintenance simplicity rather than
+file/function count as KISS. Existing runtime seams are retained after comparison;
+a small feature-local evidence route is implemented. The report records the concrete
+walkthroughs, costs and reopen conditions. No new runtime or broad experiment follows.
