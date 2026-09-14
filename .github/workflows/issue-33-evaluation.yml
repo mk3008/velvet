@@ -1,0 +1,41 @@
+name: Issue 33 refactoring evidence
+on:
+  pull_request:
+    paths:
+      - 'evaluations/issue-33/**'
+      - '.github/workflows/issue-33-evaluation.yml'
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node evaluations/issue-33/compare.mjs > probe-measurements.json
+      - run: diff -u evaluations/issue-33/probe-measurements.json probe-measurements.json
+      - run: node evaluations/issue-33/summarize.mjs > navigation-measurements.json
+      - run: diff -u evaluations/issue-33/navigation-measurements.json navigation-measurements.json
+      - run: node evaluations/issue-33/overview/build-fixtures.mjs --check
+      - run: node evaluations/issue-33/overview/parity.mjs --typecheck > overview-parity.json
+      - run: diff -u evaluations/issue-33/overview/parity.json overview-parity.json
+      - run: node evaluations/issue-33/overview/summarize.mjs > overview-measurements.json
+      - run: diff -u evaluations/issue-33/overview/measurements.json overview-measurements.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: issue-33-refactoring-evidence
+          path: |
+            probe-measurements.json
+            navigation-measurements.json
+            overview-parity.json
+            overview-measurements.json

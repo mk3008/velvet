@@ -1,0 +1,351 @@
+{
+  "baseline": "9f554991ab3068756c6b05a483082ad3cda925ef",
+  "sourceSha256": {
+    "baseline": "c0590b63d6d511f44a5a22317c280454202f1c2666a23713854d716ae439df0f",
+    "candidate": "2bfb42e479438d00717560b98753c6bb6b50b4abe919fdb05167cce396431317"
+  },
+  "evidence": {
+    "fixtureMatchesBaseline": true,
+    "runtimeMatchesCandidate": true,
+    "reconstructedBoundaryTokensIdentical": true,
+    "extractedBodyTokensIdentical": true,
+    "sqlAndBinderUnchanged": true,
+    "helperInputs": 5,
+    "helperCalls": 1,
+    "publicExportsAdded": 0,
+    "productionFilesAdded": 0
+  },
+  "cases": 29,
+  "executions": 58,
+  "traces": [
+    {
+      "kind": "update",
+      "fault": "none",
+      "events": [
+        {
+          "text": "UPDATE destination SET value = $1 WHERE key = $2 RETURNING id",
+          "values": [
+            "new",
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "success"
+    },
+    {
+      "kind": "update",
+      "fault": "empty-sql",
+      "events": [],
+      "outcome": "Destination Link has no stored Black Update SQL"
+    },
+    {
+      "kind": "update",
+      "fault": "collision",
+      "events": [],
+      "outcome": "Mapping collides with reserved destination key parameter"
+    },
+    {
+      "kind": "update",
+      "fault": "missing-active-bind",
+      "events": [],
+      "outcome": "Black Update SQL must bind the Active Black destination key"
+    },
+    {
+      "kind": "update",
+      "fault": "missing-value",
+      "events": [],
+      "outcome": "Missing parameter: absent"
+    },
+    {
+      "kind": "update",
+      "fault": "zero-rows",
+      "events": [
+        {
+          "text": "UPDATE destination SET value = $1 WHERE key = $2 RETURNING id",
+          "values": [
+            "new",
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Black Update must return exactly one destination row"
+    },
+    {
+      "kind": "update",
+      "fault": "multiple-rows",
+      "events": [
+        {
+          "text": "UPDATE destination SET value = $1 WHERE key = $2 RETURNING id",
+          "values": [
+            "new",
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Black Update must return exactly one destination row"
+    },
+    {
+      "kind": "update",
+      "fault": "zero-count",
+      "events": [
+        {
+          "text": "UPDATE destination SET value = $1 WHERE key = $2 RETURNING id",
+          "values": [
+            "new",
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Black Update must return exactly one destination row"
+    },
+    {
+      "kind": "update",
+      "fault": "missing-count",
+      "events": [
+        {
+          "text": "UPDATE destination SET value = $1 WHERE key = $2 RETURNING id",
+          "values": [
+            "new",
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Black Update must return exactly one destination row"
+    },
+    {
+      "kind": "update",
+      "fault": "missing-rows",
+      "events": [
+        {
+          "text": "UPDATE destination SET value = $1 WHERE key = $2 RETURNING id",
+          "values": [
+            "new",
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Black Update must return exactly one destination row"
+    },
+    {
+      "kind": "update",
+      "fault": "wrong-key",
+      "events": [
+        {
+          "text": "UPDATE destination SET value = $1 WHERE key = $2 RETURNING id",
+          "values": [
+            "new",
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Black Update destination key does not match Active Black"
+    },
+    {
+      "kind": "update",
+      "fault": "missing-key",
+      "events": [
+        {
+          "text": "UPDATE destination SET value = $1 WHERE key = $2 RETURNING id",
+          "values": [
+            "new",
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Missing key column: id"
+    },
+    {
+      "kind": "update",
+      "fault": "null-key",
+      "events": [
+        {
+          "text": "UPDATE destination SET value = $1 WHERE key = $2 RETURNING id",
+          "values": [
+            "new",
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Missing key column: id"
+    },
+    {
+      "kind": "update",
+      "fault": "query-throw",
+      "events": [
+        {
+          "text": "UPDATE destination SET value = $1 WHERE key = $2 RETURNING id",
+          "values": [
+            "new",
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "injected query error"
+    },
+    {
+      "kind": "update",
+      "fault": "unused-mapping",
+      "events": [],
+      "outcome": "Stored Update SQL does not consume mapping"
+    },
+    {
+      "kind": "delete",
+      "fault": "none",
+      "events": [
+        {
+          "text": "DELETE FROM destination WHERE key = $1 RETURNING id",
+          "values": [
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "success"
+    },
+    {
+      "kind": "delete",
+      "fault": "empty-sql",
+      "events": [],
+      "outcome": "Destination Link has no stored Physical Delete SQL"
+    },
+    {
+      "kind": "delete",
+      "fault": "collision",
+      "events": [],
+      "outcome": "Mapping collides with reserved destination key parameter"
+    },
+    {
+      "kind": "delete",
+      "fault": "missing-active-bind",
+      "events": [],
+      "outcome": "Physical Delete SQL must bind the Active Black destination key"
+    },
+    {
+      "kind": "delete",
+      "fault": "missing-value",
+      "events": [],
+      "outcome": "Missing parameter: absent"
+    },
+    {
+      "kind": "delete",
+      "fault": "zero-rows",
+      "events": [
+        {
+          "text": "DELETE FROM destination WHERE key = $1 RETURNING id",
+          "values": [
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Physical Delete must return exactly one destination row"
+    },
+    {
+      "kind": "delete",
+      "fault": "multiple-rows",
+      "events": [
+        {
+          "text": "DELETE FROM destination WHERE key = $1 RETURNING id",
+          "values": [
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Physical Delete must return exactly one destination row"
+    },
+    {
+      "kind": "delete",
+      "fault": "zero-count",
+      "events": [
+        {
+          "text": "DELETE FROM destination WHERE key = $1 RETURNING id",
+          "values": [
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Physical Delete must return exactly one destination row"
+    },
+    {
+      "kind": "delete",
+      "fault": "missing-count",
+      "events": [
+        {
+          "text": "DELETE FROM destination WHERE key = $1 RETURNING id",
+          "values": [
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Physical Delete must return exactly one destination row"
+    },
+    {
+      "kind": "delete",
+      "fault": "missing-rows",
+      "events": [
+        {
+          "text": "DELETE FROM destination WHERE key = $1 RETURNING id",
+          "values": [
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Physical Delete must return exactly one destination row"
+    },
+    {
+      "kind": "delete",
+      "fault": "wrong-key",
+      "events": [
+        {
+          "text": "DELETE FROM destination WHERE key = $1 RETURNING id",
+          "values": [
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Physical Delete destination key does not match Active Black"
+    },
+    {
+      "kind": "delete",
+      "fault": "missing-key",
+      "events": [
+        {
+          "text": "DELETE FROM destination WHERE key = $1 RETURNING id",
+          "values": [
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Missing key column: id"
+    },
+    {
+      "kind": "delete",
+      "fault": "null-key",
+      "events": [
+        {
+          "text": "DELETE FROM destination WHERE key = $1 RETURNING id",
+          "values": [
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "Missing key column: id"
+    },
+    {
+      "kind": "delete",
+      "fault": "query-throw",
+      "events": [
+        {
+          "text": "DELETE FROM destination WHERE key = $1 RETURNING id",
+          "values": [
+            "{\"id\":41}"
+          ]
+        }
+      ],
+      "outcome": "injected query error"
+    }
+  ],
+  "limits": [
+    "Source parity preserves existing caller guard, Work and retirement order; it does not establish baseline correctness.",
+    "Scripted DML responses exercise real binding and receipt checks, not PostgreSQL execution, rollback, FK or locking semantics.",
+    "Runtime adoption still requires full Verify and PostgreSQL CI; no speed, developer-time or failure-rate improvement measured."
+  ]
+}

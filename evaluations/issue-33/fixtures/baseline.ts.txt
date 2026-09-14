@@ -380,7 +380,31 @@ async function executeRowTransfer({
     let processingRecorded = routine && !!skip;
     if (!skip) {
       if (active && mutable) {
-        await executeMutableDestination(client, link, row, mapped, active);
+        const operation = row ? 'Black Update' : 'Physical Delete';
+        const statement = row
+          ? link.generated_update_transfer_sql_body
+          : link.generated_delete_transfer_sql_body;
+        if (!statement.trim()) throw new Error(`Destination Link has no stored ${operation} SQL`);
+        if (Object.hasOwn(mapped, 'velvet_active_destination_key'))
+          throw new Error('Mapping collides with reserved destination key parameter');
+        const prepared = bindStoredSql(statement, {
+          ...mapped,
+          velvet_active_destination_key: keyText(active.destination_key_json),
+        });
+        if (!prepared.names.includes('velvet_active_destination_key'))
+          throw new Error(`${operation} SQL must bind the Active Black destination key`);
+        if (row && Object.keys(mapped).some((name) => !prepared.names.includes(name)))
+          throw new Error('Stored Update SQL does not consume mapping');
+        const result = await client.query(prepared.text, prepared.values);
+        if (result.rows?.length !== 1 || result.rowCount !== 1)
+          throw new Error(`${operation} must return exactly one destination row`);
+        if (
+          !isDeepStrictEqual(
+            projection(result.rows[0], link.destination_key_columns),
+            active.destination_key_json,
+          )
+        )
+          throw new Error(`${operation} destination key does not match Active Black`);
         if (!row) {
           if (routine) {
             await query(queries.retireMetadataSql, {
@@ -487,40 +511,6 @@ async function executeRowTransfer({
     if (!processingRecorded) await query(queries.processingSql, { ...resultFields, work: workId });
   }
   return { inserted, skipped };
-}
-
-async function executeMutableDestination(
-  client: TransferExecutionClient,
-  link: Row,
-  row: Row | undefined,
-  mapped: Row,
-  active: Row,
-): Promise<void> {
-  const operation = row ? 'Black Update' : 'Physical Delete';
-  const statement = row
-    ? link.generated_update_transfer_sql_body
-    : link.generated_delete_transfer_sql_body;
-  if (!statement.trim()) throw new Error(`Destination Link has no stored ${operation} SQL`);
-  if (Object.hasOwn(mapped, 'velvet_active_destination_key'))
-    throw new Error('Mapping collides with reserved destination key parameter');
-  const prepared = bindStoredSql(statement, {
-    ...mapped,
-    velvet_active_destination_key: keyText(active.destination_key_json),
-  });
-  if (!prepared.names.includes('velvet_active_destination_key'))
-    throw new Error(`${operation} SQL must bind the Active Black destination key`);
-  if (row && Object.keys(mapped).some((name) => !prepared.names.includes(name)))
-    throw new Error('Stored Update SQL does not consume mapping');
-  const result = await client.query(prepared.text, prepared.values);
-  if (result.rows?.length !== 1 || result.rowCount !== 1)
-    throw new Error(`${operation} must return exactly one destination row`);
-  if (
-    !isDeepStrictEqual(
-      projection(result.rows[0], link.destination_key_columns),
-      active.destination_key_json,
-    )
-  )
-    throw new Error(`${operation} destination key does not match Active Black`);
 }
 
 /** Retires one Active Black in row mode; callers retain model and Lineage ordering. */

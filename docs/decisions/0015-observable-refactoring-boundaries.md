@@ -139,3 +139,10 @@ its exact missing question, including relevant reports outside listed paths.
 Evidence identity plus content revision prevents repeated unchanged reassessment.
 The controlled replay has one conditional synthetic queue, not a live incident or
 scheduled watcher. No new audit framework, mandatory exhaustive record or Alder change.
+
+## Subsequent proportional decision study
+
+[Decision 0016](0016-proportional-refactoring-decisions.md) now contains the
+consolidated current structural judgment rule, including KISS, evidence effort
+and execution timing. The procedures above describe their historical evaluations. Its current A2/B2 record supersedes those historical labels
+above; Issue 31 artifacts remain unchanged as the evidence of their own baseline.

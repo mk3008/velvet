@@ -1,0 +1,40 @@
+{
+  "note": "Local preparation commits were published in order through the GitHub API because direct git push lacked credentials. Every published tree SHA was checked against the local tree. Local IDs in frozen prompts/responses are retained verbatim; use this map to retrieve the corresponding public snapshot. API commit identities/timestamps differ and are not evidence of trial wall-clock timing.",
+  "commits": [
+    {
+      "local": "34a4ab9dd85118152dfc862d2c66b3d00b36c4b0",
+      "remote": "f4a57d730d211ce7a50faf08b03043749d61edd0",
+      "tree": "5a3bfd8e82f2e354f4209c140b17988419e1e1d0"
+    },
+    {
+      "local": "947c2365034a2c4a40920b6515884c37a0359c2c",
+      "remote": "29e2433409e37e80b55997998c82af54cceeb6eb",
+      "tree": "d28a942d27308f7b752b30de863d79896fc7f07b"
+    },
+    {
+      "local": "eb55b753d3ca4c32ec105fd103288694c460a6db",
+      "remote": "d10912f222e11ea83d811af6be782bbecc7e0b6e",
+      "tree": "5bc42c2e6266d550c106ff9750499ae04881af4c"
+    },
+    {
+      "local": "0703e88548b64938d8772dca2bed94d6621c6eec",
+      "remote": "098250ee7574add1498dfebeb9b48facae1c8533",
+      "tree": "9d417b132f9a371f52da9afb3261cf44bfbec692"
+    },
+    {
+      "local": "dc82b57c4a563aab6bfc4d63449687d581fe0143",
+      "remote": "c08e23065b1c62b32330346286f91c97acec20fd",
+      "tree": "04020aa09e5e7509765d4bafa8e6cc362949fb0e"
+    },
+    {
+      "local": "14fecc677496527c8d7606f5e1374ed52b270c3c",
+      "remote": "d58ef71ffb2ff276b6ed8a6e889c4fef13469135",
+      "tree": "8eced5669887bc61c21171d6ca90dd503d05ea1f"
+    },
+    {
+      "local": "cd52005d1d20cd1757db314715573a35fc8db6db",
+      "remote": "67fc622d9697d6afd7fed7ad24e0daee0bade69c",
+      "tree": "901345e43df9e994a25b815651308e5d7d4d5a39"
+    }
+  ]
+}

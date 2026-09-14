@@ -1,0 +1,415 @@
+{
+  "revision": "0086480a3c528d1d2a52d49056d90616234f5a38",
+  "baselineSha256": "2bfb42e479438d00717560b98753c6bb6b50b4abe919fdb05167cce396431317",
+  "declarations": [
+    {
+      "name": "Row",
+      "candidate": "row-work.ts",
+      "sha256": "83618ddd6e473bfaf3a56141ba1489c688598d890411147b573709ac40672ae0"
+    },
+    {
+      "name": "TransferExecutionClient",
+      "candidate": "row-work.ts",
+      "sha256": "4f342b791b2ee8fea5c7f2338fd549c55eac94c1462b54902720e4fbc9aca1c7"
+    },
+    {
+      "name": "TransferExecutionDefinition",
+      "candidate": "row-work.ts",
+      "sha256": "b11eb6136ca8dcb128015d87be8929f7e36db5a2257ef083f248d9c5bfcd585e"
+    },
+    {
+      "name": "TransferExecutionError",
+      "candidate": "row-work.ts",
+      "sha256": "2399e5a10a2f1196321459cbb0409c4a3ee773d497ce872ba80f0a5099c1ee0e"
+    },
+    {
+      "name": "object",
+      "candidate": "row-work.ts",
+      "sha256": "9789d436e95b7ad85cf0803446ed11f09b7e9ace9f337152bb6668a2374f944c"
+    },
+    {
+      "name": "keyText",
+      "candidate": "row-work.ts",
+      "sha256": "b064e88b63e4f0bf48471a691fc8be68671a2fcd6dd51100c0b0356955a31036"
+    },
+    {
+      "name": "hash",
+      "candidate": "row-work.ts",
+      "sha256": "cdc99f6a99fe9b850c9a919b12010960d739bb32c0780141d03c2bad649cd192"
+    },
+    {
+      "name": "projection",
+      "candidate": "row-work.ts",
+      "sha256": "4688fd880a4914d079e13026973cd15a682ff7f0717b8f62f5becf6302d5f35c"
+    },
+    {
+      "name": "executeTransfer",
+      "candidate": "main.ts",
+      "sha256": "981d554764b04bd86b7822de662799c78b3a9ff530a5f5677da2ce9f8b5596f7"
+    },
+    {
+      "name": "executeRowTransfer",
+      "candidate": "row-work.ts",
+      "sha256": "b4c2ccc962f4a47f1b09556216471c49fb43796490b2fc7aaf7a15d814d77b39"
+    },
+    {
+      "name": "executeMutableDestination",
+      "candidate": "row-work.ts",
+      "sha256": "f70b8c16c5ad1d96ad451319687c772c096dfdf161a577283ea6fdefbbb62f92"
+    },
+    {
+      "name": "retireRowActive",
+      "candidate": "row-work.ts",
+      "sha256": "0487bf9e283462d2fa0982a45a4b3849d2689adea69f6bde2ee5f4aae45a7791"
+    },
+    {
+      "name": "storedArguments",
+      "candidate": "row-work.ts",
+      "sha256": "e848c5f565974ae53cc11615d2812eae2e17fe2239d00a501885e26d84f7760a"
+    }
+  ],
+  "baselineEdges": [
+    {
+      "to": "node:crypto",
+      "kind": "import",
+      "typeOnly": false,
+      "names": [
+        {
+          "name": "createHash",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "to": "@mk3008/serene",
+      "kind": "import",
+      "typeOnly": false,
+      "names": [
+        {
+          "name": "bind",
+          "typeOnly": false
+        },
+        {
+          "name": "Sql",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "to": "node:util",
+      "kind": "import",
+      "typeOnly": false,
+      "names": [
+        {
+          "name": "isDeepStrictEqual",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "to": "./trusted-sql.js",
+      "kind": "import",
+      "typeOnly": false,
+      "names": [
+        {
+          "name": "bindStoredSql",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "to": "./queries.js",
+      "kind": "import",
+      "typeOnly": false,
+      "names": []
+    },
+    {
+      "to": "./link-mapping.js",
+      "kind": "import",
+      "typeOnly": false,
+      "names": [
+        {
+          "name": "assertDestinationLinkMapping",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "to": "./set-phase/config.js",
+      "kind": "import",
+      "typeOnly": false,
+      "names": [
+        {
+          "name": "loadSetPhase",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "to": "./set-phase/execute.js",
+      "kind": "import",
+      "typeOnly": false,
+      "names": [
+        {
+          "name": "executeSetPhase",
+          "typeOnly": false
+        }
+      ]
+    }
+  ],
+  "candidateEdges": {
+    "boundary.ts": [
+      {
+        "to": "./main.js",
+        "kind": "reexport",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "executeTransfer",
+            "typeOnly": false
+          }
+        ]
+      },
+      {
+        "to": "./row-work.js",
+        "kind": "reexport",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "TransferExecutionError",
+            "typeOnly": false
+          }
+        ]
+      },
+      {
+        "to": "./row-work.js",
+        "kind": "reexport",
+        "typeOnly": true,
+        "names": [
+          {
+            "name": "TransferExecutionClient",
+            "typeOnly": true
+          },
+          {
+            "name": "TransferExecutionDefinition",
+            "typeOnly": true
+          }
+        ]
+      }
+    ],
+    "main.ts": [
+      {
+        "to": "@mk3008/serene",
+        "kind": "import",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "bind",
+            "typeOnly": false
+          },
+          {
+            "name": "Sql",
+            "typeOnly": true
+          }
+        ]
+      },
+      {
+        "to": "node:util",
+        "kind": "import",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "isDeepStrictEqual",
+            "typeOnly": false
+          }
+        ]
+      },
+      {
+        "to": "./queries.js",
+        "kind": "import",
+        "typeOnly": false,
+        "names": []
+      },
+      {
+        "to": "./link-mapping.js",
+        "kind": "import",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "assertDestinationLinkMapping",
+            "typeOnly": false
+          }
+        ]
+      },
+      {
+        "to": "./set-phase/config.js",
+        "kind": "import",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "loadSetPhase",
+            "typeOnly": false
+          }
+        ]
+      },
+      {
+        "to": "./set-phase/execute.js",
+        "kind": "import",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "executeSetPhase",
+            "typeOnly": false
+          }
+        ]
+      },
+      {
+        "to": "./row-work.js",
+        "kind": "import",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "object",
+            "typeOnly": false
+          },
+          {
+            "name": "executeRowTransfer",
+            "typeOnly": false
+          },
+          {
+            "name": "TransferExecutionError",
+            "typeOnly": false
+          }
+        ]
+      },
+      {
+        "to": "./row-work.js",
+        "kind": "import",
+        "typeOnly": true,
+        "names": [
+          {
+            "name": "Row",
+            "typeOnly": true
+          },
+          {
+            "name": "TransferExecutionClient",
+            "typeOnly": true
+          },
+          {
+            "name": "TransferExecutionDefinition",
+            "typeOnly": true
+          }
+        ]
+      }
+    ],
+    "row-work.ts": [
+      {
+        "to": "node:crypto",
+        "kind": "import",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "createHash",
+            "typeOnly": false
+          }
+        ]
+      },
+      {
+        "to": "@mk3008/serene",
+        "kind": "import",
+        "typeOnly": true,
+        "names": [
+          {
+            "name": "Sql",
+            "typeOnly": true
+          }
+        ]
+      },
+      {
+        "to": "node:util",
+        "kind": "import",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "isDeepStrictEqual",
+            "typeOnly": false
+          }
+        ]
+      },
+      {
+        "to": "./trusted-sql.js",
+        "kind": "import",
+        "typeOnly": false,
+        "names": [
+          {
+            "name": "bindStoredSql",
+            "typeOnly": false
+          }
+        ]
+      },
+      {
+        "to": "./queries.js",
+        "kind": "import",
+        "typeOnly": false,
+        "names": []
+      }
+    ]
+  },
+  "candidateFileSizes": {
+    "boundary.ts": {
+      "bytes": 192,
+      "lines": 3
+    },
+    "main.ts": {
+      "bytes": 6146,
+      "lines": 141
+    },
+    "row-work.ts": {
+      "bytes": 16183,
+      "lines": 417
+    }
+  },
+  "baselineLines": 546,
+  "cost": {
+    "addedProductionFilesIfAdopted": [
+      "main.ts",
+      "row-work.ts"
+    ],
+    "changedExistingFileIfAdopted": "boundary.ts becomes compatibility facade",
+    "addedInternalExports": {
+      "runtime": [
+        "object",
+        "executeRowTransfer"
+      ],
+      "typeOnly": [
+        "Row"
+      ]
+    },
+    "existingPublicExports": [
+      "executeTransfer",
+      "TransferExecutionError",
+      "TransferExecutionClient",
+      "TransferExecutionDefinition"
+    ],
+    "publicExportChange": "none through boundary.ts or unchanged src/index.ts",
+    "addedFunctionCalls": 0,
+    "rowTransferInputs": [
+      "client",
+      "query",
+      "definition",
+      "setting",
+      "links",
+      "keyColumns",
+      "args",
+      "runId",
+      "settingId",
+      "maxDirtyKeys",
+      "routine"
+    ],
+    "duplicatedDeclarations": 0,
+    "runtimeCycle": false,
+    "typeInclusiveCycle": "existing boundary -> set-phase/execute -> boundary becomes boundary -> main -> set-phase/execute -> boundary; row-work has no back-edge"
+  },
+  "typecheck": "passed: temporary whole src/tests under original compiler settings; not runtime/DB verification",
+  "limitations": "Exact relocation evidence does not prove baseline semantics, runtime module initialization or PostgreSQL behavior; fresh DB regression would gate any production adoption."
+}
