@@ -168,9 +168,17 @@ export async function executeTransfer(
     const result = phase
       ? await executeSetPhase(client, phase, runId!, input.settingId, args, input.maxDirtyKeys)
       : await executeRowTransfer({
-          client, query, definition, setting, links, keyColumns, args,
-          runId: runId!, settingId: input.settingId,
-          maxDirtyKeys: input.maxDirtyKeys, routine,
+          client,
+          query,
+          definition,
+          setting,
+          links,
+          keyColumns,
+          args,
+          runId: runId!,
+          settingId: input.settingId,
+          maxDirtyKeys: input.maxDirtyKeys,
+          routine,
         });
     await query(queries.finishSql, { run: runId, status: 'succeeded', error: null });
     await client.query('commit');
@@ -216,8 +224,17 @@ export async function executeTransfer(
  * Model decisions and metadata ordering stay together because they share work state.
  */
 async function executeRowTransfer({
-  client, query, definition, setting, links, keyColumns, args,
-  runId, settingId, maxDirtyKeys, routine,
+  client,
+  query,
+  definition,
+  setting,
+  links,
+  keyColumns,
+  args,
+  runId,
+  settingId,
+  maxDirtyKeys,
+  routine,
 }: {
   client: TransferExecutionClient;
   query: (statement: Sql, params: Record<string, unknown>) => Promise<Row[]>;
@@ -385,8 +402,7 @@ async function executeRowTransfer({
         const statement = row
           ? link.generated_update_transfer_sql_body
           : link.generated_delete_transfer_sql_body;
-        if (!statement.trim())
-          throw new Error(`Destination Link has no stored ${operation} SQL`);
+        if (!statement.trim()) throw new Error(`Destination Link has no stored ${operation} SQL`);
         if (Object.hasOwn(mapped, 'velvet_active_destination_key'))
           throw new Error('Mapping collides with reserved destination key parameter');
         const prepared = bindStoredSql(statement, {
@@ -526,8 +542,7 @@ async function executeRowTransfer({
       }
     } else skipped++;
     completed.add(context);
-    if (!processingRecorded)
-      await query(queries.processingSql, { ...resultFields, work: workId });
+    if (!processingRecorded) await query(queries.processingSql, { ...resultFields, work: workId });
   }
   return { inserted, skipped };
 }

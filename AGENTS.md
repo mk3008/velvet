@@ -59,3 +59,8 @@ Use `@mk3008/serene` as the default construction path for executable raw SQL; if
 The owner does not prescribe a named architecture, recursive feature framework, mandatory `boundary.ts`, or fixed roles for `features` / `libraries` / `adapters`. Structure, splitting and naming are AI-owned implementation choices justified by current needs. Retain useful existing structure without treating it as a future requirement. Alder review, Raw SQL Rules and Serene remain the cross-cutting implementation contracts. This does not remove product Business Design, Concept/DFD/Process/DDL meaning, PostgreSQL assumptions, or verification requirements.
 
 The standing human implementation requirements are Alder review, Raw SQL Rules, Serene as the standard SQL construction/binding path, and PostgreSQL as the target runtime/database. Other cross-cutting choices (including ORM use, adapter shape, CLI/Web surface and coding style) are AI-owned, based on current requirements and concrete benefit; there is no separate technology exception policy.
+
+After feature work, inspect newly observed independent change reasons or reopened
+structural concerns using [Decision 0015](docs/decisions/0015-observable-refactoring-boundaries.md)
+and its linked rule. Keep, refactor for review, or record/propose based on concrete
+maintenance tasks and shared-invariant ownership; file size alone is insufficient.

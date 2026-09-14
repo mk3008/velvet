@@ -1,0 +1,1576 @@
+{
+  "files": [
+    "src/adapters/pg/sql-client.ts",
+    "src/features/_shared/query-executor.ts",
+    "src/features/create-transfer-destination-definition/boundary.ts",
+    "src/features/create-transfer-destination-definition/queries/insert-transfer-destination-definition/boundary.ts",
+    "src/features/create-transfer-destination-definition/queries/insert-transfer-destination-definition/query.ts",
+    "src/features/create-transfer-destination-definition/tests/create-transfer-destination-definition.boundary.test.ts",
+    "src/features/create-transfer-setting/boundary.ts",
+    "src/features/create-transfer-setting/input.ts",
+    "src/features/create-transfer-setting/output.ts",
+    "src/features/create-transfer-setting/queries/insert-transfer-setting-destination-definition/boundary.ts",
+    "src/features/create-transfer-setting/queries/insert-transfer-setting-destination-definition/query.ts",
+    "src/features/create-transfer-setting/queries/insert-transfer-setting/boundary.ts",
+    "src/features/create-transfer-setting/queries/insert-transfer-setting/query.ts",
+    "src/features/create-transfer-setting/queries/resolve-transfer-destination-definitions.ts",
+    "src/features/create-transfer-setting/tests/create-transfer-setting.boundary.test.ts",
+    "src/features/create-transfer-setting/workflow.ts",
+    "src/features/execute-transfer/boundary.ts",
+    "src/features/execute-transfer/queries.ts",
+    "src/features/execute-transfer/set-phase/config.ts",
+    "src/features/execute-transfer/set-phase/execute.ts",
+    "src/features/execute-transfer/set-phase/queries.ts",
+    "src/features/execute-transfer/tests/trusted-sql.test.ts",
+    "src/features/execute-transfer/trusted-sql.ts",
+    "src/index.ts"
+  ],
+  "skipped": [],
+  "findings": [
+    {
+      "file": "src/adapters/pg/sql-client.ts",
+      "line": 22,
+      "column": 24,
+      "boundary": "serene",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/adapters/pg/sql-client.ts",
+      "line": 23,
+      "column": 28,
+      "boundary": "driver-candidate",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/create-transfer-destination-definition/queries/insert-transfer-destination-definition/query.ts",
+      "line": 5,
+      "column": 55,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/create-transfer-destination-definition/queries/insert-transfer-destination-definition/query.ts",
+      "line": 83,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": "executeInsertTransferDestinationDefinitionQuery",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/create-transfer-setting/boundary.ts",
+      "line": 24,
+      "column": 25,
+      "boundary": "driver-candidate",
+      "function": "execute",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/create-transfer-setting/queries/insert-transfer-setting-destination-definition/query.ts",
+      "line": 5,
+      "column": 62,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/create-transfer-setting/queries/insert-transfer-setting-destination-definition/query.ts",
+      "line": 82,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": "executeInsertTransferSettingDestinationDefinitionQuery",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/create-transfer-setting/queries/insert-transfer-setting/query.ts",
+      "line": 5,
+      "column": 41,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/create-transfer-setting/queries/insert-transfer-setting/query.ts",
+      "line": 77,
+      "column": 10,
+      "boundary": "driver-candidate",
+      "function": "executeInsertTransferSettingQuery",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/create-transfer-setting/queries/resolve-transfer-destination-definitions.ts",
+      "line": 34,
+      "column": 22,
+      "boundary": "driver-candidate",
+      "function": "executeResolveTransferDestinationDefinitionsQuerySpec",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/create-transfer-setting/queries/resolve-transfer-destination-definitions.ts",
+      "line": 38,
+      "column": 57,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/create-transfer-setting/tests/create-transfer-setting.boundary.test.ts",
+      "line": 44,
+      "column": 24,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/create-transfer-setting/tests/create-transfer-setting.boundary.test.ts",
+      "line": 124,
+      "column": 5,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/create-transfer-setting/tests/create-transfer-setting.boundary.test.ts",
+      "line": 135,
+      "column": 16,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/create-transfer-setting/tests/create-transfer-setting.boundary.test.ts",
+      "line": 148,
+      "column": 16,
+      "boundary": "driver-candidate",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 97,
+      "column": 22,
+      "boundary": "serene",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 98,
+      "column": 19,
+      "boundary": "driver-candidate",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 102,
+      "column": 9,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 105,
+      "column": 29,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 122,
+      "column": 26,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 153,
+      "column": 33,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 158,
+      "column": 11,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 160,
+      "column": 11,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 162,
+      "column": 36,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 163,
+      "column": 33,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 183,
+      "column": 11,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 184,
+      "column": 11,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 190,
+      "column": 13,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 197,
+      "column": 15,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 198,
+      "column": 15,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 202,
+      "column": 15,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 206,
+      "column": 17,
+      "boundary": "driver-candidate",
+      "function": "executeTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 251,
+      "column": 25,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 270,
+      "column": 13,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 292,
+      "column": 15,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 337,
+      "column": 32,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 344,
+      "column": 32,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 394,
+      "column": 17,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 397,
+      "column": 17,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 416,
+      "column": 30,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 428,
+      "column": 19,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 433,
+      "column": 19,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 437,
+      "column": 35,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 454,
+      "column": 27,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 474,
+      "column": 17,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 479,
+      "column": 17,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 483,
+      "column": 33,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 488,
+      "column": 17,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 496,
+      "column": 30,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 510,
+      "column": 17,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 522,
+      "column": 17,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 529,
+      "column": 19,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/boundary.ts",
+      "line": 545,
+      "column": 36,
+      "boundary": "driver-candidate",
+      "function": "executeRowTransfer",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 3,
+      "column": 27,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_UPDATE_WITHOUT_WHERE",
+          "detail": "Review suggested: UPDATE has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 4,
+      "column": 25,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 11,
+      "column": 27,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 20,
+      "column": 23,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 22,
+      "column": 31,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 24,
+      "column": 26,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_UPDATE_WITHOUT_WHERE",
+          "detail": "Review suggested: UPDATE has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 26,
+      "column": 24,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_UPDATE_WITHOUT_WHERE",
+          "detail": "Review suggested: UPDATE has no apparent WHERE before the next operation or statement boundary."
+        },
+        {
+          "code": "SQL_DELETE_WITHOUT_WHERE",
+          "detail": "Review suggested: DELETE has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 34,
+      "column": 32,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 37,
+      "column": 27,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 42,
+      "column": 30,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 46,
+      "column": 26,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 49,
+      "column": 24,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 53,
+      "column": 27,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 63,
+      "column": 32,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 65,
+      "column": 30,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 71,
+      "column": 43,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 76,
+      "column": 35,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 77,
+      "column": 33,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 78,
+      "column": 34,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/queries.ts",
+      "line": 82,
+      "column": 34,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 31,
+      "column": 15,
+      "boundary": "serene",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 32,
+      "column": 12,
+      "boundary": "driver-candidate",
+      "function": "query",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 40,
+      "column": 12,
+      "boundary": "driver-candidate",
+      "function": "materialize",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 43,
+      "column": 26,
+      "boundary": "driver-candidate",
+      "function": "check",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 50,
+      "column": 28,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 57,
+      "column": 11,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 61,
+      "column": 11,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 63,
+      "column": 11,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 68,
+      "column": 11,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 75,
+      "column": 13,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 87,
+      "column": 13,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 89,
+      "column": 31,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 92,
+      "column": 13,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 94,
+      "column": 13,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 97,
+      "column": 16,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 103,
+      "column": 31,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 104,
+      "column": 15,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 109,
+      "column": 30,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 114,
+      "column": 15,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 117,
+      "column": 17,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 119,
+      "column": 20,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 125,
+      "column": 20,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 131,
+      "column": 18,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 136,
+      "column": 15,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 139,
+      "column": 16,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 143,
+      "column": 31,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/execute.ts",
+      "line": 146,
+      "column": 13,
+      "boundary": "driver-candidate",
+      "function": "executeSetPhase",
+      "level": "review-required",
+      "code": "SINK_ALIAS",
+      "detail": "Local execution alias; inspect its receiver and any prebound arguments."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 3,
+      "column": 22,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_CREATE_TEMP",
+          "detail": "Review suggested: Temporary creation may introduce operational state."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 11,
+      "column": 24,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_CREATE_TEMP",
+          "detail": "Review suggested: Temporary creation may introduce operational state."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 17,
+      "column": 33,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_TEMP_DDL",
+          "detail": "Review suggested: Explicit pg_temp ALTER TABLE targets PostgreSQL temporary state; inspect locking, resources and effects."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 18,
+      "column": 32,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_TEMP_DDL",
+          "detail": "Review suggested: Explicit pg_temp ALTER TABLE targets PostgreSQL temporary state; inspect locking, resources and effects."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 19,
+      "column": 30,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 29,
+      "column": 30,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 31,
+      "column": 22,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_CREATE_TEMP",
+          "detail": "Review suggested: Temporary creation may introduce operational state."
+        },
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 46,
+      "column": 27,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 57,
+      "column": 37,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_TEMP_DDL",
+          "detail": "Review suggested: Explicit pg_temp ALTER TABLE targets PostgreSQL temporary state; inspect locking, resources and effects."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 58,
+      "column": 32,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 67,
+      "column": 25,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_CREATE_TEMP",
+          "detail": "Review suggested: Temporary creation may introduce operational state."
+        },
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 77,
+      "column": 30,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_TEMP_DDL",
+          "detail": "Review suggested: Explicit pg_temp ALTER TABLE targets PostgreSQL temporary state; inspect locking, resources and effects."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 78,
+      "column": 25,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 88,
+      "column": 26,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 90,
+      "column": 31,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 92,
+      "column": 21,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 98,
+      "column": 23,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_CREATE_TEMP",
+          "detail": "Review suggested: Temporary creation may introduce operational state."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 105,
+      "column": 33,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_TEMP_DDL",
+          "detail": "Review suggested: Explicit pg_temp ALTER TABLE targets PostgreSQL temporary state; inspect locking, resources and effects."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 106,
+      "column": 35,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_TEMP_DDL",
+          "detail": "Review suggested: Explicit pg_temp ALTER TABLE targets PostgreSQL temporary state; inspect locking, resources and effects."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 107,
+      "column": 30,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 112,
+      "column": 24,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 124,
+      "column": 24,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 126,
+      "column": 23,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 128,
+      "column": 23,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 130,
+      "column": 27,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 137,
+      "column": 23,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately."
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 139,
+      "column": 27,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_DROP",
+          "detail": "Review suggested: DROP keyword may indicate an exceptional operation."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/set-phase/queries.ts",
+      "line": 140,
+      "column": 25,
+      "boundary": "serene",
+      "function": null,
+      "level": "ordinary",
+      "code": "SCREENED_SOURCE",
+      "detail": "Literal SQL through Serene; review SQL meaning and binding use separately.",
+      "reviewSignals": [
+        {
+          "code": "SQL_DROP",
+          "detail": "Review suggested: DROP keyword may indicate an exceptional operation."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/tests/trusted-sql.test.ts",
+      "line": 65,
+      "column": 21,
+      "boundary": "serene",
+      "function": null,
+      "level": "review-required",
+      "code": "EXTERNAL_SQL",
+      "detail": "External SQL has no Serene source provenance; binding does not grant approval.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/tests/trusted-sql.test.ts",
+      "line": 70,
+      "column": 18,
+      "boundary": "serene",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/tests/trusted-sql.test.ts",
+      "line": 71,
+      "column": 18,
+      "boundary": "serene",
+      "function": null,
+      "level": "review-required",
+      "code": "UNRESOLVED",
+      "detail": "SQL provenance cannot be established in this file."
+    },
+    {
+      "file": "src/features/execute-transfer/tests/trusted-sql.test.ts",
+      "line": 76,
+      "column": 20,
+      "boundary": "serene",
+      "function": null,
+      "level": "review-required",
+      "code": "EXTERNAL_SQL",
+      "detail": "External SQL has no Serene source provenance; binding does not grant approval.",
+      "reviewSignals": [
+        {
+          "code": "SQL_SELECT_WITHOUT_WHERE",
+          "detail": "Review suggested: SELECT has no apparent WHERE before the next operation or statement boundary."
+        }
+      ]
+    },
+    {
+      "file": "src/features/execute-transfer/trusted-sql.ts",
+      "line": 76,
+      "column": 10,
+      "boundary": "serene",
+      "function": "bindStoredSql",
+      "level": "review-required",
+      "code": "EXTERNAL_SQL",
+      "detail": "External SQL has no Serene source provenance; binding does not grant approval."
+    },
+    {
+      "file": "src/features/execute-transfer/trusted-sql.ts",
+      "line": 76,
+      "column": 23,
+      "boundary": "serene",
+      "function": "bindStoredSql",
+      "level": "review-required",
+      "code": "EXTERNAL_SQL",
+      "detail": "External SQL has no Serene source provenance; binding does not grant approval."
+    }
+  ],
+  "scope": "file-local candidate inventory; not exhaustive driver discovery"
+}

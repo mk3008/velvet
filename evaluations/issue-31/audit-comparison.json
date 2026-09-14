@@ -1,0 +1,16 @@
+{
+  "baseline": "b3190e3d341ee21478161f2b8b31f96826c503b1",
+  "baselineCounts": {
+    "UNRESOLVED": 33,
+    "SCREENED_SOURCE": 52,
+    "SINK_ALIAS": 47,
+    "EXTERNAL_SQL": 4
+  },
+  "candidateCounts": {
+    "UNRESOLVED": 32,
+    "SCREENED_SOURCE": 52,
+    "SINK_ALIAS": 46,
+    "EXTERNAL_SQL": 4
+  },
+  "explanation": "Removed exactly one duplicate finish query SINK_ALIAS and COMMIT UNRESOLVED. Other trust paths retained."
+}
