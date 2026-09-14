@@ -2,10 +2,7 @@ import {readFile,readdir} from 'node:fs/promises';
 import {auditSource} from '@mk3008/serene/audit';
 import {contentReview} from './content-review.mjs';
 
-const report={construction:[],content:[],exceptions:[{
- file:'materialize.mjs',function:'materializeSource',scope:'fixed CTAS prefix + identity-checked bound complete SELECT only',
- disposition:'explicit local reviewed exception; original findings retained, not promoted to ordinary',
-}]};
+const report={construction:[],content:[],exceptions:[]};
 for(const file of (await readdir(new URL('.',import.meta.url))).sort()){
  if(!/\.(mjs|sql)$/.test(file)||['audit.mjs','content-review.mjs'].includes(file))continue;
  const text=await readFile(new URL(file,import.meta.url),'utf8');
