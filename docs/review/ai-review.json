@@ -9,36 +9,41 @@
       "status": "resolved",
       "severity": "medium",
       "category": "concept-boundary",
-      "title": "重複制御を Draft Concept として昇格済み",
-      "summary": "重複制御は候補概念から Draft Concept に昇格した。Draft では、Dirty Key を転送作業対象にするか、転送不要として扱うかを分ける判断境界として整理し、Active Black と Dirty Key Processing の責務差も明示した。",
+      "title": "重複転送制御は defined Concept として責務を確定済み",
+      "summary": "重複転送制御は現行 Concept Spec と関係 metadata の双方で defined であり、Concept の openIssues は空である。同じ Transfer Setting、Destination Link、source key の文脈で重複転送を分ける判断境界を持ち、Active Black は現在有効な黒伝、Dirty Key Processing は処理済み変更キーと結果の追跡を担う。Draft の昇格判断を待つ状態ではない。",
       "evidence": [
         {
           "path": "docs/concepts/concept-relationship.json",
           "line": 63,
-          "note": "duplicate-control is registered as draft."
+          "note": "duplicate-control は status: defined として登録され、現行 Concept Spec を参照する。"
         },
         {
           "path": "docs/concepts/duplicate-control/concept.json",
-          "line": 1,
-          "note": "重複制御 Draft を追加した。"
+          "line": 6,
+          "note": "lifecycle.status は defined。重複判断の境界と Active Black / Dirty Key Processing の責務差を定義済み。"
+        },
+        {
+          "path": "docs/concepts/duplicate-control/concept.json",
+          "line": 231,
+          "note": "現行 Concept の未解決事項はない。"
         },
         {
           "path": "docs/concepts/work-item/concept.json",
-          "line": 20,
-          "note": "転送作業対象は Transfer Setting、Destination Link、source key の文脈で重複 Dirty Key を判定できる必要がある。"
-        },
-        {
-          "path": "docs/concepts/work-item/concept.json",
-          "line": 54,
-          "note": "転送作業対象は、同じ転送判断として既に扱われた重複 Dirty Key を無視できる。"
+          "line": 85,
+          "note": "同じ Transfer Setting、Destination Link、source key の文脈で重複 Dirty Key を判定する。"
         },
         {
           "path": "docs/concepts/dirty-key-processing/concept.json",
-          "line": 41,
-          "note": "Dirty Key Processing provides material for preventing duplicate transfer."
+          "line": 175,
+          "note": "同じ Dirty Key を同じ Setting / Link で二重転送しない判断材料を提供する。"
+        },
+        {
+          "path": "docs/processes/transfer-execution-process.md",
+          "line": 88,
+          "note": "Prepare Work Item は Dirty Key Processing を重複判定に使い、処理結果を記録する。"
         }
       ],
-      "recommendation": "Draft を人間がレビューし、独立 Concept Spec に昇格するか、転送作業対象、Active Black、Dirty Key Processing の責務として閉じるかを決める。"
+      "recommendation": "現行の defined Concept、関係 metadata、Process の責務分担に照らして resolved。Draft の昇格判断は不要。重複制御の意味や runtime を変更せず、レビュー記録を現行仕様に同期する。"
     },
     {
       "id": "transfer-work-item-lineage-candidate",
