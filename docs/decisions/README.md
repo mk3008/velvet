@@ -22,3 +22,4 @@ A record of an implementation choice is not approval of unresolved business poli
 - [DB-managed immutable set phases](0013-product-set-phases.md)
 - [Current transfer schema sufficiency](0014-schema-invariant-review.md)
 - [Observable refactoring boundaries](0015-observable-refactoring-boundaries.md)
+- [Proportional refactoring decisions](0016-proportional-refactoring-decisions.md)

@@ -6,6 +6,7 @@
   },
   "evidence": {
     "fixtureMatchesBaseline": true,
+    "runtimeMatchesCandidate": true,
     "reconstructedBoundaryTokensIdentical": true,
     "extractedBodyTokensIdentical": true,
     "sqlAndBinderUnchanged": true,

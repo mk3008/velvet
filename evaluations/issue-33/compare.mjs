@@ -11,6 +11,7 @@ const baseline = '9f554991ab3068756c6b05a483082ad3cda925ef';
 const path = 'src/features/execute-transfer/boundary.ts';
 const before = readFileSync('evaluations/issue-33/fixtures/baseline.ts.txt', 'utf8');
 const after = readFileSync('evaluations/issue-33/fixtures/candidate.ts.txt', 'utf8');
+assert.equal(readFileSync(path, 'utf8'), after, 'shipped runtime equals evaluated candidate');
 assert.equal(before, execFileSync('git', ['show', `${baseline}:${path}`], { encoding: 'utf8' }));
 function parse(source) {
   const file = ts.createSourceFile('probe.ts', source, ts.ScriptTarget.Latest, true);
@@ -130,7 +131,7 @@ for (const kind of ['update', 'delete']) {
 console.log(JSON.stringify({
   baseline,
   sourceSha256: { baseline: createHash('sha256').update(before).digest('hex'), candidate: createHash('sha256').update(after).digest('hex') },
-  evidence: { fixtureMatchesBaseline: true, reconstructedBoundaryTokensIdentical: true, extractedBodyTokensIdentical: true, sqlAndBinderUnchanged: true, helperInputs: 5, helperCalls: 1, publicExportsAdded: 0, productionFilesAdded: 0 },
+  evidence: { fixtureMatchesBaseline: true, runtimeMatchesCandidate: true, reconstructedBoundaryTokensIdentical: true, extractedBodyTokensIdentical: true, sqlAndBinderUnchanged: true, helperInputs: 5, helperCalls: 1, publicExportsAdded: 0, productionFilesAdded: 0 },
   cases: traces.length, executions: traces.length * 2, traces,
   limits: [
     'Source parity preserves existing caller guard, Work and retirement order; it does not establish baseline correctness.',

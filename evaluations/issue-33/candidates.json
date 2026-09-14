@@ -1,0 +1,41 @@
+{
+  "baseline": "9f554991ab3068756c6b05a483082ad3cda925ef",
+  "scope": "Current assessments of A2 and B2 only; other Issue 31 candidates retain their existing records.",
+  "previousRegister": "../issue-31/context/candidates.json",
+  "evidenceEvent": "Issue33:0703e88-frozen-packet-and-dc82b57-navigation-results",
+  "candidates": [
+    {
+      "id": "mutable-dml-function",
+      "variant": "B2 private same-file five-input mutable DML/receipt function",
+      "status": "ADOPT",
+      "execution": "now: dedicated authorized structural task, separate review branch",
+      "trialStatus": "evaluated",
+      "implementationStatus": "implemented",
+      "verificationStatus": "pending PostgreSQL CI and independent review",
+      "evidenceEffort": "Exact source walkthrough and scripted receipts suffice for the safety comparison; four navigation trials were required by this research protocol, not routine policy.",
+      "sufficiency": "Named mutable operation gives focused follow-up navigation and less overview detail without moving caller facts. All four answers preserve ordering; total unique exposure is not reduced. Five inputs and an extra frame/promise boundary are accepted for this exact scope.",
+      "evidence": ["selection.md", "navigation-measurements.json", "runs/n1.md", "runs/n2.md", "runs/n3.md", "runs/n4.md", "probe-measurements.json"],
+      "missingContext": [],
+      "reopenCondition": "Ordinary tasks need repeated caller/helper coordination, inputs grow, names mislead, or observed navigation cost outweighs local addressability; changed sequencing/receipts also require safety reassessment.",
+      "priorAssessment": "Issue31:M1-mutable DEFER comparison_not_performed; resolved here by scoped source/navigation comparison, not by green CI alone."
+    },
+    {
+      "id": "model-operation-module",
+      "variant": "A2 internal module for mutable DML and immutable Red execution/receipt",
+      "status": "DEFER",
+      "execution": "no runtime selection; stop after B2 and the bounded rule study",
+      "implementationStatus": "not_started",
+      "evidenceEffort": "One exact interface sketch and maintenance walkthrough; no mandatory time study or full candidate tournament.",
+      "missingContext": [{
+        "id": "M1-module",
+        "state": "comparison_not_performed",
+        "question": "Does this exact broader interface improve a real navigation/change/reproduction task after counting exports, capabilities, caller facts and opposite mutable/Red key invariants? Fixture reduction is not required if navigation benefit suffices.",
+        "attempt": "Inspected source and previous contracts/tests; completed B2 comparison. Its narrower result cannot price A2's additional interface/dependency obligations.",
+        "smallestNextObservation": "Review-only A2 interface/body sketch plus one existing locator/malformed-return task walkthrough against keep/B2, preserving prerequisite and metadata timing.",
+        "supplier": "Implementation/review agent under a relevant task; no new business meaning required."
+      }],
+      "reopenCondition": "A scoped module sketch/task comparison or new relevant maintenance observation addresses M1-module. A touched path, unchanged evidence redelivery or B2 adoption alone does not settle it.",
+      "priorAssessment": "Issue31:M1-module; question broadened to admit navigation evidence, disposition unchanged."
+    }
+  ]
+}

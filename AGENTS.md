@@ -67,3 +67,9 @@ inspection costs; preserve invariant/recovery ownership. Use the rule's ADOPT/RE
 unresolved candidates. On relevant new task evidence, consult the linked candidate
 record's reopen question and avoid repeating unchanged evidence; file size alone is
 insufficient. No recurring audit is required.
+
+For structural decisions, also apply [Decision 0016](docs/decisions/0016-proportional-refactoring-decisions.md):
+separate value, execution timing and proportionate evidence effort. A concrete
+navigation walkthrough may suffice for a reversible local trial; names alone do
+not. Preserve safety gates and causal isolation, and use its linked current A2/B2
+records rather than treating Issue 31's historical DEFER labels as current.
