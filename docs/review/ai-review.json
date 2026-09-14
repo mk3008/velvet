@@ -85,12 +85,12 @@
         },
         {
           "path": "src/features/execute-transfer/queries.ts",
-          "line": 10,
+          "line": 11,
           "note": "処理済み除外は Processing、現在有効な黒は activeSql で取得する。"
         },
         {
           "path": "src/features/execute-transfer/boundary.ts",
-          "line": 171,
+          "line": 217,
           "note": "Phase 1–5 の判断は現在行、Active Black、transfer model、比較と重複判定を使い、Lineage は転送成功時の出力。"
         }
       ],
@@ -146,22 +146,22 @@
         },
         {
           "path": "src/features/execute-transfer/boundary.ts",
-          "line": 380,
+          "line": 460,
           "note": "成功・skip 結果を文脈付きで保存。mutable は Lineage を追加しない。失敗時の Work Item / Processing は rollback 対象で、全試行の監査ログとは異なる。"
         },
         {
           "path": "tests/features/execute-transfer/mutable.integration.test.ts",
-          "line": 145,
+          "line": 154,
           "note": "mutable lifecycle と混在・重複テストは insert / update / delete / no-op / duplicate_ignore、評価キー保持、Lineage 非生成を検証。"
         },
         {
           "path": "tests/features/execute-transfer/execution.integration.test.ts",
-          "line": 79,
+          "line": 88,
           "note": "Phase 1 の成功時由来追跡と失敗時の独立 Run 記録を検証。"
         },
         {
           "path": "tests/features/execute-transfer/insert-only.integration.test.ts",
-          "line": 145,
+          "line": 154,
           "note": "Phase 5 の既存 Black Insert / Lineage と後続 no-op 契約を検証。"
         }
       ],
