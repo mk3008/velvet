@@ -81,4 +81,14 @@ nor add production SQL exceptions.
   application 35 tests; 231 DB-backed tests explicitly skipped locally because no
   PostgreSQL/Docker is available. Typecheck, build and DDL metadata/drift checks pass
   (0 errors, 0 warnings). Full database coverage remains the PR CI gate.
-- PostgreSQL CI evidence is pending the branch push.
+- [PostgreSQL Verify](https://github.com/mk3008/velvet/actions/runs/34799228202)
+  succeeds at implementation commit `20151d25772f4d83f34037074c6073ce080a5f68`:
+  52 DDL CLI + 266 application tests, with no DB skips, plus the TEMP regression.
+  This includes existing row/routine and immutable set-phase behavior, stored-SQL
+  lowering, binding, commit/rollback cleanup and reused connections. Typecheck,
+  build, DDL metadata/drift and SQL audit also pass.
+- The existing [Issue 23 phase workflow](https://github.com/mk3008/velvet/actions/runs/34799228192)
+  auto-runs its 1,000-row/1-Link and 10,000-row/3-Link matrix because the historical
+  helper changed. It is unchanged; no new candidate search or performance acceptance
+  criterion was added. Final workflow status and any later documentation-only head
+  checks are recorded in [PR #29](https://github.com/mk3008/velvet/pull/29).
