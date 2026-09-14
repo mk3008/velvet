@@ -1,4 +1,8 @@
-# Alder v0.2 / Serene v0.6.0 adoption verification
+# Alder v0.2 / Serene adoption verification
+
+The current pin is Serene v0.7.0; see [the PR review follow-up](#serene-v070-review-follow-up).
+
+## Initial v0.6.0 adoption
 
 Issue: #28. Baseline: `39e5a79` (includes the completed Issue #18 schema review).
 This is a dependency/adoption change; product `src`, schema and Business Design
@@ -92,3 +96,67 @@ nor add production SQL exceptions.
   helper changed. It is unchanged; no new candidate search or performance acceptance
   criterion was added. Final workflow status and any later documentation-only head
   checks are recorded in [PR #29](https://github.com/mk3008/velvet/pull/29).
+
+## Serene v0.7.0 review follow-up
+
+Requested in [the owner review](https://github.com/mk3008/velvet/pull/29#issuecomment-5659464055).
+Baseline for this follow-up is `5177d9858ba79858e9175a5bf8d8abfd76a64990`.
+Serene tag `v0.7.0` resolves to `48545f18b73e5d0111ac8d550e25569d270e6dc4`;
+package, lockfile and current adoption references are synchronized. Alder and its
+review knowledge are unchanged.
+
+`bindStoredSql` delegates positional-marker generation and value-array ordering to
+`bindExternal(externalSql(text), selectedValues, 'indexed')`, returning the actual
+Serene external-bound value. Runtime review therefore reports
+`review-required / EXTERNAL_SQL`, never source-backed provenance. The product
+hash/revision checks, reviewed-object identity, fixed CTAS composition, invocation
+permissions, and conservative master semicolon subset remain unchanged.
+
+Retained local work is authoring validation and argument selection, not marker
+lowering: missing/inherited/undefined/accessor parameters, native positional markers
+and unterminated quotes/comments still fail before execution. Shared Run/Link
+contexts may still contain unused values; only referenced own data properties are
+passed to Serene. Serene v0.7 alone neither rejects absent requested names nor
+accepts extra supplied names, so removing this compatibility would weaken early
+failure or reject valid existing calls. No private scanner API is imported.
+The updated tests preserve all prior rejection cases and add shared-context,
+getter, external provenance, source-backed API rejection and forged-master cases.
+
+Audit results, fresh review and CI outcomes for this follow-up are recorded below
+and in PR #29; the v0.6 results above remain historical evidence.
+
+### Follow-up audit and verification
+
+The current full `src` inventory contains 136 candidates: ordinary 52,
+review-required 84, violations 0. The previous 130 candidates retain their
+construction classifications. The six additions are two external boundaries in
+`bindStoredSql`, two external statements in its new tests and two deliberately
+misused source-backed APIs in those tests (retained as `UNRESOLVED`). No existing
+reviewed-master call site was promoted to ordinary.
+
+All six former `SQL_PERSISTENT_DDL` signals on fixed `pg_temp` constraints are now
+`SQL_TEMP_DDL` advisory, as recognized by upstream v0.7.0. No priority is rewritten
+locally. The current inventory has no persistent-DDL elevation; existing TEMP
+creation hints remain. New provenance tests add two SELECT-without-WHERE hints.
+Normal audit still exits 0 and strict audit exits 1; isolated CLI probes preserve
+persistent/procedural/routine elevation and violation/input-error exits.
+
+The fixed DB-master CTAS wrapper still returns its explicit reviewed composition;
+it does not manufacture source identity. Its complete stored body is bound through
+the external API, while the original fixed prefix/values separation remains.
+
+A fresh separate Alder review found no concrete blocker or Business meaning change:
+required-name failures, shared-context selection, atomic execution and durable Run
+behavior retain their current guarantees. External provenance and the local
+reviewed-master identity remain distinct. One compatibility limit is retained:
+Serene's generic scanner treats backticks as quoted spans, so an authored PostgreSQL
+custom backtick operator around named parameters can fail binding. No affected
+repository SQL was identified. This does not warrant an arbitrary raw fallback or
+an unbounded grammar-compatibility claim.
+
+Local pnpm 10.19.0 frozen installation and non-DB `pnpm verify` succeed: 52 DDL CLI
+and 39 application tests pass; the same 231 DB tests are deferred to PostgreSQL CI.
+TEMP regression and normal/strict audit checks pass locally. The required current
+PostgreSQL Verify, TEMP and phase regression outcomes are recorded in
+[PR #29](https://github.com/mk3008/velvet/pull/29) at the follow-up commit; prior v0.6
+CI links above are not used as proof of the new external binding integration.

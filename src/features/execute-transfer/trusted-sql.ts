@@ -1,13 +1,13 @@
-/** Named-marker lowering for developer-owned stored SQL (an explicit Serene exception).
- * This is lexical binding, not SQL validation or an approval mechanism.
+import { bindExternal, externalSql } from '@mk3008/serene';
+
+/** Bind developer-owned stored SQL without granting Serene source provenance.
+ * Velvet retains its fail-closed authoring checks and permits extra context values.
+ * Serene owns marker lowering and value-array construction; neither approves SQL.
  */
 export function bindStoredSql(text: string, params: Readonly<Record<string, unknown>>) {
-  const names: string[] = [];
-  const positions = new Map<string, number>();
-  const chunks: string[] = [];
+  const values: Record<string, unknown> = Object.create(null);
   let i = 0;
   while (i < text.length) {
-    const start = i;
     const c = text[i];
     if (c === "'" || c === '"') {
       const quote = c;
@@ -65,18 +65,13 @@ export function bindStoredSql(text: string, params: Readonly<Record<string, unkn
         const descriptor = Object.getOwnPropertyDescriptor(params, name);
         if (!descriptor || !('value' in descriptor) || descriptor.value === undefined)
           throw new Error(`Missing parameter: ${name}`);
-        if (!positions.has(name)) {
-          names.push(name);
-          positions.set(name, names.length);
-        }
-        chunks.push('$' + positions.get(name));
+        values[name] = descriptor.value;
         i += name.length + 1;
         continue;
       }
     } else {
       i++;
     }
-    chunks.push(text.slice(start, i));
   }
-  return { names, text: chunks.join(''), values: names.map((name) => params[name]) };
+  return bindExternal(externalSql(text), values, 'indexed');
 }

@@ -22,8 +22,8 @@ importers:
   .:
     dependencies:
       '@mk3008/serene':
-        specifier: github:mk3008/serene#v0.6.0
-        version: https://codeload.github.com/mk3008/serene/tar.gz/2946ee29bc959ca5e4cd27b00b68eb63f4f9a669(typescript@5.9.3)
+        specifier: github:mk3008/serene#v0.7.0
+        version: https://codeload.github.com/mk3008/serene/tar.gz/48545f18b73e5d0111ac8d550e25569d270e6dc4(typescript@5.9.3)
       zod:
         specifier: ^4.3.6
         version: 4.6.1
@@ -330,9 +330,9 @@ packages:
   '@kwsites/file-exists@1.1.1':
     resolution: {integrity: sha512-m9/5YGR18lIwxSFDwfE3oA7bWuq9kdau6ugN4H2rJeyhFQZcG9AgSHkQtSD15a8WvTgfz9aikZMrKPHvbpqFiw==}
 
-  '@mk3008/serene@https://codeload.github.com/mk3008/serene/tar.gz/2946ee29bc959ca5e4cd27b00b68eb63f4f9a669':
-    resolution: {tarball: https://codeload.github.com/mk3008/serene/tar.gz/2946ee29bc959ca5e4cd27b00b68eb63f4f9a669}
-    version: 0.6.0
+  '@mk3008/serene@https://codeload.github.com/mk3008/serene/tar.gz/48545f18b73e5d0111ac8d550e25569d270e6dc4':
+    resolution: {tarball: https://codeload.github.com/mk3008/serene/tar.gz/48545f18b73e5d0111ac8d550e25569d270e6dc4}
+    version: 0.7.0
     engines: {node: '>=22'}
     hasBin: true
     peerDependencies:
@@ -1994,7 +1994,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mk3008/serene@https://codeload.github.com/mk3008/serene/tar.gz/2946ee29bc959ca5e4cd27b00b68eb63f4f9a669(typescript@5.9.3)':
+  '@mk3008/serene@https://codeload.github.com/mk3008/serene/tar.gz/48545f18b73e5d0111ac8d550e25569d270e6dc4(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
 

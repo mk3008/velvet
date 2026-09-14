@@ -54,7 +54,7 @@ surrogate identities by their relational context instead of numeric sequence ord
 
 ## Official Serene TEMP composition
 
-As of Velvet #28, `materializeSource` delegates to Serene v0.6.0
+As of Velvet #28, `materializeSource` delegates to Serene v0.7.0
 `materializeTemp(statement, 'velvet_source_snapshot')`, then binds named values.
 It accepts only identity-backed, unbound code-authored `Sql`. The literal single
 identifier is quoted by upstream; arbitrary schema paths and identifier fragments
@@ -76,7 +76,7 @@ run `node experiments/issue-23/phases/audit.mjs` for the current inventory.
 
 `content-review.mjs` retains supplemental whole-file hints for historical raw `.sql`
 assets outside Serene's JavaScript/TypeScript candidate inventory. The official
-v0.6 audit supplies runtime content signals; the supplemental pass is not its
+v0.7 audit supplies runtime content signals; the supplemental pass is not its
 replacement. In that supplemental pass: persistent CREATE TABLE
 (including UNLOGGED) is elevated; TEMP is temporary-state/advisory; ON COMMIT DROP
 alone is lifecycle, while a separate DROP remains elevated. This conservative hint
