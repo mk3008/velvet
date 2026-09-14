@@ -57,8 +57,9 @@ The modest overview benefit and extra call/parameter cost must both enter select
 
 The source still contains several detailed stages: this experiment does not show
 that one seam makes the whole repository easy to understand or that more extraction
-would improve it. Existing Business Design routing already supplies repository
-entry points; no observed task requires another index.
+would improve it. Existing Business Design routing supplies repository entry points, but this first
+study did not test a separate code overview file. The follow-up below evaluates
+that missing question; the first study alone cannot settle it.
 
 ## Trial safety and verification scope
 
@@ -134,3 +135,20 @@ verification commit. No merge is authorized by these results.
 Stop condition reached: supported proportional distinctions, reproducible timing
 boundary, a tested local semantic grouping candidate and separately scoped A2
 DEFER. No elapsed-time, production-fitness or general AI-efficiency claim follows.
+
+## Follow-up: explicit main-flow entry
+
+[PR comment 5671427098](https://github.com/mk3008/velvet/pull/35#issuecomment-5671427098)
+requested the previously untested overview-only entry comparison. The
+[extension report](overview/README.md) retains a publicly frozen three-file trial,
+four fresh staged readings with ordinary file/range/search access, deterministic
+exposure replay and independent review. One trial reader limited overview to
+274 lines; the other expanded the worker and read 660. Both current-layout readers
+read 613/645. All required local facts remained correct. Deeper/full tasks consumed
+the worker; total unique local-plus-common source was 753 current versus 768 trial,
+with additional file transitions.
+
+The trial demonstrates selective reading is possible, not consistently cheaper.
+The exact extra runtime split is not adopted; B2, A2 and the proportional rule
+remain as previously selected. See the extension for task coverage, missing DB
+routine bodies, carryover and interpretation limits.

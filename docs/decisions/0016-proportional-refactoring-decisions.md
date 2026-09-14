@@ -76,3 +76,23 @@ A2's wider mutable-plus-Red module remains DEFER pending its own interface and
 maintenance-task comparison. B2 evidence does not settle its distinct costs.
 Stop at this supported local choice; no additional decomposition, navigation
 scheme, recurring audit or Alder change follows.
+
+## Explicit overview follow-up
+
+[The additional comparison](../../evaluations/issue-33/overview/README.md) tests a
+separate main-flow-only entry, which the original same-file experiment did not.
+With ordinary range/search access, one of two trial readers stopped at a selective
+overview (274 lines); the other expanded the whole worker (660). Current-layout
+readers inspected 613/645 lines. All four retained required local ordering/recovery
+facts. The focused reader later consumed all 417 worker lines for the mutable task,
+including unrelated model detail. Full local review required 753 unique lines in
+current layout versus 768 in the trial, with additional file transitions.
+
+The explicit boundary enabled a lower-resolution read but did not consistently
+reduce inspection or solve the next detail boundary. Keep this exact three-file
+layout as an evaluated fixture; reject further runtime splitting for this pass.
+B2 adoption and A2's distinct DEFER remain. No general AI speed benefit, always-read-
+everything policy, mandatory index filename or recursive decomposition rule follows.
+Deployed metadata routine bodies were outside the reading packet and disclosed as
+uninspected by every participant; this is local source comprehension evidence,
+not verification of all database guarantees.
