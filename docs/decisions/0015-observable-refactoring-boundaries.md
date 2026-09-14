@@ -74,7 +74,7 @@ or applicability to Alder. No Alder file is changed.
 The original procedure was useful but insufficient to assess maintainability
 beyond change locality and invariant ownership. The owner requested a multi-axis
 comparison in [comment 5663431190](https://github.com/mk3008/velvet/pull/32#issuecomment-5663431190).
-The [v2 rule](../../evaluations/issue-31/rule.md) therefore also considers concrete
+The [v2 rule](../../evaluations/issue-31/context/rule-v2.md) therefore also considers concrete
 testability, fault investigation, verification, side-effect/dependency locality,
 reproduction and recovery tasks. It does not prescribe pure functions, DI, model
 handlers, an additive quality score or improvements on every axis.
@@ -110,3 +110,32 @@ and verification are in the [extension report](../../evaluations/issue-31/multia
 Reopen if mapping changes require unrelated imports, validation predicates drift,
 call-site coordination grows, or a concrete diagnosis/recovery task exposes a new
 cost. No mandatory recurring audit or Alder integration follows from one subject.
+
+## Context sufficiency and disposition extension
+
+The final owner request [5664632667](https://github.com/mk3008/velvet/pull/32#issuecomment-5664632667)
+exposed that v2 Keep conflated sufficient objections with missing comparative evidence.
+The [v3 rule](../../evaluations/issue-31/rule.md) separates ADOPT, REJECT and DEFER
+from implementation and verification readiness. Agents generate candidate-specific
+context questions, retrieve available design/source/history/tests first, and identify
+the smallest remaining observation that could reverse the decision.
+
+The [final report](../../evaluations/issue-31/context/README.md) preserves preregistration,
+two independent baseline applications and their differing narrow model contracts.
+Broad distributed model/metadata ownership is REJECT. A2 internal model-operation
+module and B2 same-file mutable DML function are separately DEFER: current evidence
+defines safe scope, but neither has the comparative maintenance task required to
+choose it over keep. This is not rejection of all model seams or a mandate for one
+function; the implementation agent can collect the missing comparison without a
+new business decision.
+
+The private same-file row retirement helper is ADOPT and implemented: two identical
+release/delete/exactly-one protocols gain one owner, with three inputs and a call hop.
+Callers retain model decisions, routine branches, Work/Lineage order and Run recovery.
+This limited source benefit does not establish developer-time or recovery gains.
+
+Ordinary task intake can consult the candidate record when new evidence addresses
+its exact missing question, including relevant reports outside listed paths.
+Evidence identity plus content revision prevents repeated unchanged reassessment.
+The controlled replay has one conditional synthetic queue, not a live incident or
+scheduled watcher. No new audit framework, mandatory exhaustive record or Alder change.

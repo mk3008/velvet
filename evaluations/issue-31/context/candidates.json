@@ -1,4 +1,5 @@
 {
+  "assessmentState": "Current source-backed records; simulated queue is only in reopen-ledger.json.",
   "baseline": "4b895265d8262fafd7a95221a344a7de8c93841e",
   "candidates": [
     {
@@ -47,12 +48,12 @@
       ],
       "status": "DEFER",
       "sufficiency": "Enough to specify behavior and a feasible comparison; not enough to decide net maintenance benefit of either seam. Their unchanged caller guards/flags and new interface may offset local focus.",
+      "variant": "A2 internal module",
       "watchScope": [
         "src/features/execute-transfer/",
         "tests/features/execute-transfer/",
         "docs/decisions/0005-phase4-mutable-snapshots.md"
-      ],
-      "variant": "A2 internal module"
+      ]
     },
     {
       "contract": "B2: private same-file mutable UPDATE/DELETE preparation/execution/receipt function; caller retains pre-reassessment identity guard, Work, retirement, Processing, counts and Run. No internal export assumed; independent direct tests may require an extra interface.",
@@ -83,12 +84,12 @@
       ],
       "status": "DEFER",
       "sufficiency": "Enough to specify behavior and a feasible comparison; not enough to decide net maintenance benefit of either seam. Their unchanged caller guards/flags and new interface may offset local focus.",
+      "variant": "B2 same-file function",
       "watchScope": [
         "src/features/execute-transfer/",
         "tests/features/execute-transfer/",
         "docs/decisions/0005-phase4-mutable-snapshots.md"
-      ],
-      "variant": "B2 same-file function"
+      ]
     },
     {
       "contract": "Private same-file retireRowActive(query, activeId, linkId); only fixed release SQL, delete SQL, exactly-one result. Caller retains routine branch and Lineage; no transactions or model decisions.",
@@ -96,16 +97,20 @@
         "src/features/execute-transfer/boundary.ts",
         "src/features/execute-transfer/queries.ts",
         "db/runtime/execute-transfer-metadata.sql",
-        "docs/decisions/0010-bounded-execution-candidate.md"
+        "docs/decisions/0010-bounded-execution-candidate.md",
+        "retirement-measurements.json",
+        "https://github.com/mk3008/velvet/actions/runs/34851012947",
+        "runtime-review.md"
       ],
       "id": "row-retirement-helper",
-      "implementationStatus": "planned",
+      "implementationStatus": "implemented",
       "missingContext": [],
       "problem": "Two row-mode branches maintain the same release/delete/exactly-one retirement obligation.",
       "reopenCondition": "The two call sites need different retirement order/cardinality, helper inputs grow into mutable context, or traces/regressions differ.",
       "status": "ADOPT",
       "sufficiency": "The identical FK-sensitive protocol has two source owners; a three-input helper replaces one duplicate without changing SQL/ordering. Source-level benefit and cost support adoption, separately from gates.",
-      "verificationStatus": "not_run_on_candidate"
+      "verificationStatus": "passed",
+      "verifiedHead": "d8cdd87fa1cc7633a89092e7d6db13251deb1635"
     },
     {
       "contract": "One canonical rule for ADOPT/REJECT/DEFER, candidate-specific retrieval and missing/reopen evidence, short existing AGENTS/Decision pointers.",
@@ -115,7 +120,7 @@
         "PR32:5664632667"
       ],
       "id": "context-disposition-rule",
-      "implementationStatus": "planned",
+      "implementationStatus": "implemented",
       "missingContext": [],
       "problem": "Rule v2 groups speculative evidence and sufficient cost objections into Keep, losing the distinction exposed by the model question.",
       "reopenCondition": "Normal use produces gratuitous records, fails to distinguish labels or treats a touched path as sufficient new evidence.",
@@ -124,8 +129,7 @@
     }
   ],
   "lastEvidenceEvent": "PR32:5664632667",
-  "schemaVersion": 2,
-  "scope": "Issue 31 final extension; candidate dispositions are separate from implementation/verification status.",
   "recordRevision": "split variant scopes after independent reopen critique",
-  "assessmentState": "Current source-backed records; simulated queue is only in reopen-ledger.json."
+  "schemaVersion": 2,
+  "scope": "Issue 31 final extension; candidate dispositions are separate from implementation/verification status."
 }

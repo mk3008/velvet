@@ -1,0 +1,99 @@
+{
+  "kind": "controlled_replay_not_live_monitor",
+  "registryProvenance": {
+    "blobShas": [
+      "7fb9d18ddb6a411b7642c14d9600f84b13eebe3e",
+      "7fb9d18ddb6a411b7642c14d9600f84b13eebe3e"
+    ],
+    "commits": [
+      "5acb7ee899778b5cccca26353fa7ea55dc056d5b",
+      "7e499451a04ddd6ff3c4dd06cb0bf24b7bd19344"
+    ],
+    "equal": true
+  },
+  "order": "Intake sequence, not historical commit chronology",
+  "scopeCorrection": "Original umbrella split into A2 module and B2 same-file records after critique. This replay addresses only mutable-dml-function / M1-mutable; no evidence transfer to A2.",
+  "events": [
+    {
+      "sequence": 1,
+      "eventId": "history:6008e27",
+      "contentRevision": "6008e27e1955eaf48576fe6759fc08d7b355be62",
+      "candidate": "mutable-dml-function",
+      "variant": "B2 same-file function",
+      "question": "M1-mutable",
+      "alreadyInBaseline": true,
+      "synthetic": false,
+      "relevance": "Safety constraints, no new comparative evidence",
+      "queueId": null,
+      "action": "no_queue",
+      "duplicateOf": null,
+      "statusAfter": "DEFER",
+      "questionClosed": false
+    },
+    {
+      "sequence": 2,
+      "eventId": "history:31e966f",
+      "contentRevision": "31e966fa88aafa37d781838ce644248de60c60ce",
+      "candidate": "mutable-dml-function",
+      "variant": "B2 same-file function",
+      "question": "M1-mutable",
+      "alreadyInBaseline": true,
+      "synthetic": false,
+      "relevance": "Unrelated alias removal",
+      "queueId": null,
+      "action": "no_queue",
+      "duplicateOf": null,
+      "statusAfter": "DEFER",
+      "questionClosed": false
+    },
+    {
+      "sequence": 3,
+      "eventId": "synthetic:mutable-repro-1",
+      "contentRevision": "fixture-v1",
+      "candidate": "mutable-dml-function",
+      "variant": "B2 same-file function",
+      "question": "M1-mutable",
+      "alreadyInBaseline": false,
+      "synthetic": true,
+      "relevance": "Conditional task relevance; asserted reproduction attachment is absent",
+      "queueId": "simulated-reassessment-1",
+      "action": "queue_once_conditionally",
+      "duplicateOf": null,
+      "statusAfter": "DEFER",
+      "questionClosed": false
+    },
+    {
+      "sequence": 4,
+      "eventId": "synthetic:keyword-only",
+      "contentRevision": "fixture-v1",
+      "candidate": "mutable-dml-function",
+      "variant": "B2 same-file function",
+      "question": "M1-mutable",
+      "alreadyInBaseline": false,
+      "synthetic": true,
+      "relevance": "Keywords only, no task evidence",
+      "queueId": null,
+      "action": "no_queue",
+      "duplicateOf": null,
+      "statusAfter": "DEFER",
+      "questionClosed": false
+    },
+    {
+      "sequence": 5,
+      "eventId": "synthetic:mutable-repro-1",
+      "contentRevision": "fixture-v1",
+      "candidate": "mutable-dml-function",
+      "variant": "B2 same-file function",
+      "question": "M1-mutable",
+      "alreadyInBaseline": false,
+      "synthetic": true,
+      "relevance": "Identical evidence redelivery",
+      "queueId": "simulated-reassessment-1",
+      "action": "deduplicate",
+      "duplicateOf": 3,
+      "statusAfter": "DEFER",
+      "questionClosed": false
+    }
+  ],
+  "nextAction": "Simulation only: obtain the actual minimal reproduction promised but not attached, then compare exact B2 seam with keep; no real incident or live task created."
+}

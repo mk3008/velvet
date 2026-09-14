@@ -16,7 +16,7 @@ Published runtime `f2a1e22d86ab6dac313b8a242ef4db005c773d41` has the same tree
 `462313785c8cc75c8c87ba207d308be1d6ac95f6` as local `e889709`. The
 [engineering basis](../engineering-basis.md) distinguishes established precedent,
 Velvet observations and agent judgments. [Rule v1](rule-v1.md) stays historical;
-[rule v2](../rule.md) broadens consideration beyond divergent change.
+[rule v2](../context/rule-v2.md) broadens consideration beyond divergent change.
 
 Two independently spawned fresh contexts received the same baseline/protocol and
 no candidate design. Complete prompts and responses: [A](fresh-a.md), [B](fresh-b.md).
@@ -71,7 +71,11 @@ registry, external dependency or mandatory file convention was introduced.
 
 ## Reproducible checks and negative controls
 
-From repository root with pinned dependencies installed:
+This checker describes B1 -> B2 only. Check out B2
+`4b895265d8262fafd7a95221a344a7de8c93841e` in a separate worktree before running it;
+later retirement extraction is a separate transformation with its own
+[context report](../context/README.md) and checker. From that pinned repository root
+with dependencies installed:
 
 ```sh
 pnpm build

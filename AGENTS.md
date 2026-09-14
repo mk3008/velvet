@@ -63,5 +63,7 @@ The standing human implementation requirements are Alder review, Raw SQL Rules, 
 After feature work, inspect newly observed maintenance costs or reopened
 structural concerns using [Decision 0015](docs/decisions/0015-observable-refactoring-boundaries.md)
 and its linked rule. Compare relevant quality benefits with added structure and
-inspection costs; preserve invariant/recovery ownership. Keep, refactor for review,
-or record/propose from concrete task evidence; file size alone is insufficient.
+inspection costs; preserve invariant/recovery ownership. Use the rule's ADOPT/REJECT/DEFER distinction and record missing evidence for concrete
+unresolved candidates. On relevant new task evidence, consult the linked candidate
+record's reopen question and avoid repeating unchanged evidence; file size alone is
+insufficient. No recurring audit is required.

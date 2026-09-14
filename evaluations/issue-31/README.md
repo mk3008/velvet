@@ -1,9 +1,10 @@
 # Issue 31 — observable refactoring experiment
 
 This page records the original B0 -> B1 experiment. The PR review extension,
-including the current multi-axis conclusions and verification, is in
+including the historical multi-axis conclusions and verification, is in
 [multiaxis/README.md](multiaxis/README.md). Do not attribute these original gains
-to the later mapping-validator extraction.
+to the later mapping-validator extraction. The final context/disposition extension is in
+[context/README.md](context/README.md).
 
 Baseline: `b3190e3d341ee21478161f2b8b31f96826c503b1`.
 Hypothesis: observable independent changes can justify a repeatable, behavior-preserving
