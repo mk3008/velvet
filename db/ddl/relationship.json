@@ -144,7 +144,7 @@
       "concepts": [
         {
           "path": "../../docs/concepts/work-item/concept.json",
-          "reason": "work_item persists fixed Dirty Key work with the decision materials needed by the transfer route. Composite foreign keys keep run, setting, Destination Link, and referenced Active Black contexts aligned."
+          "reason": "work_item persists fixed Dirty Key work with the decision materials needed by the transfer route. Composite foreign keys keep run, setting, Destination Link, and referenced Active Black contexts aligned. Local CHECKs preserve captured model/route and operation/source-presence consistency; historical evaluation is not tied to editable masters or retired Active Black rows."
         }
       ],
       "processes": [
@@ -166,7 +166,7 @@
       "concepts": [
         {
           "path": "../../docs/concepts/lineage/concept.json",
-          "reason": "lineage records immutable transfer source-to-destination correspondence for audit and debugging. Its destination-row identity is destination_table_name plus destination_key_json; destination_key_hash is kept only as a lookup aid."
+          "reason": "lineage records immutable transfer source-to-destination correspondence for audit and debugging. Its destination-row identity is destination_table_name plus destination_key_json; destination_key_hash is kept only as a lookup aid. Operation/source-kind CHECK preserves the distinction between a logical source key for Black and an old destination key for Red."
         }
       ],
       "processes": [
@@ -196,7 +196,7 @@
       "concepts": [
         {
           "path": "../../docs/concepts/dirty-key-processing/concept.json",
-          "reason": "dirty_key_processing records processed Dirty Keys, processing results, and duplicate-transfer prevention scope. Composite foreign keys keep the recorded run, setting, Destination Link, and Work Item contexts aligned."
+          "reason": "dirty_key_processing records processed Dirty Keys, processing results, and duplicate-transfer prevention scope. Composite foreign keys keep the recorded run, setting, Destination Link, and Work Item contexts aligned. Final status/result CHECK distinguishes skipped decisions from succeeded transfer operations without specifying failed-attempt policy."
         }
       ],
       "processes": [

@@ -23,6 +23,10 @@ Missing local PostgreSQL or Docker is not a stopping condition. Complete the imp
 
 Do not merge PRs or publish packages unless explicitly requested. Report incomplete or skipped verification. Keep temporary task notes in `tmp/`.
 
+## Operational design
+
+Prefer structures that make ordinary operations correct even when users forget, misunderstand or hurry. Remove avoidable error points with simple structural changes rather than relying on attention, memory or exceptional manual steps. In particular, migration filenames must sort in application order; allocate the next sequence number rather than an Issue number.
+
 ## Evaluation decisions
 
 Rank implementation candidates using requirements, cardinality, resource costs and timeout/backlog/retry dynamics before choosing experiments. A smaller change is not automatically the highest-value first experiment. Test uncertainties that can change the decision; do not deeply measure a coefficient improvement when reasoning already shows it leaves the main failure mode. Distinguish bounded work per Run from aggregate recovery cost. State the evaluation envelope and stopping condition; stop when a sufficiently good candidate is supported rather than searching indefinitely for an optimum. Ask the owner only when an unclear requirement level materially changes the work; record assumptions separately from production acceptance.
