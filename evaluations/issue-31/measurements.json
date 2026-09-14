@@ -1,0 +1,126 @@
+{
+  "baseline": "b3190e3d341ee21478161f2b8b31f96826c503b1",
+  "candidate": "working-tree",
+  "candidateBlob": "1c6a9b2d43a6760b20c57ca663b81af89d1cd69c",
+  "assertions": [
+    "ordered work tokens preserved",
+    "recovery tokens preserved",
+    "work helper owns no transaction control",
+    "success finalizers 2 -> 1"
+  ],
+  "before": [
+    {
+      "probe": "P1",
+      "locations": [
+        {
+          "owner": "executeTransfer",
+          "line": 493,
+          "functionStart": 72,
+          "functionEnd": 519,
+          "lexicalSpan": 448
+        }
+      ]
+    },
+    {
+      "probe": "P2",
+      "locations": [
+        {
+          "owner": "executeTransfer",
+          "line": 247,
+          "functionStart": 72,
+          "functionEnd": 519,
+          "lexicalSpan": 448
+        }
+      ]
+    },
+    {
+      "probe": "P3",
+      "locations": [
+        {
+          "owner": "executeTransfer",
+          "line": 169,
+          "functionStart": 72,
+          "functionEnd": 519,
+          "lexicalSpan": 448
+        }
+      ]
+    },
+    {
+      "probe": "P4",
+      "locations": [
+        {
+          "owner": "executeTransfer",
+          "line": 360,
+          "functionStart": 72,
+          "functionEnd": 519,
+          "lexicalSpan": 448
+        },
+        {
+          "owner": "executeTransfer",
+          "line": 406,
+          "functionStart": 72,
+          "functionEnd": 519,
+          "lexicalSpan": 448
+        }
+      ]
+    }
+  ],
+  "after": [
+    {
+      "probe": "P1",
+      "locations": [
+        {
+          "owner": "executeTransfer",
+          "line": 195,
+          "functionStart": 72,
+          "functionEnd": 221,
+          "lexicalSpan": 150
+        }
+      ]
+    },
+    {
+      "probe": "P2",
+      "locations": [
+        {
+          "owner": "executeRowTransfer",
+          "line": 316,
+          "functionStart": 226,
+          "functionEnd": 548,
+          "lexicalSpan": 323
+        }
+      ]
+    },
+    {
+      "probe": "P3",
+      "locations": [
+        {
+          "owner": "executeTransfer",
+          "line": 169,
+          "functionStart": 72,
+          "functionEnd": 221,
+          "lexicalSpan": 150
+        }
+      ]
+    },
+    {
+      "probe": "P4",
+      "locations": [
+        {
+          "owner": "executeRowTransfer",
+          "line": 428,
+          "functionStart": 226,
+          "functionEnd": 548,
+          "lexicalSpan": 323
+        },
+        {
+          "owner": "executeRowTransfer",
+          "line": 474,
+          "functionStart": 226,
+          "functionEnd": 548,
+          "lexicalSpan": 323
+        }
+      ]
+    }
+  ],
+  "caveat": "Lexical span is not actual reading effort; edit-file count and cross-cutting SQL ownership do not improve automatically."
+}

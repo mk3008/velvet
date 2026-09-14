@@ -3,6 +3,7 @@ import { bind, type Sql } from '@mk3008/serene';
 import { isDeepStrictEqual } from 'node:util';
 import { bindStoredSql } from './trusted-sql.js';
 import * as queries from './queries.js';
+import { assertDestinationLinkMapping } from './link-mapping.js';
 import { loadSetPhase } from './set-phase/config.js';
 import { executeSetPhase } from './set-phase/execute.js';
 
@@ -128,26 +129,7 @@ export async function executeTransfer(
         throw new Error('Mutable destinations cannot require posting-date lower-bound control');
       if (!useSetPhase && !link.generated_insert_transfer_sql_body.trim())
         throw new Error('Destination Link has no stored Black Insert SQL');
-      const mapping = link.mapping_definition?.columns;
-      const allowed = link.destination_columns?.columns?.map((c: Row) => c.name);
-      const keys = link.destination_key_mapping;
-      if (
-        !object(mapping) ||
-        !Object.keys(mapping).length ||
-        !Array.isArray(allowed) ||
-        Object.entries(mapping).some(
-          ([target, source]) => !allowed.includes(target) || typeof source !== 'string' || !source,
-        ) ||
-        !isDeepStrictEqual(keys?.sourceKey, keyColumns) ||
-        !Array.isArray(keys?.destinationKey) ||
-        !keys.destinationKey.length ||
-        !isDeepStrictEqual(
-          keys.destinationKey.map((k: Row) => k.name).sort(),
-          [...link.destination_key_columns].sort(),
-        ) ||
-        keys.destinationKey.some((k: Row) => mapping[k.name] !== k.sourceColumn)
-      )
-        throw new Error('Invalid Destination Link mapping');
+      assertDestinationLinkMapping(link, keyColumns);
     }
     const phase = useSetPhase ? loadSetPhase(setting, links) : undefined;
     [{ run_id: runId }] = await query(phase ? queries.setPhaseRunSql : queries.runSql, {
@@ -165,322 +147,24 @@ export async function executeTransfer(
     );
     if (!isDeepStrictEqual(currentSetting, setting) || !isDeepStrictEqual(currentLinks, links))
       throw new Error('Transfer configuration changed after Run creation');
-    if (phase) {
-      const result = await executeSetPhase(
-        client,
-        phase,
-        runId!,
-        input.settingId,
-        args,
-        input.maxDirtyKeys,
-      );
-      await query(queries.finishSql, { run: runId, status: 'succeeded', error: null });
-      await client.query('commit');
-      return { runId: runId!, ...result };
-    }
-    const pending = await query(
-      input.maxDirtyKeys === undefined ? queries.pendingSql : queries.boundedPendingSql,
-      {
-        setting: input.settingId,
-        ...(input.maxDirtyKeys === undefined ? {} : { maximum: input.maxDirtyKeys }),
-        schema: definition.sourceSchema,
-        table: definition.sourceTable,
-      },
-    );
-    // Freeze the explicit logical identity before looking at source current values.
-    const work = pending.map((item): Row & { key: string } => {
-      const key = definition.resolveLogicalKey(Object.freeze({ ...item.source_key_json }));
-      if (!object(key) || !isDeepStrictEqual(Object.keys(key).sort(), [...keyColumns].sort()))
-        throw new Error('Logical key does not match Setting');
-      projection(key, keyColumns);
-      return { ...item, key: keyText(key) };
-    });
-    {
-      // Explicit exception: execute the developer-owned DB source, never a mirrored literal.
-      const source = work.length
-        ? await client.query(...storedArguments(setting.source_sql_body, args))
-        : { rows: [] };
-      if (!Array.isArray(source.rows)) throw new Error('Source SQL must return one rowset');
-      const current = new Map<string, Row>();
-      for (const row of source.rows) {
-        const key = keyText(projection(row, keyColumns));
-        if (current.has(key)) throw new Error('Source SQL returned duplicate logical keys');
-        current.set(key, row);
-      }
-      let inserted = 0;
-      let skipped = 0;
-      const completed = new Set<string>();
-      for (const item of work) {
-        const link = links.find((l) => l.destination_link_id === item.destination_link_id)!;
-        const mutable = link.transfer_model === 'mutable';
-        const immutable = link.transfer_model === 'immutable';
-        const insertOnly = link.transfer_model === 'insert_only';
-        const row = current.get(item.key);
-        const context = JSON.stringify([link.destination_link_id, item.key]);
-        const duplicate = completed.has(context);
-        const [active] = duplicate
-          ? []
-          : await query(queries.activeSql, {
-              link: link.destination_link_id,
-              key: item.key,
-            });
-        const mapped =
-          duplicate || !row
-            ? {}
-            : Object.fromEntries(
-                Object.entries(link.mapping_definition.columns).map(([target, source]) => {
-                  if (!Object.hasOwn(row, source as string) || row[source as string] === undefined)
-                    throw new Error(`Missing mapping source: ${source}`);
-                  return [target, row[source as string]];
-                }),
-              );
-        let noOp: boolean = (!row && !active) || (insertOnly && !!active);
-        if (active && row && !insertOnly) {
-          // Mutable identity is stable, including when key columns are excluded from comparison.
-          if (
-            mutable &&
-            !isDeepStrictEqual(
-              projection(mapped, link.destination_key_columns),
-              active.destination_key_json,
-            )
-          )
-            throw new Error('Mutable destination key does not match Active Black');
-          const excluded = link.diff_compare_excluded_columns?.columns ?? [];
-          const allowed = link.destination_columns.columns.map((c: Row) => c.name);
-          if (
-            (link.diff_compare_excluded_columns !== null &&
-              (!object(link.diff_compare_excluded_columns) ||
-                !Array.isArray(link.diff_compare_excluded_columns.columns))) ||
-            !Array.isArray(excluded) ||
-            excluded.some((c: unknown) => typeof c !== 'string' || !allowed.includes(c))
-          )
-            throw new Error('Invalid comparison exclusions');
-          if (!link.generated_reassessment_sql_body.trim())
-            throw new Error('Destination Link has no stored reassessment SQL');
-          if (Object.hasOwn(mapped, 'velvet_active_destination_key'))
-            throw new Error('Mapping collides with reserved reassessment parameter');
-          const prepared = bindStoredSql(link.generated_reassessment_sql_body, {
-            ...mapped,
-            velvet_active_destination_key: keyText(active.destination_key_json),
-          });
-          if (!prepared.names.includes('velvet_active_destination_key'))
-            throw new Error('Reassessment SQL must bind the Active Black destination key');
-          const comparison = await client.query(prepared.text, prepared.values);
-          if (
-            comparison.rows?.length !== 1 ||
-            typeof comparison.rows[0].current_values !== 'string' ||
-            typeof comparison.rows[0].active_values !== 'string'
-          )
-            throw new Error('Reassessment SQL must return one pair of JSON object texts');
-          const [decision] = await query(queries.compareSql, {
-            current: comparison.rows[0].current_values,
-            previous: comparison.rows[0].active_values,
-            columns: allowed.filter((c: string) => !excluded.includes(c)),
-            allColumns: allowed,
-            excluded,
-          });
-          if (!decision.valid)
-            throw new Error('Reassessment returned invalid destination comparison columns');
-          noOp = !decision.changed;
-        }
-        const skip = duplicate ? 'duplicate_ignore' : noOp ? 'no_op' : null;
-        const common = {
-          run: runId,
-          dirty: item.dirty_key_id,
-          setting: input.settingId,
-          link: link.destination_link_id,
-          key: item.key,
-          hash: hash(item.key),
-        };
-        const workFields = {
-          ...common,
-          model: link.transfer_model,
-          route: skip ? 'skipped' : link.transfer_model,
-          sourceExists: !!row,
-          insert: !!row && !skip && (!mutable || !active),
-          update: mutable && !!active && !!row && !skip,
-          delete: mutable && !!active && !row && !skip,
-          skip,
-          active: active?.active_black_id ?? null,
-          evaluated: active ? keyText(active.destination_key_json) : null,
-          red: immutable && !!active && !skip,
-        };
-        const resultFields = {
-          ...common,
-          status: skip ? 'skipped' : 'succeeded',
-          result:
-            skip ??
-            (active
-              ? mutable
-                ? row
-                  ? 'black_update'
-                  : 'physical_delete'
-                : row
-                  ? 'red_then_black_insert'
-                  : 'red'
-              : 'black_insert'),
-        };
-        const [{ work_item_id: workId }] =
-          routine && skip
-            ? await query(queries.skippedMetadataSql, {
-                fields: JSON.stringify({ ...workFields, ...resultFields }),
-              })
-            : await query(queries.workSql, workFields);
-        let processingRecorded = routine && !!skip;
-        if (!skip) {
-          if (active && mutable) {
-            const operation = row ? 'Black Update' : 'Physical Delete';
-            const statement = row
-              ? link.generated_update_transfer_sql_body
-              : link.generated_delete_transfer_sql_body;
-            if (!statement.trim())
-              throw new Error(`Destination Link has no stored ${operation} SQL`);
-            if (Object.hasOwn(mapped, 'velvet_active_destination_key'))
-              throw new Error('Mapping collides with reserved destination key parameter');
-            const prepared = bindStoredSql(statement, {
-              ...mapped,
-              velvet_active_destination_key: keyText(active.destination_key_json),
-            });
-            if (!prepared.names.includes('velvet_active_destination_key'))
-              throw new Error(`${operation} SQL must bind the Active Black destination key`);
-            if (row && Object.keys(mapped).some((name) => !prepared.names.includes(name)))
-              throw new Error('Stored Update SQL does not consume mapping');
-            const result = await client.query(prepared.text, prepared.values);
-            if (result.rows?.length !== 1 || result.rowCount !== 1)
-              throw new Error(`${operation} must return exactly one destination row`);
-            if (
-              !isDeepStrictEqual(
-                projection(result.rows[0], link.destination_key_columns),
-                active.destination_key_json,
-              )
-            )
-              throw new Error(`${operation} destination key does not match Active Black`);
-            if (!row) {
-              if (routine) {
-                await query(queries.retireMetadataSql, {
-                  fields: JSON.stringify({ active: active.active_black_id, link: common.link }),
-                  withLineage: false,
-                });
-              } else {
-                await query(queries.releaseActiveReferencesSql, {
-                  active: active.active_black_id,
-                  link: common.link,
-                });
-                const removed = await query(queries.activeDeleteSql, {
-                  active: active.active_black_id,
-                  link: common.link,
-                });
-                if (removed.length !== 1) throw new Error('Active Black retirement failed');
-              }
-            }
-          }
-          if (active && immutable) {
-            if (!link.generated_red_transfer_sql_body.trim())
-              throw new Error('Destination has no stored Red Transfer SQL');
-            const prepared = bindStoredSql(
-              link.generated_red_transfer_sql_body,
-              active.destination_key_json,
-            );
-            if (link.destination_key_columns.some((name: string) => !prepared.names.includes(name)))
-              throw new Error('Red SQL must bind every original destination key column');
-            const red = await client.query(prepared.text, prepared.values);
-            if (red.rows?.length !== 1 || red.rowCount !== 1)
-              throw new Error('Red Transfer must return exactly one destination row');
-            const redKey = projection(red.rows[0], link.destination_key_columns);
-            if (isDeepStrictEqual(redKey, active.destination_key_json))
-              throw new Error('Red Transfer must create a different destination row');
-            const originalText = keyText(active.destination_key_json);
-            const redText = keyText(redKey);
-            const redFields = {
-              run: common.run,
-              setting: common.setting,
-              link: common.link,
-              work: workId,
-              key: originalText,
-              hash: hash(originalText),
-              table: link.destination_table_name,
-              destination: redText,
-              destinationHash: hash(redText),
-            };
-            if (routine) {
-              await query(queries.retireMetadataSql, {
-                fields: JSON.stringify({ ...redFields, active: active.active_black_id }),
-                withLineage: true,
-              });
-            } else {
-              await query(queries.releaseActiveReferencesSql, {
-                active: active.active_black_id,
-                link: common.link,
-              });
-              const removed = await query(queries.activeDeleteSql, {
-                active: active.active_black_id,
-                link: common.link,
-              });
-              if (removed.length !== 1) throw new Error('Active Black retirement failed');
-              await query(queries.redLineageSql, redFields);
-            }
-          }
-          if (row && (!mutable || !active)) {
-            const prepared = bindStoredSql(link.generated_insert_transfer_sql_body, mapped);
-            // Every mapped column must actually be bound by the stored insertion statement.
-            if (Object.keys(mapped).some((name) => !prepared.names.includes(name)))
-              throw new Error('Stored Insert SQL does not consume mapping');
-            const result = await client.query(prepared.text, prepared.values);
-            if (result.rows?.length !== 1 || result.rowCount !== 1)
-              throw new Error('Black Insert must return exactly one destination row');
-            const destination = projection(result.rows[0], link.destination_key_columns);
-            const expected = Object.fromEntries(
-              link.destination_key_mapping.destinationKey.map((k: Row) => [
-                k.name,
-                row[k.sourceColumn],
-              ]),
-            );
-            if (!isDeepStrictEqual(destination, expected))
-              throw new Error('Inserted destination key does not match mapping');
-            const destinationText = keyText(destination);
-            if (routine) {
-              await query(queries.blackMetadataSql, {
-                fields: JSON.stringify({
-                  ...resultFields,
-                  work: workId,
-                  table: link.destination_table_name,
-                  destination: destinationText,
-                  destinationHash: hash(destinationText),
-                }),
-                withLineage: !mutable,
-              });
-              processingRecorded = true;
-            } else {
-              await query(queries.activeInsertSql, {
-                link: common.link,
-                key: common.key,
-                hash: common.hash,
-                destination: destinationText,
-              });
-              if (!mutable)
-                await query(queries.lineageSql, {
-                  run: common.run,
-                  setting: common.setting,
-                  link: common.link,
-                  work: workId,
-                  key: common.key,
-                  hash: common.hash,
-                  table: link.destination_table_name,
-                  destination: destinationText,
-                  destinationHash: hash(destinationText),
-                });
-            }
-            inserted++;
-          }
-        } else skipped++;
-        completed.add(context);
-        if (!processingRecorded)
-          await query(queries.processingSql, { ...resultFields, work: workId });
-      }
-      await query(queries.finishSql, { run: runId, status: 'succeeded', error: null });
-      await client.query('commit');
-      return { runId: runId!, inserted, skipped };
-    }
+    const result = phase
+      ? await executeSetPhase(client, phase, runId!, input.settingId, args, input.maxDirtyKeys)
+      : await executeRowTransfer({
+          client,
+          query,
+          definition,
+          setting,
+          links,
+          keyColumns,
+          args,
+          runId: runId!,
+          settingId: input.settingId,
+          maxDirtyKeys: input.maxDirtyKeys,
+          routine,
+        });
+    await query(queries.finishSql, { run: runId, status: 'succeeded', error: null });
+    await client.query('commit');
+    return { runId: runId!, ...result };
   } catch (error) {
     const recoveryErrors: unknown[] = [];
     let discarded = false;
@@ -517,6 +201,335 @@ export async function executeTransfer(
     throw error;
   }
 }
+/** Executes the legacy ordered row/routine work inside the caller-owned transaction.
+ * Throws directly to executeTransfer; never finalizes, commits or recovers a Run.
+ * Model decisions and metadata ordering stay together because they share work state.
+ */
+async function executeRowTransfer({
+  client,
+  query,
+  definition,
+  setting,
+  links,
+  keyColumns,
+  args,
+  runId,
+  settingId,
+  maxDirtyKeys,
+  routine,
+}: {
+  client: TransferExecutionClient;
+  query: (statement: Sql, params: Record<string, unknown>) => Promise<Row[]>;
+  definition: TransferExecutionDefinition;
+  setting: Row;
+  links: Row[];
+  keyColumns: string[];
+  args: Record<string, unknown>;
+  runId: string;
+  settingId: string;
+  maxDirtyKeys: number | undefined;
+  routine: boolean;
+}): Promise<{ inserted: number; skipped: number }> {
+  const pending = await query(
+    maxDirtyKeys === undefined ? queries.pendingSql : queries.boundedPendingSql,
+    {
+      setting: settingId,
+      ...(maxDirtyKeys === undefined ? {} : { maximum: maxDirtyKeys }),
+      schema: definition.sourceSchema,
+      table: definition.sourceTable,
+    },
+  );
+  // Freeze the explicit logical identity before looking at source current values.
+  const work = pending.map((item): Row & { key: string } => {
+    const key = definition.resolveLogicalKey(Object.freeze({ ...item.source_key_json }));
+    if (!object(key) || !isDeepStrictEqual(Object.keys(key).sort(), [...keyColumns].sort()))
+      throw new Error('Logical key does not match Setting');
+    projection(key, keyColumns);
+    return { ...item, key: keyText(key) };
+  });
+  // Explicit exception: execute the developer-owned DB source, never a mirrored literal.
+  const source = work.length
+    ? await client.query(...storedArguments(setting.source_sql_body, args))
+    : { rows: [] };
+  if (!Array.isArray(source.rows)) throw new Error('Source SQL must return one rowset');
+  const current = new Map<string, Row>();
+  for (const row of source.rows) {
+    const key = keyText(projection(row, keyColumns));
+    if (current.has(key)) throw new Error('Source SQL returned duplicate logical keys');
+    current.set(key, row);
+  }
+  let inserted = 0;
+  let skipped = 0;
+  const completed = new Set<string>();
+  for (const item of work) {
+    const link = links.find((l) => l.destination_link_id === item.destination_link_id)!;
+    const mutable = link.transfer_model === 'mutable';
+    const immutable = link.transfer_model === 'immutable';
+    const insertOnly = link.transfer_model === 'insert_only';
+    const row = current.get(item.key);
+    const context = JSON.stringify([link.destination_link_id, item.key]);
+    const duplicate = completed.has(context);
+    const [active] = duplicate
+      ? []
+      : await query(queries.activeSql, {
+          link: link.destination_link_id,
+          key: item.key,
+        });
+    const mapped =
+      duplicate || !row
+        ? {}
+        : Object.fromEntries(
+            Object.entries(link.mapping_definition.columns).map(([target, source]) => {
+              if (!Object.hasOwn(row, source as string) || row[source as string] === undefined)
+                throw new Error(`Missing mapping source: ${source}`);
+              return [target, row[source as string]];
+            }),
+          );
+    let noOp: boolean = (!row && !active) || (insertOnly && !!active);
+    if (active && row && !insertOnly) {
+      // Mutable identity is stable, including when key columns are excluded from comparison.
+      if (
+        mutable &&
+        !isDeepStrictEqual(
+          projection(mapped, link.destination_key_columns),
+          active.destination_key_json,
+        )
+      )
+        throw new Error('Mutable destination key does not match Active Black');
+      const excluded = link.diff_compare_excluded_columns?.columns ?? [];
+      const allowed = link.destination_columns.columns.map((c: Row) => c.name);
+      if (
+        (link.diff_compare_excluded_columns !== null &&
+          (!object(link.diff_compare_excluded_columns) ||
+            !Array.isArray(link.diff_compare_excluded_columns.columns))) ||
+        !Array.isArray(excluded) ||
+        excluded.some((c: unknown) => typeof c !== 'string' || !allowed.includes(c))
+      )
+        throw new Error('Invalid comparison exclusions');
+      if (!link.generated_reassessment_sql_body.trim())
+        throw new Error('Destination Link has no stored reassessment SQL');
+      if (Object.hasOwn(mapped, 'velvet_active_destination_key'))
+        throw new Error('Mapping collides with reserved reassessment parameter');
+      const prepared = bindStoredSql(link.generated_reassessment_sql_body, {
+        ...mapped,
+        velvet_active_destination_key: keyText(active.destination_key_json),
+      });
+      if (!prepared.names.includes('velvet_active_destination_key'))
+        throw new Error('Reassessment SQL must bind the Active Black destination key');
+      const comparison = await client.query(prepared.text, prepared.values);
+      if (
+        comparison.rows?.length !== 1 ||
+        typeof comparison.rows[0].current_values !== 'string' ||
+        typeof comparison.rows[0].active_values !== 'string'
+      )
+        throw new Error('Reassessment SQL must return one pair of JSON object texts');
+      const [decision] = await query(queries.compareSql, {
+        current: comparison.rows[0].current_values,
+        previous: comparison.rows[0].active_values,
+        columns: allowed.filter((c: string) => !excluded.includes(c)),
+        allColumns: allowed,
+        excluded,
+      });
+      if (!decision.valid)
+        throw new Error('Reassessment returned invalid destination comparison columns');
+      noOp = !decision.changed;
+    }
+    const skip = duplicate ? 'duplicate_ignore' : noOp ? 'no_op' : null;
+    const common = {
+      run: runId,
+      dirty: item.dirty_key_id,
+      setting: settingId,
+      link: link.destination_link_id,
+      key: item.key,
+      hash: hash(item.key),
+    };
+    const workFields = {
+      ...common,
+      model: link.transfer_model,
+      route: skip ? 'skipped' : link.transfer_model,
+      sourceExists: !!row,
+      insert: !!row && !skip && (!mutable || !active),
+      update: mutable && !!active && !!row && !skip,
+      delete: mutable && !!active && !row && !skip,
+      skip,
+      active: active?.active_black_id ?? null,
+      evaluated: active ? keyText(active.destination_key_json) : null,
+      red: immutable && !!active && !skip,
+    };
+    const resultFields = {
+      ...common,
+      status: skip ? 'skipped' : 'succeeded',
+      result:
+        skip ??
+        (active
+          ? mutable
+            ? row
+              ? 'black_update'
+              : 'physical_delete'
+            : row
+              ? 'red_then_black_insert'
+              : 'red'
+          : 'black_insert'),
+    };
+    const [{ work_item_id: workId }] =
+      routine && skip
+        ? await query(queries.skippedMetadataSql, {
+            fields: JSON.stringify({ ...workFields, ...resultFields }),
+          })
+        : await query(queries.workSql, workFields);
+    let processingRecorded = routine && !!skip;
+    if (!skip) {
+      if (active && mutable) {
+        const operation = row ? 'Black Update' : 'Physical Delete';
+        const statement = row
+          ? link.generated_update_transfer_sql_body
+          : link.generated_delete_transfer_sql_body;
+        if (!statement.trim()) throw new Error(`Destination Link has no stored ${operation} SQL`);
+        if (Object.hasOwn(mapped, 'velvet_active_destination_key'))
+          throw new Error('Mapping collides with reserved destination key parameter');
+        const prepared = bindStoredSql(statement, {
+          ...mapped,
+          velvet_active_destination_key: keyText(active.destination_key_json),
+        });
+        if (!prepared.names.includes('velvet_active_destination_key'))
+          throw new Error(`${operation} SQL must bind the Active Black destination key`);
+        if (row && Object.keys(mapped).some((name) => !prepared.names.includes(name)))
+          throw new Error('Stored Update SQL does not consume mapping');
+        const result = await client.query(prepared.text, prepared.values);
+        if (result.rows?.length !== 1 || result.rowCount !== 1)
+          throw new Error(`${operation} must return exactly one destination row`);
+        if (
+          !isDeepStrictEqual(
+            projection(result.rows[0], link.destination_key_columns),
+            active.destination_key_json,
+          )
+        )
+          throw new Error(`${operation} destination key does not match Active Black`);
+        if (!row) {
+          if (routine) {
+            await query(queries.retireMetadataSql, {
+              fields: JSON.stringify({ active: active.active_black_id, link: common.link }),
+              withLineage: false,
+            });
+          } else {
+            await retireRowActive(query, active.active_black_id, common.link);
+          }
+        }
+      }
+      if (active && immutable) {
+        if (!link.generated_red_transfer_sql_body.trim())
+          throw new Error('Destination has no stored Red Transfer SQL');
+        const prepared = bindStoredSql(
+          link.generated_red_transfer_sql_body,
+          active.destination_key_json,
+        );
+        if (link.destination_key_columns.some((name: string) => !prepared.names.includes(name)))
+          throw new Error('Red SQL must bind every original destination key column');
+        const red = await client.query(prepared.text, prepared.values);
+        if (red.rows?.length !== 1 || red.rowCount !== 1)
+          throw new Error('Red Transfer must return exactly one destination row');
+        const redKey = projection(red.rows[0], link.destination_key_columns);
+        if (isDeepStrictEqual(redKey, active.destination_key_json))
+          throw new Error('Red Transfer must create a different destination row');
+        const originalText = keyText(active.destination_key_json);
+        const redText = keyText(redKey);
+        const redFields = {
+          run: common.run,
+          setting: common.setting,
+          link: common.link,
+          work: workId,
+          key: originalText,
+          hash: hash(originalText),
+          table: link.destination_table_name,
+          destination: redText,
+          destinationHash: hash(redText),
+        };
+        if (routine) {
+          await query(queries.retireMetadataSql, {
+            fields: JSON.stringify({ ...redFields, active: active.active_black_id }),
+            withLineage: true,
+          });
+        } else {
+          await retireRowActive(query, active.active_black_id, common.link);
+          await query(queries.redLineageSql, redFields);
+        }
+      }
+      if (row && (!mutable || !active)) {
+        const prepared = bindStoredSql(link.generated_insert_transfer_sql_body, mapped);
+        // Every mapped column must actually be bound by the stored insertion statement.
+        if (Object.keys(mapped).some((name) => !prepared.names.includes(name)))
+          throw new Error('Stored Insert SQL does not consume mapping');
+        const result = await client.query(prepared.text, prepared.values);
+        if (result.rows?.length !== 1 || result.rowCount !== 1)
+          throw new Error('Black Insert must return exactly one destination row');
+        const destination = projection(result.rows[0], link.destination_key_columns);
+        const expected = Object.fromEntries(
+          link.destination_key_mapping.destinationKey.map((k: Row) => [
+            k.name,
+            row[k.sourceColumn],
+          ]),
+        );
+        if (!isDeepStrictEqual(destination, expected))
+          throw new Error('Inserted destination key does not match mapping');
+        const destinationText = keyText(destination);
+        if (routine) {
+          await query(queries.blackMetadataSql, {
+            fields: JSON.stringify({
+              ...resultFields,
+              work: workId,
+              table: link.destination_table_name,
+              destination: destinationText,
+              destinationHash: hash(destinationText),
+            }),
+            withLineage: !mutable,
+          });
+          processingRecorded = true;
+        } else {
+          await query(queries.activeInsertSql, {
+            link: common.link,
+            key: common.key,
+            hash: common.hash,
+            destination: destinationText,
+          });
+          if (!mutable)
+            await query(queries.lineageSql, {
+              run: common.run,
+              setting: common.setting,
+              link: common.link,
+              work: workId,
+              key: common.key,
+              hash: common.hash,
+              table: link.destination_table_name,
+              destination: destinationText,
+              destinationHash: hash(destinationText),
+            });
+        }
+        inserted++;
+      }
+    } else skipped++;
+    completed.add(context);
+    if (!processingRecorded) await query(queries.processingSql, { ...resultFields, work: workId });
+  }
+  return { inserted, skipped };
+}
+
+/** Retires one Active Black in row mode; callers retain model and Lineage ordering. */
+async function retireRowActive(
+  query: (statement: Sql, params: Record<string, unknown>) => Promise<Row[]>,
+  activeId: unknown,
+  linkId: unknown,
+): Promise<void> {
+  await query(queries.releaseActiveReferencesSql, {
+    active: activeId,
+    link: linkId,
+  });
+  const removed = await query(queries.activeDeleteSql, {
+    active: activeId,
+    link: linkId,
+  });
+  if (removed.length !== 1) throw new Error('Active Black retirement failed');
+}
+
 function storedArguments(text: string, params: Record<string, unknown>): [string, unknown[]] {
   const prepared = bindStoredSql(text, params);
   return [prepared.text, prepared.values];

@@ -1,0 +1,219 @@
+{
+  "baseline": "4b895265d8262fafd7a95221a344a7de8c93841e",
+  "candidate": "57491bee7ea16abc43e02ce3c4aefe840d37885a",
+  "sourceSha256": "c0590b63d6d511f44a5a22317c280454202f1c2666a23713854d716ae439df0f",
+  "evidence": {
+    "inlinedBoundaryTokensIdentical": true,
+    "sqlAndRoutineUnchanged": true,
+    "originalProtocolCopies": 2,
+    "candidateProtocolOwners": 1,
+    "candidateCalls": 2,
+    "helperInputs": 3,
+    "productionFilesAdded": 0,
+    "publicExportsAdded": 0
+  },
+  "cases": 10,
+  "traces": [
+    {
+      "context": "mutable-delete",
+      "fault": "none",
+      "events": [
+        {
+          "operation": "release",
+          "params": {
+            "active": "41",
+            "link": "2"
+          }
+        },
+        {
+          "operation": "delete",
+          "params": {
+            "active": "41",
+            "link": "2"
+          }
+        }
+      ],
+      "outcome": "success"
+    },
+    {
+      "context": "mutable-delete",
+      "fault": "zero",
+      "events": [
+        {
+          "operation": "release",
+          "params": {
+            "active": "41",
+            "link": "2"
+          }
+        },
+        {
+          "operation": "delete",
+          "params": {
+            "active": "41",
+            "link": "2"
+          }
+        }
+      ],
+      "outcome": "Active Black retirement failed"
+    },
+    {
+      "context": "mutable-delete",
+      "fault": "multiple",
+      "events": [
+        {
+          "operation": "release",
+          "params": {
+            "active": "41",
+            "link": "2"
+          }
+        },
+        {
+          "operation": "delete",
+          "params": {
+            "active": "41",
+            "link": "2"
+          }
+        }
+      ],
+      "outcome": "Active Black retirement failed"
+    },
+    {
+      "context": "mutable-delete",
+      "fault": "release",
+      "events": [
+        {
+          "operation": "release",
+          "params": {
+            "active": "41",
+            "link": "2"
+          }
+        }
+      ],
+      "outcome": "injected release"
+    },
+    {
+      "context": "mutable-delete",
+      "fault": "delete",
+      "events": [
+        {
+          "operation": "release",
+          "params": {
+            "active": "41",
+            "link": "2"
+          }
+        },
+        {
+          "operation": "delete",
+          "params": {
+            "active": "41",
+            "link": "2"
+          }
+        }
+      ],
+      "outcome": "injected delete"
+    },
+    {
+      "context": "immutable-red",
+      "fault": "none",
+      "events": [
+        {
+          "operation": "release",
+          "params": {
+            "active": "87",
+            "link": "5"
+          }
+        },
+        {
+          "operation": "delete",
+          "params": {
+            "active": "87",
+            "link": "5"
+          }
+        }
+      ],
+      "outcome": "success"
+    },
+    {
+      "context": "immutable-red",
+      "fault": "zero",
+      "events": [
+        {
+          "operation": "release",
+          "params": {
+            "active": "87",
+            "link": "5"
+          }
+        },
+        {
+          "operation": "delete",
+          "params": {
+            "active": "87",
+            "link": "5"
+          }
+        }
+      ],
+      "outcome": "Active Black retirement failed"
+    },
+    {
+      "context": "immutable-red",
+      "fault": "multiple",
+      "events": [
+        {
+          "operation": "release",
+          "params": {
+            "active": "87",
+            "link": "5"
+          }
+        },
+        {
+          "operation": "delete",
+          "params": {
+            "active": "87",
+            "link": "5"
+          }
+        }
+      ],
+      "outcome": "Active Black retirement failed"
+    },
+    {
+      "context": "immutable-red",
+      "fault": "release",
+      "events": [
+        {
+          "operation": "release",
+          "params": {
+            "active": "87",
+            "link": "5"
+          }
+        }
+      ],
+      "outcome": "injected release"
+    },
+    {
+      "context": "immutable-red",
+      "fault": "delete",
+      "events": [
+        {
+          "operation": "release",
+          "params": {
+            "active": "87",
+            "link": "5"
+          }
+        },
+        {
+          "operation": "delete",
+          "params": {
+            "active": "87",
+            "link": "5"
+          }
+        }
+      ],
+      "outcome": "injected delete"
+    }
+  ],
+  "limits": [
+    "Scripted query traces do not prove PostgreSQL FK, locking or rollback behavior.",
+    "Full Verify and deployment gates remain required.",
+    "No developer-time, AI-speed or production failure-rate gain measured."
+  ]
+}

@@ -1,0 +1,573 @@
+{
+  "baseline": "03b998ee3b768e2a03af763714627523243b3cc2",
+  "candidate": "2783d8f0e941e1f3872cc6056193c9722a543191",
+  "candidateSource": "working tree; hashes identify measured files",
+  "sourceHashes": {
+    "src/features/execute-transfer/boundary.ts": "6b006f317b7bd0e910fa6651ccd85631e1c3badc3f7fd1de0bbbeaf7accf9fb8",
+    "src/features/execute-transfer/link-mapping.ts": "0fa37e2b06a697cb72d0d287bab0d444b88c58084b8a43754fc3a9f20d4ff33c"
+  },
+  "equivalence": {
+    "validatorTokens": true,
+    "objectPredicateTokens": true,
+    "entireCoordinatorAfterInliningTokens": true,
+    "noInputMutation": true
+  },
+  "fixtureCount": 39,
+  "fixtures": [
+    {
+      "fixtureName": "valid composite",
+      "accepted": true
+    },
+    {
+      "fixtureName": "mapping 1",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "mapping 2",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "mapping 3",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "mapping 4",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "mapping 5",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "mapping 6",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "mapping 7",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "mapping 8",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "mapping 9",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "mapping 10",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "mapping 11",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "allowed 12",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "allowed 13",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "allowed 14",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "allowed 15",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "allowed 16",
+      "accepted": false,
+      "type": "TypeError",
+      "name": "TypeError",
+      "message": "link.destination_columns?.columns?.map is not a function"
+    },
+    {
+      "fixtureName": "allowed 17",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "allowed 18",
+      "accepted": false,
+      "type": "TypeError",
+      "name": "TypeError",
+      "message": "Cannot read properties of null (reading 'name')"
+    },
+    {
+      "fixtureName": "keys 19",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "keys 20",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "keys 21",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "keys 22",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "keys 23",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "keys 24",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "keys 25",
+      "accepted": false,
+      "type": "TypeError",
+      "name": "TypeError",
+      "message": "Cannot read properties of null (reading 'name')"
+    },
+    {
+      "fixtureName": "keys 26",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "keys 27",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "destination columns 28",
+      "accepted": false,
+      "type": "TypeError",
+      "name": "TypeError",
+      "message": "link.destination_key_columns is not iterable"
+    },
+    {
+      "fixtureName": "destination columns 29",
+      "accepted": false,
+      "type": "TypeError",
+      "name": "TypeError",
+      "message": "link.destination_key_columns is not iterable"
+    },
+    {
+      "fixtureName": "destination columns 30",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "destination columns 31",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "destination columns 32",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "destination columns 33",
+      "accepted": true
+    },
+    {
+      "fixtureName": "wrong mapped key source",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    },
+    {
+      "fixtureName": "valid single",
+      "accepted": true
+    },
+    {
+      "fixtureName": "null-prototype mapping",
+      "accepted": true
+    },
+    {
+      "fixtureName": "competing malformed fields",
+      "accepted": false,
+      "type": "TypeError",
+      "name": "TypeError",
+      "message": "link.destination_columns?.columns?.map is not a function"
+    },
+    {
+      "fixtureName": "empty mapping short-circuits malformed keys",
+      "accepted": false,
+      "type": "Error",
+      "name": "Error",
+      "message": "Invalid Destination Link mapping"
+    }
+  ],
+  "traceCount": 9,
+  "traces": [
+    {
+      "name": "valid legacy",
+      "events": [
+        [
+          "begin"
+        ],
+        [
+          "setting",
+          [
+            "1"
+          ]
+        ],
+        [
+          "links",
+          [
+            "1"
+          ]
+        ],
+        [
+          "post-validation query",
+          "insert into rawsql_transfer.run(setting_id, run_arguments, run_status, started_at)\n  values ($1, cast($2 as jsonb), 'running', current_timestamp) returning run_id",
+          [
+            "1",
+            "{}"
+          ]
+        ],
+        [
+          "rollback"
+        ],
+        [
+          "error",
+          "Error",
+          "probe stops before Run creation"
+        ]
+      ]
+    },
+    {
+      "name": "mapping legacy",
+      "events": [
+        [
+          "begin"
+        ],
+        [
+          "setting",
+          [
+            "1"
+          ]
+        ],
+        [
+          "links",
+          [
+            "1"
+          ]
+        ],
+        [
+          "rollback"
+        ],
+        [
+          "error",
+          "Error",
+          "Invalid Destination Link mapping"
+        ]
+      ]
+    },
+    {
+      "name": "date precedes mapping",
+      "events": [
+        [
+          "begin"
+        ],
+        [
+          "setting",
+          [
+            "1"
+          ]
+        ],
+        [
+          "links",
+          [
+            "1"
+          ]
+        ],
+        [
+          "rollback"
+        ],
+        [
+          "error",
+          "Error",
+          "Mutable destinations cannot require posting-date lower-bound control"
+        ]
+      ]
+    },
+    {
+      "name": "SQL precedes mapping",
+      "events": [
+        [
+          "begin"
+        ],
+        [
+          "setting",
+          [
+            "1"
+          ]
+        ],
+        [
+          "links",
+          [
+            "1"
+          ]
+        ],
+        [
+          "rollback"
+        ],
+        [
+          "error",
+          "Error",
+          "Destination Link has no stored Black Insert SQL"
+        ]
+      ]
+    },
+    {
+      "name": "set skips legacy SQL",
+      "events": [
+        [
+          "begin"
+        ],
+        [
+          "setting",
+          [
+            "1"
+          ]
+        ],
+        [
+          "links",
+          [
+            "1"
+          ]
+        ],
+        [
+          "rollback"
+        ],
+        [
+          "error",
+          "Error",
+          "Invalid Destination Link mapping"
+        ]
+      ]
+    },
+    {
+      "name": "set profile follows mapping",
+      "events": [
+        [
+          "begin"
+        ],
+        [
+          "setting",
+          [
+            "1"
+          ]
+        ],
+        [
+          "links",
+          [
+            "1"
+          ]
+        ],
+        [
+          "rollback"
+        ],
+        [
+          "error",
+          "ZodError",
+          "[\n  {\n    \"code\": \"invalid_value\",\n    \"values\": [\n      1\n    ],\n    \"path\": [\n      \"version\"\n    ],\n    \"message\": \"Invalid input: expected 1\"\n  },\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"revision\"\n    ],\n    \"message\": \"Invalid input: expected string, received undefined\"\n  },\n  {\n    \"code\": \"invalid_value\",\n    \"values\": [\n      true\n    ],\n    \"path\": [\n      \"independentKeys\"\n    ],\n    \"message\": \"Invalid input: expected true\"\n  },\n  {\n    \"expected\": \"number\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"maxDirtyKeys\"\n    ],\n    \"message\": \"Invalid input: expected number, received undefined\"\n  },\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"sourceSchema\"\n    ],\n    \"message\": \"Invalid input: expected string, received undefined\"\n  },\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"sourceTable\"\n    ],\n    \"message\": \"Invalid input: expected string, received undefined\"\n  },\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"sourceSqlSha256\"\n    ],\n    \"message\": \"Invalid input: expected string, received undefined\"\n  },\n  {\n    \"expected\": \"object\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"sourceIdentity\"\n    ],\n    \"message\": \"Invalid input: expected object, received undefined\"\n  },\n  {\n    \"expected\": \"object\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"dirtyIdentity\"\n    ],\n    \"message\": \"Invalid input: expected object, received undefined\"\n  }\n]"
+        ]
+      ]
+    },
+    {
+      "name": "first Link wins",
+      "events": [
+        [
+          "begin"
+        ],
+        [
+          "setting",
+          [
+            "1"
+          ]
+        ],
+        [
+          "links",
+          [
+            "1"
+          ]
+        ],
+        [
+          "rollback"
+        ],
+        [
+          "error",
+          "Error",
+          "Invalid Destination Link mapping"
+        ]
+      ]
+    },
+    {
+      "name": "second Link reached",
+      "events": [
+        [
+          "begin"
+        ],
+        [
+          "setting",
+          [
+            "1"
+          ]
+        ],
+        [
+          "links",
+          [
+            "1"
+          ]
+        ],
+        [
+          "rollback"
+        ],
+        [
+          "error",
+          "Error",
+          "Mutable destinations cannot require posting-date lower-bound control"
+        ]
+      ]
+    },
+    {
+      "name": "disabled Link ignored",
+      "events": [
+        [
+          "begin"
+        ],
+        [
+          "setting",
+          [
+            "1"
+          ]
+        ],
+        [
+          "links",
+          [
+            "1"
+          ]
+        ],
+        [
+          "post-validation query",
+          "insert into rawsql_transfer.run(setting_id, run_arguments, run_status, started_at)\n  values ($1, cast($2 as jsonb), 'running', current_timestamp) returning run_id",
+          [
+            "1",
+            "{}"
+          ]
+        ],
+        [
+          "rollback"
+        ],
+        [
+          "error",
+          "Error",
+          "probe stops before Run creation"
+        ]
+      ]
+    }
+  ],
+  "dependencies": {
+    "baselineDirectImports": [
+      "node:crypto",
+      "@mk3008/serene",
+      "node:util",
+      "./trusted-sql.js",
+      "./queries.js",
+      "./set-phase/config.js",
+      "./set-phase/execute.js"
+    ],
+    "validatorDirectImports": [
+      "node:util"
+    ],
+    "validatorParameters": [
+      "link",
+      "keyColumns"
+    ]
+  },
+  "limits": [
+    "Trace client is not PostgreSQL.",
+    "Baseline oracle may preserve existing defects; expected-outcome tests and full DB gates remain required.",
+    "No timing, fault-rate, production diagnostic-context or AI-speed gain measured."
+  ]
+}

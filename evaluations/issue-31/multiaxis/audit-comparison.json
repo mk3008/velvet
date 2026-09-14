@@ -1,0 +1,19 @@
+{
+  "baseline": "03b998ee3b768e2a03af763714627523243b3cc2",
+  "baselineEvidence": "../sql-audit.json",
+  "beforeCounts": {
+    "UNRESOLVED": 32,
+    "SCREENED_SOURCE": 52,
+    "SINK_ALIAS": 46,
+    "EXTERNAL_SQL": 4
+  },
+  "afterCounts": {
+    "UNRESOLVED": 32,
+    "SCREENED_SOURCE": 52,
+    "SINK_ALIAS": 46,
+    "EXTERNAL_SQL": 4
+  },
+  "findingsExcludingLineColumnIdentical": true,
+  "reproduce": "pnpm audit:sql",
+  "review": "All SQL tokens, binding paths and call order are unchanged by inline reconstruction. Existing unresolved/external SQL paths remain review-required."
+}
