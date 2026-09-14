@@ -17,7 +17,7 @@
       "constraints": {
         "chk_transfer_destination_transfer_model": {
           "designNotes": [
-            "Destination の転送モデルは immutable または mutable のどちらかに限定する。転送モデルは後続の赤伝、黒伝更新、物理削除の判断前提になる。"
+            "Destination の転送モデルは immutable、mutable、insert_only。転送先側がモデルを所有し、履歴の評価時モデルはWork Itemへ固定する。"
           ]
         },
         "chk_transfer_destination_generated_red_transfer_sql_status": {
@@ -64,9 +64,7 @@
           }
         },
         "destination_key_columns": {
-          "sample": [
-            "journal_id"
-          ]
+          "sample": ["journal_id"]
         },
         "sequence_expression_definition": {
           "sample": {
@@ -77,9 +75,7 @@
           "sample": "immutable"
         },
         "sign_inversion_columns": {
-          "sample": [
-            "amount"
-          ]
+          "sample": ["amount"]
         },
         "date_lower_bound_adjustments": {
           "sample": {
@@ -87,10 +83,7 @@
               {
                 "destinationColumn": "journal_date",
                 "functionName": "fn_lower_limit_date",
-                "argumentColumns": [
-                  "shop_id",
-                  "journal_date"
-                ],
+                "argumentColumns": ["shop_id", "journal_date"],
                 "adjustmentNotice": {
                   "destinationColumn": "system_note",
                   "value": "date lower bound adjusted"
@@ -124,7 +117,8 @@
         "set_phase_definition": {
           "sample": {},
           "designNotes": [
-            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。"
+            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。",
+            "複数Linkから共有するDestination所有のRedと書込検証SQL。source mappingは持たせない。"
           ]
         }
       }
@@ -190,7 +184,8 @@
         "set_phase_definition": {
           "sample": {},
           "designNotes": [
-            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。"
+            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。",
+            "NULLが従来経路、非NULLが明示opt-in。DBはobjectまで、version/hash/実行可能性はlocked masterを読むruntimeで検証する。"
           ]
         }
       },
@@ -215,9 +210,7 @@
           ]
         },
         "uq_setting_destination_execution_order": {
-          "designNotes": [
-            "同一 Transfer Setting 内の転送順序を一意にし、転送順の曖昧さを避ける。"
-          ]
+          "designNotes": ["同一 Transfer Setting 内の転送順序を一意にし、転送順の曖昧さを避ける。"]
         },
         "uq_destination_link_setting_identity": {
           "designNotes": [
@@ -248,9 +241,7 @@
         },
         "destination_key_mapping": {
           "sample": {
-            "sourceKey": [
-              "sales_id"
-            ],
+            "sourceKey": ["sales_id"],
             "destinationKey": [
               {
                 "name": "journal_id",
@@ -275,10 +266,7 @@
         },
         "diff_compare_excluded_columns": {
           "sample": {
-            "columns": [
-              "journal_id",
-              "created_at"
-            ]
+            "columns": ["journal_id", "created_at"]
           }
         },
         "generated_insert_transfer_sql_body": {
@@ -316,7 +304,8 @@
         "set_phase_definition": {
           "sample": {},
           "designNotes": [
-            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。"
+            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。",
+            "Link固有の評価とBlack SQL。SettingがNULLなら残存definitionは不活性。"
           ]
         }
       }
@@ -324,12 +313,8 @@
     "rawsql_transfer.active_black": {
       "decision": "active_black は転送プロセス用の current-state table とし、履歴や転送先行からの逆引きは持たせない。",
       "reviewRisk": "identity-boundary",
-      "conceptRefs": [
-        "active-black"
-      ],
-      "processRefs": [
-        "transfer-execution"
-      ],
+      "conceptRefs": ["active-black"],
+      "processRefs": ["transfer-execution"],
       "tradeoff": [
         "Destination Link と source key から現在有効な黒伝を高速に見つけるため、source_key_hash をlookup補助値として保持する。",
         "転送先行からの追跡は lineage に寄せ、active_black には destination_key_hash を持たせない。"
@@ -374,9 +359,7 @@
           "sample": {
             "sales_id": 123
           },
-          "designNotes": [
-            "この値は、Destination Link 文脈における転送元論理行の正本キーである。"
-          ]
+          "designNotes": ["この値は、Destination Link 文脈における転送元論理行の正本キーである。"]
         },
         "source_key_hash": {
           "sample": "sha256:source-key-json",
@@ -407,9 +390,7 @@
       ],
       "constraints": {
         "idx_dirty_key_source_created_at": {
-          "designNotes": [
-            "転送対象候補を発生元テーブルと登録順で読むための基本lookup経路である。"
-          ]
+          "designNotes": ["転送対象候補を発生元テーブルと登録順で読むための基本lookup経路である。"]
         }
       },
       "columns": {
@@ -452,7 +433,8 @@
         "execution_configuration": {
           "sample": {},
           "designNotes": [
-            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。"
+            "nullは従来経路。immutable set-phase v1の完全SQLとSHA-256・revision契約は docs/decisions/0013-product-set-phases.md を参照。空objectは実行可能なopt-inではない。",
+            "そのRunで検証したmaster設定の履歴証拠。編集可能なmasterへのFKでは実行時SQLを復元できないため全文を保持する。SQL定義の正本やapprovalではなく、従来経路ではNULL。"
           ]
         }
       }
@@ -507,6 +489,16 @@
         "idx_work_item_destination_source": {
           "designNotes": [
             "Destination Link と source_key_hash で作業対象を絞り込むための大規模lookup経路である。最終的な同一性は source_key_json で確認する。"
+          ]
+        },
+        "chk_work_item_route_model": {
+          "designNotes": [
+            "非skipのrouteは評価時に固定したtransfer_modelと一致する。後から変更されるDestination masterとは比較しない。"
+          ]
+        },
+        "chk_work_item_operation_model": {
+          "designNotes": [
+            "Redはimmutable、UPDATE/DELETEはmutableに限定する。Black INSERT/UPDATEは転送元存在時、DELETEは不在時のみ。INSERTとUPDATEを同時に要求しない。Activeのlive FKは退役でNULLになるため条件に含めない。"
           ]
         }
       },
@@ -579,6 +571,11 @@
           "designNotes": [
             "Lineage が Work Item を参照する場合、Work Item、Transfer Run、setting、Destination Link の文脈が一致することをDBで保証する。"
           ]
+        },
+        "chk_lineage_operation_source_kind": {
+          "designNotes": [
+            "Black Insertの由来はtransfer_source、Red Insertの由来はreversed_destination_row。キーが何を識別するかを永続化時に保証する。"
+          ]
         }
       },
       "columns": {
@@ -642,6 +639,11 @@
         "fk_dirty_key_processing_work_item_context": {
           "designNotes": [
             "Dirty Key Processing が参照する Work Item と、run、Dirty Key、setting、Destination Link の文脈が一致することをDBで保証する。"
+          ]
+        },
+        "chk_dirty_key_processing_final_result": {
+          "designNotes": [
+            "確定結果はskippedならno_op/duplicate_ignore、succeededなら転送操作を記録する。failedの結果とerror_messageの必須性は追加規定しない。"
           ]
         }
       },

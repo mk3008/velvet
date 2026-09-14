@@ -55,6 +55,39 @@ create table rawsql_transfer.work_item (
       )
     )
   ),
+  constraint chk_work_item_route_model check (
+    route_type = 'skipped'
+    or route_type = transfer_model
+  ),
+  constraint chk_work_item_operation_model check (
+    (
+      not requires_red_transfer
+      or transfer_model = 'immutable'
+    )
+    and (
+      not requires_black_update_transfer
+      or transfer_model = 'mutable'
+    )
+    and (
+      not requires_physical_delete_transfer
+      or transfer_model = 'mutable'
+    )
+    and (
+      not (
+        requires_black_insert_transfer
+        or requires_black_update_transfer
+      )
+      or source_exists
+    )
+    and (
+      not requires_physical_delete_transfer
+      or not source_exists
+    )
+    and not (
+      requires_black_insert_transfer
+      and requires_black_update_transfer
+    )
+  ),
   constraint fk_work_item_run_setting foreign key (run_id, setting_id) references rawsql_transfer.run (run_id, setting_id),
   constraint fk_work_item_setting_destination_link foreign key (setting_id, destination_link_id) references rawsql_transfer.destination_link (setting_id, destination_link_id),
   constraint fk_work_item_active_black_destination_link foreign key (active_black_id, destination_link_id) references rawsql_transfer.active_black (active_black_id, destination_link_id),
