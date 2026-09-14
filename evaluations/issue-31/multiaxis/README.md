@@ -10,7 +10,10 @@ benefits are recorded separately in [the original report](../README.md).
 [Protocol](protocol.md) local commit `9e33f3b`, published
 `88955319a3c5a9daf2b1e66a9d61771dc16230ee`, same tree
 `82cc6dbe96d6e0d3255a2c48e9dfdb5aa3061f4c`, preceded runtime changes.
-[Selection](selection.md) commit `5469ec2` preceded runtime changes. The
+[Selection](selection.md) local commit `5469ec2` (published
+`8986317f89d624e4f2bebe03094e4af5a692f0ce`) preceded runtime changes.
+Published runtime `f2a1e22d86ab6dac313b8a242ef4db005c773d41` has the same tree
+`462313785c8cc75c8c87ba207d308be1d6ac95f6` as local `e889709`. The
 [engineering basis](../engineering-basis.md) distinguishes established precedent,
 Velvet observations and agent judgments. [Rule v1](rule-v1.md) stays historical;
 [rule v2](../rule.md) broadens consideration beyond divergent change.
@@ -62,7 +65,7 @@ Do not sum them. Local testability/replay and reduced direct import dependencies
 justify this bounded candidate; recovery/diagnosis gains do not justify it.
 
 Costs: one production file (31 lines), one internal callable export, two arguments,
-one additional production import/call hop, and the small object predicate copy.
+one additional production import/call hop, a local Row type alias and the small object predicate copy.
 No root package export, public type, DI interface, normalized data structure,
 registry, external dependency or mandatory file convention was introduced.
 
@@ -108,9 +111,31 @@ Raw outputs and file hashes: [measurements.json](measurements.json).
 ## Verification and limits
 
 Local comparison passed: 39 differential fixtures, nine placement traces, token
-and input-mutation checks. Runtime typecheck/build passed. Full local DB-skipped
-Verify, PostgreSQL CI, SQL audit and independent post-change review are pending
-at this report draft; final evidence will replace this paragraph before delivery.
+and input-mutation checks. Local pinned pnpm 10.19.0 / Node 24 Verify passed: 52 tooling tests and 55 main
+tests (including 16 new validator tests), with 231 DB-backed cases explicitly
+skipped locally. Typecheck/build, metadata/doc checks and SQL audit passed.
+[Audit comparison](audit-comparison.json): 52 screened, 46 SINK_ALIAS, 32 UNRESOLVED
+and four EXTERNAL_SQL findings; every finding except its line/column is identical
+to B1. Unresolved/external paths remain review-required. SQL tokens/binding/order
+are unchanged.
+
+Published runtime `f2a1e22d86ab6dac313b8a242ef4db005c773d41`:
+
+- PostgreSQL 18 [Verify 34841357206](https://github.com/mk3008/velvet/actions/runs/34841357206)
+  passed: **52 tooling + 286 main = 338 tests**, no skips, plus the existing
+  materialization check. This supplies all 231 locally skipped DB cases.
+- [Issue 25 deployment 34841357195](https://github.com/mk3008/velvet/actions/runs/34841357195)
+  passed, including the existing production-boundary deployment evaluation and
+  artifact upload. No new throughput or deployment-fitness claim is inferred.
+- [Independent fresh Alder review](post-review.md) found no production blocker;
+  independently ran 39 differential fixtures, nine traces and 16 direct tests.
+  It identified an evidence-label collision: rejected outcomes overwrote fixture
+  names with the error name. The harness now uses fixtureName and measurements
+  were regenerated; the reviewer confirmed the correction. This changed evidence
+  labeling, not assertions, runtime behavior or existing regression tests.
+
+Final documentation reconciliation preserves the verified runtime source; final
+head CI links are recorded in the PR to avoid a self-referential evidence commit.
 
 Environment note: the default pnpm wrapper resolved to 11.19.0 and attempted an
 install before formatting; it aborted without a TTY. The cached project-pinned
@@ -118,7 +143,8 @@ install before formatting; it aborted without a TTY. The cached project-pinned
 
 No defect rate, developer/AI time, live diagnostic context or whole-Run replay
 improvement was measured. Native malformed-value errors are preserved rather than
-hardened. The source token proof is scoped to this mechanical extraction and does
+hardened. Error stacks gain a helper frame; equality covers error type/message,
+not byte-identical stacks. The source token proof is scoped to this mechanical extraction and does
 not establish PostgreSQL correctness. Agent judgment and source anchors cannot
 replace operational measurements. No broader candidate tournament or Alder edit.
 

@@ -12,7 +12,7 @@ and set-phase dispatch subsequently supply concrete separate change reasons.
 
 The [engineering basis](../../evaluations/issue-31/engineering-basis.md) separates
 Parnas/Fowler/Beck precedent, Velvet observations and our judgment. The
-[frozen rule](../../evaluations/issue-31/rule.md) requires actual change evidence,
+[frozen v1 rule](../../evaluations/issue-31/multiaxis/rule-v1.md) requires actual change evidence,
 a task exposing unrelated reasoning or coordinated edits, a keep alternative,
 and explicit invariant/verification ownership. Neither LOC nor named architecture
 is an action criterion. [Protocol](../../evaluations/issue-31/protocol.md) was
