@@ -1,0 +1,455 @@
+{
+  "baseline": "0086480a3c528d1d2a52d49056d90616234f5a38",
+  "results": [
+    {
+      "run": "r1",
+      "variant": "baseline",
+      "stages": {
+        "overview": {
+          "commands": 3,
+          "displayedSourceLines": 645,
+          "uniqueSourceLines": 645,
+          "newlyExposedSourceLines": 645,
+          "outputBytes": 39927,
+          "files": [
+            "boundary.ts",
+            "queries.ts"
+          ],
+          "fileTransitions": 1,
+          "clearlyUnrelatedLocalDetailUniqueLines": 367,
+          "cumulativeUniqueSourceLines": 645
+        },
+        "target": {
+          "commands": 2,
+          "displayedSourceLines": 171,
+          "uniqueSourceLines": 171,
+          "newlyExposedSourceLines": 0,
+          "outputBytes": 9816,
+          "files": [
+            "boundary.ts"
+          ],
+          "fileTransitions": 1,
+          "clearlyUnrelatedLocalDetailUniqueLines": 0,
+          "cumulativeUniqueSourceLines": 645
+        },
+        "broad": {
+          "commands": 2,
+          "displayedSourceLines": 108,
+          "uniqueSourceLines": 108,
+          "newlyExposedSourceLines": 108,
+          "outputBytes": 6009,
+          "files": [
+            "link-mapping.ts",
+            "trusted-sql.ts"
+          ],
+          "fileTransitions": 2,
+          "clearlyUnrelatedLocalDetailUniqueLines": 0,
+          "cumulativeUniqueSourceLines": 753
+        }
+      },
+      "totalUniqueSourceLines": 753,
+      "totalFileTransitions": 4,
+      "allFiles": [
+        "boundary.ts",
+        "queries.ts",
+        "link-mapping.ts",
+        "trusted-sql.ts"
+      ],
+      "cumulativeLocalDeclarationCoverage": {
+        "Row": {
+          "availableLines": 1,
+          "exposedLines": 1
+        },
+        "TransferExecutionClient": {
+          "availableLines": 6,
+          "exposedLines": 6
+        },
+        "TransferExecutionDefinition": {
+          "availableLines": 7,
+          "exposedLines": 7
+        },
+        "TransferExecutionError": {
+          "availableLines": 10,
+          "exposedLines": 10
+        },
+        "object": {
+          "availableLines": 3,
+          "exposedLines": 3
+        },
+        "keyText": {
+          "availableLines": 22,
+          "exposedLines": 22
+        },
+        "hash": {
+          "availableLines": 1,
+          "exposedLines": 1
+        },
+        "projection": {
+          "availableLines": 9,
+          "exposedLines": 9
+        },
+        "executeTransfer": {
+          "availableLines": 131,
+          "exposedLines": 131
+        },
+        "executeRowTransfer": {
+          "availableLines": 283,
+          "exposedLines": 283
+        },
+        "executeMutableDestination": {
+          "availableLines": 33,
+          "exposedLines": 33
+        },
+        "retireRowActive": {
+          "availableLines": 15,
+          "exposedLines": 15
+        },
+        "storedArguments": {
+          "availableLines": 4,
+          "exposedLines": 4
+        }
+      }
+    },
+    {
+      "run": "r2",
+      "variant": "candidate",
+      "stages": {
+        "overview": {
+          "commands": 6,
+          "displayedSourceLines": 274,
+          "uniqueSourceLines": 274,
+          "newlyExposedSourceLines": 274,
+          "outputBytes": 18734,
+          "files": [
+            "boundary.ts",
+            "main.ts",
+            "queries.ts",
+            "link-mapping.ts"
+          ],
+          "fileTransitions": 3,
+          "clearlyUnrelatedLocalDetailUniqueLines": 0,
+          "cumulativeUniqueSourceLines": 274
+        },
+        "target": {
+          "commands": 1,
+          "displayedSourceLines": 417,
+          "uniqueSourceLines": 417,
+          "newlyExposedSourceLines": 417,
+          "outputBytes": 23164,
+          "files": [
+            "row-work.ts"
+          ],
+          "fileTransitions": 1,
+          "clearlyUnrelatedLocalDetailUniqueLines": 90,
+          "cumulativeUniqueSourceLines": 691
+        },
+        "broad": {
+          "commands": 1,
+          "displayedSourceLines": 77,
+          "uniqueSourceLines": 77,
+          "newlyExposedSourceLines": 77,
+          "outputBytes": 4189,
+          "files": [
+            "trusted-sql.ts"
+          ],
+          "fileTransitions": 1,
+          "clearlyUnrelatedLocalDetailUniqueLines": 0,
+          "cumulativeUniqueSourceLines": 768
+        }
+      },
+      "totalUniqueSourceLines": 768,
+      "totalFileTransitions": 5,
+      "allFiles": [
+        "boundary.ts",
+        "main.ts",
+        "queries.ts",
+        "link-mapping.ts",
+        "row-work.ts",
+        "trusted-sql.ts"
+      ],
+      "cumulativeLocalDeclarationCoverage": {
+        "executeTransfer": {
+          "availableLines": 131,
+          "exposedLines": 131
+        },
+        "Row": {
+          "availableLines": 1,
+          "exposedLines": 1
+        },
+        "TransferExecutionClient": {
+          "availableLines": 6,
+          "exposedLines": 6
+        },
+        "TransferExecutionDefinition": {
+          "availableLines": 7,
+          "exposedLines": 7
+        },
+        "TransferExecutionError": {
+          "availableLines": 10,
+          "exposedLines": 10
+        },
+        "object": {
+          "availableLines": 3,
+          "exposedLines": 3
+        },
+        "keyText": {
+          "availableLines": 22,
+          "exposedLines": 22
+        },
+        "hash": {
+          "availableLines": 1,
+          "exposedLines": 1
+        },
+        "projection": {
+          "availableLines": 9,
+          "exposedLines": 9
+        },
+        "executeRowTransfer": {
+          "availableLines": 283,
+          "exposedLines": 283
+        },
+        "executeMutableDestination": {
+          "availableLines": 33,
+          "exposedLines": 33
+        },
+        "retireRowActive": {
+          "availableLines": 15,
+          "exposedLines": 15
+        },
+        "storedArguments": {
+          "availableLines": 4,
+          "exposedLines": 4
+        }
+      }
+    },
+    {
+      "run": "r3",
+      "variant": "baseline",
+      "stages": {
+        "overview": {
+          "commands": 3,
+          "displayedSourceLines": 613,
+          "uniqueSourceLines": 613,
+          "newlyExposedSourceLines": 613,
+          "outputBytes": 37411,
+          "files": [
+            "boundary.ts",
+            "queries.ts"
+          ],
+          "fileTransitions": 1,
+          "clearlyUnrelatedLocalDetailUniqueLines": 367,
+          "cumulativeUniqueSourceLines": 613
+        },
+        "target": {
+          "commands": 1,
+          "displayedSourceLines": 99,
+          "uniqueSourceLines": 99,
+          "newlyExposedSourceLines": 32,
+          "outputBytes": 8621,
+          "files": [
+            "queries.ts"
+          ],
+          "fileTransitions": 0,
+          "clearlyUnrelatedLocalDetailUniqueLines": 0,
+          "cumulativeUniqueSourceLines": 645
+        },
+        "broad": {
+          "commands": 2,
+          "displayedSourceLines": 108,
+          "uniqueSourceLines": 108,
+          "newlyExposedSourceLines": 108,
+          "outputBytes": 6009,
+          "files": [
+            "trusted-sql.ts",
+            "link-mapping.ts"
+          ],
+          "fileTransitions": 2,
+          "clearlyUnrelatedLocalDetailUniqueLines": 0,
+          "cumulativeUniqueSourceLines": 753
+        }
+      },
+      "totalUniqueSourceLines": 753,
+      "totalFileTransitions": 3,
+      "allFiles": [
+        "boundary.ts",
+        "queries.ts",
+        "trusted-sql.ts",
+        "link-mapping.ts"
+      ],
+      "cumulativeLocalDeclarationCoverage": {
+        "Row": {
+          "availableLines": 1,
+          "exposedLines": 1
+        },
+        "TransferExecutionClient": {
+          "availableLines": 6,
+          "exposedLines": 6
+        },
+        "TransferExecutionDefinition": {
+          "availableLines": 7,
+          "exposedLines": 7
+        },
+        "TransferExecutionError": {
+          "availableLines": 10,
+          "exposedLines": 10
+        },
+        "object": {
+          "availableLines": 3,
+          "exposedLines": 3
+        },
+        "keyText": {
+          "availableLines": 22,
+          "exposedLines": 22
+        },
+        "hash": {
+          "availableLines": 1,
+          "exposedLines": 1
+        },
+        "projection": {
+          "availableLines": 9,
+          "exposedLines": 9
+        },
+        "executeTransfer": {
+          "availableLines": 131,
+          "exposedLines": 131
+        },
+        "executeRowTransfer": {
+          "availableLines": 283,
+          "exposedLines": 283
+        },
+        "executeMutableDestination": {
+          "availableLines": 33,
+          "exposedLines": 33
+        },
+        "retireRowActive": {
+          "availableLines": 15,
+          "exposedLines": 15
+        },
+        "storedArguments": {
+          "availableLines": 4,
+          "exposedLines": 4
+        }
+      }
+    },
+    {
+      "run": "r4",
+      "variant": "candidate",
+      "stages": {
+        "overview": {
+          "commands": 4,
+          "displayedSourceLines": 660,
+          "uniqueSourceLines": 660,
+          "newlyExposedSourceLines": 660,
+          "outputBytes": 39893,
+          "files": [
+            "boundary.ts",
+            "main.ts",
+            "row-work.ts",
+            "queries.ts"
+          ],
+          "fileTransitions": 3,
+          "clearlyUnrelatedLocalDetailUniqueLines": 367,
+          "cumulativeUniqueSourceLines": 660
+        },
+        "target": {
+          "commands": 2,
+          "displayedSourceLines": 55,
+          "uniqueSourceLines": 55,
+          "newlyExposedSourceLines": 0,
+          "outputBytes": 3268,
+          "files": [
+            "row-work.ts"
+          ],
+          "fileTransitions": 1,
+          "clearlyUnrelatedLocalDetailUniqueLines": 0,
+          "cumulativeUniqueSourceLines": 660
+        },
+        "broad": {
+          "commands": 2,
+          "displayedSourceLines": 108,
+          "uniqueSourceLines": 108,
+          "newlyExposedSourceLines": 108,
+          "outputBytes": 6009,
+          "files": [
+            "link-mapping.ts",
+            "trusted-sql.ts"
+          ],
+          "fileTransitions": 2,
+          "clearlyUnrelatedLocalDetailUniqueLines": 0,
+          "cumulativeUniqueSourceLines": 768
+        }
+      },
+      "totalUniqueSourceLines": 768,
+      "totalFileTransitions": 6,
+      "allFiles": [
+        "boundary.ts",
+        "main.ts",
+        "row-work.ts",
+        "queries.ts",
+        "link-mapping.ts",
+        "trusted-sql.ts"
+      ],
+      "cumulativeLocalDeclarationCoverage": {
+        "executeTransfer": {
+          "availableLines": 131,
+          "exposedLines": 131
+        },
+        "Row": {
+          "availableLines": 1,
+          "exposedLines": 1
+        },
+        "TransferExecutionClient": {
+          "availableLines": 6,
+          "exposedLines": 6
+        },
+        "TransferExecutionDefinition": {
+          "availableLines": 7,
+          "exposedLines": 7
+        },
+        "TransferExecutionError": {
+          "availableLines": 10,
+          "exposedLines": 10
+        },
+        "object": {
+          "availableLines": 3,
+          "exposedLines": 3
+        },
+        "keyText": {
+          "availableLines": 22,
+          "exposedLines": 22
+        },
+        "hash": {
+          "availableLines": 1,
+          "exposedLines": 1
+        },
+        "projection": {
+          "availableLines": 9,
+          "exposedLines": 9
+        },
+        "executeRowTransfer": {
+          "availableLines": 283,
+          "exposedLines": 283
+        },
+        "executeMutableDestination": {
+          "availableLines": 33,
+          "exposedLines": 33
+        },
+        "retireRowActive": {
+          "availableLines": 15,
+          "exposedLines": 15
+        },
+        "storedArguments": {
+          "availableLines": 4,
+          "exposedLines": 4
+        }
+      }
+    }
+  ],
+  "limits": [
+    "Counts are metered emitted source/output, not elapsed time, model tokens or proof of comprehension.",
+    "Sequential tasks carry earlier knowledge; newly exposed and cumulative lines separate this from rereading.",
+    "Unrelated is deliberately narrow: row details in overview; immutable-Red and Black-insert regions in target. It is not all unnecessary reasoning.",
+    "File transitions count source-output path changes, including within searches; they are not runtime calls.",
+    "Compare correctness and disclosed coverage before interpreting line counts; raw final answers remain necessary."
+  ]
+}
