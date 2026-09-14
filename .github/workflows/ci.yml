@@ -36,3 +36,4 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+      - run: node experiments/issue-23/phases/materialize.test.mjs

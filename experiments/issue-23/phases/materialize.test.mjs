@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {sql,bind} from '@mk3008/serene';
+import {sql,bind,materializeTemp} from '@mk3008/serene';
 import {materializeSource} from './materialize.mjs';
 import {contentReview} from './content-review.mjs';
 
@@ -13,7 +13,11 @@ for(const bad of [statement.sourceText,{sourceText:statement.sourceText},bind(st
  assert.throws(()=>materializeSource(bad,{value}));
 assert.throws(()=>materializeSource(sql`select 1; select 2`));
 assert.throws(()=>materializeSource(sql`select 1;`));
-assert.throws(()=>materializeSource(sql`select ';'`));
+// Quoted/comment semicolons are data; upstream rejects actual terminators.
+assert.doesNotThrow(()=>materializeSource(sql`select ';' value /* ; */`));
+for(const name of ['pg_temp.snapshot','public.snapshot','x; DROP TABLE t','x"','', 'x'.repeat(64)])
+ assert.throws(()=>materializeTemp(statement,name));
+assert(result.text.startsWith('CREATE TEMPORARY TABLE "velvet_source_snapshot"\n'));
 assert.throws(()=>materializeSource(statement,{value,unused:1}));
 assert.deepEqual(contentReview('CREATE TEMP TABLE t ON COMMIT DROP AS SELECT 1').map(s=>s.priority),['advisory']);
 assert.deepEqual(contentReview('CREATE UNLOGGED TABLE t(id int)').map(s=>s.priority),['elevated']);
@@ -32,6 +36,12 @@ if(process.env.ASHIBA_DB_URL){
   await client.query('begin');
   const invalid=materializeSource(sql`select missing_column from missing_table`);
   await assert.rejects(client.query(invalid.text,invalid.values));
+  await client.query('rollback');
+  assert.equal((await client.query("select to_regclass('pg_temp.velvet_source_snapshot') relation")).rows[0].relation,null);
+  await client.query('begin');
+  const quoted=materializeSource(sql`select ';' value /* ; */`);
+  await client.query(quoted.text,quoted.values);
+  assert.deepEqual((await client.query('select * from pg_temp.velvet_source_snapshot')).rows,[{value:';'}]);
   await client.query('rollback');
  }finally{await client.end();}
 }

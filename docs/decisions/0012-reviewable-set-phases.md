@@ -53,3 +53,11 @@ seconds or less. Select the bounded profile as a reasonable candidate. Unbounded
 corrections took 78–111 seconds and fail the illustrative 45-second work allowance;
 neighbor latency varied significantly. Neither universal compatibility nor production
 resource acceptance is implied. This ends the current candidate search.
+
+## Upstream adoption (Issue 28)
+
+The Serene 0.4 composition exception above records the original evaluation.
+Serene v0.6.0 now supplies official `materializeTemp`; the code-authored experimental
+source uses it and the local CTAS prefix is removed. Original measurements and
+audit snapshots are historical evidence, not a claim about the upgraded runtime.
+The DB-master boundary in Decision 0013 remains separate and unchanged.

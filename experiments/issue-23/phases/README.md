@@ -52,34 +52,32 @@ order is deliberately outside this profile. Canonical comparison checks final
 destination, Active, Work, Lineage, Processing and hashes/references, normalizing
 surrogate identities by their relational context instead of numeric sequence order.
 
-## Narrow local Serene boundary
+## Official Serene TEMP composition
 
-`materializeSource` accepts only an identity-backed, unbound Serene `Sql`, not a
-string, raw fragment, fabricated object or BoundSql. `bind` verifies that identity
-and lowers parameters once; the fixed CTAS prefix adds no parameters, so its output
-positions and values remain unchanged. There is one fixed `pg_temp` table name and
-no configurable prefix/suffix/schema/name. The complete SELECT is authored in
-`work.mjs`; its grammar and side effects still require review. The conservative
-semicolon prohibition also rejects semicolons inside strings/comments. It does not
-claim to prove read-only SQL or parse SQL grammar. No runtime AST is used.
+As of Velvet #28, `materializeSource` delegates to Serene v0.7.0
+`materializeTemp(statement, 'velvet_source_snapshot')`, then binds named values.
+It accepts only identity-backed, unbound code-authored `Sql`. The literal single
+identifier is quoted by upstream; arbitrary schema paths and identifier fragments
+are rejected. PostgreSQL creates it in the session TEMP schema, still accessible
+as `pg_temp.velvet_source_snapshot`. No connection or transaction is opened by the
+helper; the phase executor retains its existing connection and atomic work boundary.
 
-`pg_temp` is PostgreSQL's special alias for the current session's temporary schema.
-`CREATE TEMPORARY TABLE pg_temp...` is permitted; this does not permit arbitrary
-schema-qualified TEMP creation. The source snapshot, pending and decision relations
-use only this fixed alias. PostgreSQL's [CREATE TABLE regression cases](https://github.com/postgres/postgres/blob/master/src/test/regress/expected/create_table.out)
-explicitly distinguish `pg_temp.doubly_temp` (allowed) from `public.temp_to_perm`
-(rejected). The existing `materialize.test.mjs` exercises the exact wrapper on
-PostgreSQL, including bound values, commit/rollback cleanup and connection reuse;
-the phase evaluation also executes the pending and decision CTAS statements.
+Actual statement terminators are rejected upstream. Semicolons inside quoted data
+or comments are now accepted; the authored experiment query is unchanged. This
+lexical check does not prove SELECT grammar or absence of side effects.
+`materialize.test.mjs` verifies identity, binding, identifier rejection and real
+PostgreSQL commit/rollback cleanup in the normal Verify workflow.
 
-This is an explicit local construction exception permitted by the review, not a
-new Serene identity or general `unsafeRaw` API. Upstream 0.4 inventory remains
-unchanged: unresolved flows and any concatenation finding remain visible for manual
-review. The exception covers ONLY the fixed composition expression in
-`materialize.mjs`; it does not approve arbitrary string-built SQL elsewhere.
-See [Serene #26](https://github.com/mk3008/serene/issues/26).
+The former local CTAS composition exception is retired. This does not apply to
+DB-master stored SQL in the product runtime: Decision 0013's explicit reviewed
+master boundary and conservative subset remain unchanged. Historical
+`sql-audit.json` and measured results record the original Serene 0.4 evaluation;
+run `node experiments/issue-23/phases/audit.mjs` for the current inventory.
 
-`content-review.mjs` reports an independent advisory axis: persistent CREATE TABLE
+`content-review.mjs` retains supplemental whole-file hints for historical raw `.sql`
+assets outside Serene's JavaScript/TypeScript candidate inventory. The official
+v0.7 audit supplies runtime content signals; the supplemental pass is not its
+replacement. In that supplemental pass: persistent CREATE TABLE
 (including UNLOGGED) is elevated; TEMP is temporary-state/advisory; ON COMMIT DROP
 alone is lifecycle, while a separate DROP remains elevated. This conservative hint
 pass does not alter construction levels, strict exits, or original Serene signals.
