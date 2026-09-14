@@ -68,3 +68,45 @@ change reasons. It does not require a recurring full structural audit. The rule
 is a candidate reasoning procedure, not a validated universal smell detector.
 The experiment does not establish developer-time savings, future regression rate
 or applicability to Alder. No Alder file is changed.
+
+## Multi-axis extension after PR 32 review
+
+The original procedure was useful but insufficient to assess maintainability
+beyond change locality and invariant ownership. The owner requested a multi-axis
+comparison in [comment 5663431190](https://github.com/mk3008/velvet/pull/32#issuecomment-5663431190).
+The [v2 rule](../../evaluations/issue-31/rule.md) therefore also considers concrete
+testability, fault investigation, verification, side-effect/dependency locality,
+reproduction and recovery tasks. It does not prescribe pure functions, DI, model
+handlers, an additive quality score or improvements on every axis.
+
+The extension baseline is B1 `03b998ee3b768e2a03af763714627523243b3cc2`, after the
+original lifecycle extraction. Its [protocol](../../evaluations/issue-31/multiaxis/protocol.md)
+was recorded before candidate selection and implementation. Two fresh contexts
+selected a pre-Run Link-validation seam, but differed on exact scope and whether
+a new module was worth its dependency benefit. We selected mapping-only validation
+in `link-mapping.ts`, keeping the caller's date/SQL prerequisite checks, link order,
+configuration locks and pre-Run call location. See [selection and tradeoffs](../../evaluations/issue-31/multiaxis/selection.md).
+
+Measured local benefits are direct value-only rejection fixtures and replay with
+no DB/query capability, plus an isolated module importing only `node:util`.
+An inline reconstruction of the candidate has exactly B1's runtime token sequence.
+The old and new mapping predicates agree on 39 valid/malformed fixtures; nine
+coordinator traces preserve rejection precedence and pre-Run placement. Separate
+expected-outcome tests and existing PostgreSQL tests remain necessary: preserving
+the baseline could preserve its defects, and scripted traces do not prove locks.
+
+Costs are one production module, one internal export, two parameters, one call hop,
+and a three-line object-shape predicate duplicated from the boundary. No root API
+export, schema, normalization layer or new dependency is introduced. Mapping
+rejection messages and native malformed-input errors are intentionally unchanged.
+Operational diagnosis, recovery, global verification cost and Q2-Q4 are not improved.
+AI analysability has a more explicit local owner but also a timing-inspection hop;
+no measured AI-speed gain is claimed.
+
+The prior B0 -> B1 benefits remain historical results, not gains from this extension.
+The original measurements/checker are pinned to B1 because exact work extraction
+and the later mapping extraction are separate transformations. Multi-axis results
+and verification are in the [extension report](../../evaluations/issue-31/multiaxis/README.md).
+Reopen if mapping changes require unrelated imports, validation predicates drift,
+call-site coordination grows, or a concrete diagnosis/recovery task exposes a new
+cost. No mandatory recurring audit or Alder integration follows from one subject.

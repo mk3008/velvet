@@ -1,10 +1,15 @@
 # Issue 31 — observable refactoring experiment
 
+This page records the original B0 -> B1 experiment. The PR review extension,
+including the current multi-axis conclusions and verification, is in
+[multiaxis/README.md](multiaxis/README.md). Do not attribute these original gains
+to the later mapping-validator extraction.
+
 Baseline: `b3190e3d341ee21478161f2b8b31f96826c503b1`.
 Hypothesis: observable independent changes can justify a repeatable, behavior-preserving
 reorganization without a human prescribing the decomposition.
 
-The [rule](rule.md), [protocol](protocol.md) and [engineering basis](engineering-basis.md)
+The [v1 rule](multiaxis/rule-v1.md), [protocol](protocol.md) and [engineering basis](engineering-basis.md)
 were written before code extraction and before the two independent assessments.
 Published protocol commit: `283c2380fffbf4068be87dbf0e4851b9e4a74ad8`.
 Initial runtime commit: `10549ce001b4c162a4d543bab333b3f7f6dc958f`.
@@ -45,9 +50,8 @@ large and the public API, SQL, tests, schema and Business Design remain unchange
 Run from repository root after `pnpm install --frozen-lockfile`:
 
 ```sh
-node evaluations/issue-31/measure.mjs
-# To compare a committed candidate instead of the working tree:
-node evaluations/issue-31/measure.mjs <candidate-commit>
+node evaluations/issue-31/measure.mjs 03b998ee3b768e2a03af763714627523243b3cc2
+# The extension has its own compare.mjs; the original token checker tests B0 -> B1.
 git diff --ignore-all-space b3190e3 -- src/features/execute-transfer/boundary.ts
 pnpm verify
 ```

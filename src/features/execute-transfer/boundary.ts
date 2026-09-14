@@ -3,6 +3,7 @@ import { bind, type Sql } from '@mk3008/serene';
 import { isDeepStrictEqual } from 'node:util';
 import { bindStoredSql } from './trusted-sql.js';
 import * as queries from './queries.js';
+import { assertDestinationLinkMapping } from './link-mapping.js';
 import { loadSetPhase } from './set-phase/config.js';
 import { executeSetPhase } from './set-phase/execute.js';
 
@@ -128,26 +129,7 @@ export async function executeTransfer(
         throw new Error('Mutable destinations cannot require posting-date lower-bound control');
       if (!useSetPhase && !link.generated_insert_transfer_sql_body.trim())
         throw new Error('Destination Link has no stored Black Insert SQL');
-      const mapping = link.mapping_definition?.columns;
-      const allowed = link.destination_columns?.columns?.map((c: Row) => c.name);
-      const keys = link.destination_key_mapping;
-      if (
-        !object(mapping) ||
-        !Object.keys(mapping).length ||
-        !Array.isArray(allowed) ||
-        Object.entries(mapping).some(
-          ([target, source]) => !allowed.includes(target) || typeof source !== 'string' || !source,
-        ) ||
-        !isDeepStrictEqual(keys?.sourceKey, keyColumns) ||
-        !Array.isArray(keys?.destinationKey) ||
-        !keys.destinationKey.length ||
-        !isDeepStrictEqual(
-          keys.destinationKey.map((k: Row) => k.name).sort(),
-          [...link.destination_key_columns].sort(),
-        ) ||
-        keys.destinationKey.some((k: Row) => mapping[k.name] !== k.sourceColumn)
-      )
-        throw new Error('Invalid Destination Link mapping');
+      assertDestinationLinkMapping(link, keyColumns);
     }
     const phase = useSetPhase ? loadSetPhase(setting, links) : undefined;
     [{ run_id: runId }] = await query(phase ? queries.setPhaseRunSql : queries.runSql, {

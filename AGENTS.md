@@ -60,7 +60,8 @@ The owner does not prescribe a named architecture, recursive feature framework, 
 
 The standing human implementation requirements are Alder review, Raw SQL Rules, Serene as the standard SQL construction/binding path, and PostgreSQL as the target runtime/database. Other cross-cutting choices (including ORM use, adapter shape, CLI/Web surface and coding style) are AI-owned, based on current requirements and concrete benefit; there is no separate technology exception policy.
 
-After feature work, inspect newly observed independent change reasons or reopened
+After feature work, inspect newly observed maintenance costs or reopened
 structural concerns using [Decision 0015](docs/decisions/0015-observable-refactoring-boundaries.md)
-and its linked rule. Keep, refactor for review, or record/propose based on concrete
-maintenance tasks and shared-invariant ownership; file size alone is insufficient.
+and its linked rule. Compare relevant quality benefits with added structure and
+inspection costs; preserve invariant/recovery ownership. Keep, refactor for review,
+or record/propose from concrete task evidence; file size alone is insufficient.
