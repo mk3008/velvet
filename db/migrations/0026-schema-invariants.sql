@@ -1,4 +1,4 @@
--- Apply once after the current schema (including 0025-set-phase.sql).
+-- Apply once in ascending migration filename order.
 -- Existing inconsistent history aborts the whole migration; investigate rather than rewrite evidence.
 begin;
 

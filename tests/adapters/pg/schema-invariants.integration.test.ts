@@ -230,7 +230,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       await query(work, initial);
       await query(lineage, { operation: 'red_insert', kind: 'transfer_source' });
       const migration = await readFile(
-        new URL('../../../db/migrations/0018-schema-invariants.sql', import.meta.url),
+        new URL('../../../db/migrations/0026-schema-invariants.sql', import.meta.url),
         'utf8',
       );
       await expect(db.query(migration)).rejects.toThrow(/chk_lineage_operation_source_kind/);
