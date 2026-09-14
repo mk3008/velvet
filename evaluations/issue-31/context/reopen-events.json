@@ -1,0 +1,64 @@
+{
+  "kind": "controlled_replay_not_live_monitor",
+  "baseline": "4b895265d8262fafd7a95221a344a7de8c93841e",
+  "candidateRecordCommit": "5acb7ee899778b5cccca26353fa7ea55dc056d5b",
+  "instructions": "Assess event relevance and whether to queue reassessment of M1; separate that from closing M1 or changing ADOPT/REJECT/DEFER. Historical patches are already ancestors of B2. Synthetic reports are routing fixtures, not real incidents or benefit evidence. Track event IDs in order.",
+  "events": [
+    {
+      "id": "history:6008e27",
+      "type": "historical_patch",
+      "commit": "6008e27e1955eaf48576fe6759fc08d7b355be62",
+      "title": "test: cover rollback of historical live Work Item references",
+      "alreadyInBaseline": true,
+      "files": [
+        {
+          "path": "tests/features/execute-transfer/multi-destination.integration.test.ts",
+          "patch": "@@ -287,7 +287,7 @@ describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', ()\n     ]);\n   });\n   test('100 to 120 correction retains original Red provenance and correlates all new Blacks', async () => {\n-    const initial = await run();\n+    await run();\n     const old = await state();\n     await db.query('update public.source set amount=120,version=2');\n     await dirty();\n@@ -355,13 +355,6 @@ describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', ()\n         destination_key_json: { row_id: '6' },\n       },\n     ]);\n-    expect(\n-      (\n-        await db.query('select active_black_id from rawsql_transfer.work_item where run_id=$1', [\n-          initial.runId,\n-        ])\n-      ).rows.every((w) => w.active_black_id === null),\n-    ).toBe(true);\n   });\n   test('one Dirty Key changes only the journal memo while both ledger links independently no-op', async () => {\n     await run();\n@@ -397,6 +390,16 @@ describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', ()\n       // Existing work makes rollback also prove that retired Active Blacks and cleared references return.\n       if (phase === 'correction') {\n         await run();\n+        await dirty();\n+        const unchanged = await run();\n+        expect(\n+          (\n+            await db.query(\n+              'select active_black_id from rawsql_transfer.work_item where run_id=$1',\n+              [unchanged.runId],\n+            )\n+          ).rows.every((w) => w.active_black_id !== null),\n+        ).toBe(true);\n         await db.query('update public.source set amount=120,version=2');\n         await dirty();\n       }\n@@ -432,7 +435,7 @@ describe.skipIf(!enabled)('three correlated destination links on PostgreSQL', ()\n         (await db.query('select run_status from rawsql_transfer.run order by run_id')).rows,\n       ).toEqual(\n         phase === 'correction'\n-          ? [{ run_status: 'succeeded' }, { run_status: 'failed' }]\n+          ? [{ run_status: 'succeeded' }, { run_status: 'succeeded' }, { run_status: 'failed' }]\n           : [{ run_status: 'failed' }],\n       );\n       await db.query(\"set velvet.fail_role=''\");"
+        }
+      ]
+    },
+    {
+      "id": "history:31e966f",
+      "type": "historical_patch",
+      "commit": "31e966fa88aafa37d781838ce644248de60c60ce",
+      "title": "refactor: remove unused test import alias",
+      "alreadyInBaseline": true,
+      "files": [
+        {
+          "path": "docs/decisions/0007-structure-inventory.md",
+          "patch": "@@ -14,8 +14,8 @@ Inventory recorded before implementation for Issue #13 against main `5d551595fdb\n | `queryMany`, `queryOne`, `queryOneOrNull` | obsolete / over-structured | First only forwards to executor; latter two have no consumers. Use the executor directly; retain INSERT-specific cardinality checks. |\n | `src/libraries/sql/sql-client.ts` | obsolete | Unused re-export, with misleading multi-DB advice. Remove; no root export depends on it. |\n | PostgreSQL adapter | useful | Serene named-to-indexed binding and native pg seam support actual runtime and tests. Retain implementation, remove obsolete Ashiba CLI example. |\n-| `#libraries`, `#adapters` aliases | obsolete | No consumers in source or tests. Remove matching package, TypeScript and Vitest mappings. |\n-| `#features`, `#tests` aliases | useful | Existing imports use these access paths. Retain; names do not prescribe architecture. |\n+| `#libraries`, `#adapters`, `#tests` aliases | obsolete | No consumers in source or tests. Remove matching package, TypeScript and Vitest mappings. |\n+| `#features` alias | useful | Existing imports use this access path. Retain; the name does not prescribe architecture. |\n | `features`, `_shared`, `adapters/pg` directories | incidental / useful | Current use cases, shared query contract and driver code are easy to locate. Keep without a mandatory tree. |\n | `ashiba.config.json` | obsolete | No repository script, dependency, build/test config or code reads it. DDL tooling passes paths/schema explicitly; runtime schema is in SQL; Serene audits `src`. Remove unused featureRoot/sqlRoots/format settings. Keep ASHIBA environment contracts. |\n | Feature README structure language | misleading | Remove imperative CRUD/layout advice and describe actual entrypoints and validation responsibilities. Retain product scope and transaction requirements. |"
+        },
+        {
+          "path": "package.json",
+          "patch": "@@ -16,10 +16,6 @@\n     \"#features/*.js\": {\n       \"types\": \"./src/features/*.ts\",\n       \"default\": \"./dist/features/*.js\"\n-    },\n-    \"#tests/*.js\": {\n-      \"types\": \"./tests/*.ts\",\n-      \"default\": \"./tests/*.ts\"\n     }\n   },\n   \"scripts\": {"
+        },
+        {
+          "path": "tsconfig.json",
+          "patch": "@@ -6,8 +6,7 @@\n     \"moduleResolution\": \"NodeNext\",\n     \"baseUrl\": \".\",\n     \"paths\": {\n-      \"#features/*\": [\"src/features/*\"],\n-      \"#tests/*\": [\"tests/*\"]\n+      \"#features/*\": [\"src/features/*\"]\n     },\n     \"strict\": true,\n     \"esModuleInterop\": true,"
+        },
+        {
+          "path": "vitest.config.ts",
+          "patch": "@@ -5,7 +5,6 @@ export default defineConfig({\n   resolve: {\n     alias: {\n       '#features': fileURLToPath(new URL('./src/features', import.meta.url)),\n-      '#tests': fileURLToPath(new URL('./tests', import.meta.url)),\n     },\n   },\n   test: {"
+        }
+      ]
+    },
+    {
+      "id": "synthetic:mutable-repro-1",
+      "type": "synthetic_new_task_report",
+      "alreadyInBaseline": false,
+      "content": "Routing fixture only. A future maintainer reports that a newly added mutable UPDATE returned-key rejection test required configuring unrelated immutable-history fixture state before reaching the failure. They supply a minimal failing input and identify the mutable returned-key check. They request evaluation of whether the recorded same-file DML seam lets the test omit that unrelated state while preserving pre-reassessment identity validation and rollback. No before/after candidate comparison, new business meaning or green candidate CI is supplied."
+    },
+    {
+      "id": "synthetic:keyword-only",
+      "type": "synthetic_new_task_report",
+      "alreadyInBaseline": false,
+      "content": "Routing fixture only. A documentation spelling fix mentions mutable, immutable, model and boundary.ts. It changes no runtime/tests, supplies no maintenance task, fixture reduction or comparison."
+    },
+    {
+      "id": "synthetic:mutable-repro-1",
+      "type": "redelivery",
+      "alreadyInBaseline": false,
+      "content": "Exact same event identifier as the earlier synthetic mutable reproduction report, with no additional attachments or observations."
+    }
+  ]
+}
