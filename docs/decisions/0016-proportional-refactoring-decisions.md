@@ -96,3 +96,10 @@ everything policy, mandatory index filename or recursive decomposition rule foll
 Deployed metadata routine bodies were outside the reading packet and disclosed as
 uninspected by every participant; this is local source comprehension evidence,
 not verification of all database guarantees.
+
+## Maintainer requirements follow-up (non-normative)
+
+[The requirements reflection](../../evaluations/issue-33/maintainer-requirements.md)
+distinguishes observed navigation, current tool constraints and hypotheses about
+broader maintenance. Its candidate directions are not adopted rules or additional
+experiments, and do not change B2, A2 or the overview-layout disposition above.

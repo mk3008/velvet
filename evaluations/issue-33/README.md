@@ -152,3 +152,12 @@ The trial demonstrates selective reading is possible, not consistently cheaper.
 The exact extra runtime split is not adopted; B2, A2 and the proportional rule
 remain as previously selected. See the extension for task coverage, missing DB
 routine bodies, carryover and interpretation limits.
+
+## Follow-up: maintainer requirements before new structure
+
+[Astra's maintainer requirements](maintainer-requirements.md) responds to
+[comment 5671784799](https://github.com/mk3008/velvet/pull/35#issuecomment-5671784799).
+It separates observed reading behavior, current tool capabilities and untested
+requirements across investigation, change, verification, recovery and authority
+tracking. Three ranked candidate directions are proposals only; no further layout
+or agent comparison was performed. Existing dispositions and rules are unchanged.
