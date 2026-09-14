@@ -450,7 +450,7 @@
         "displayName": "Has Transfer Model",
         "polarity": "positive",
         "type": "rationale",
-        "text": "Destination は、転送先行の保存方法を決める `transfer_model` を持つ。値は `immutable` または `mutable` である。",
+        "text": "Destination は、転送先行の保存方法を決める `transfer_model` を持つ。値は `immutable`、`mutable`、`insert_only` のいずれかである。",
         "evidence": [
           "spec:destination"
         ]
