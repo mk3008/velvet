@@ -519,8 +519,14 @@ async function retireRowActive(
   activeId: unknown,
   linkId: unknown,
 ): Promise<void> {
-  await query(queries.releaseActiveReferencesSql, { active: activeId, link: linkId });
-  const removed = await query(queries.activeDeleteSql, { active: activeId, link: linkId });
+  await query(queries.releaseActiveReferencesSql, {
+    active: activeId,
+    link: linkId,
+  });
+  const removed = await query(queries.activeDeleteSql, {
+    active: activeId,
+    link: linkId,
+  });
   if (removed.length !== 1) throw new Error('Active Black retirement failed');
 }
 

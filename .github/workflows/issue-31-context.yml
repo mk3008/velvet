@@ -23,7 +23,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: node evaluations/issue-31/context/retirement-compare.mjs | tee retirement-comparison.json
+      - run: node evaluations/issue-31/context/retirement-compare.mjs > retirement-comparison.json
+      - run: cat retirement-comparison.json
       - uses: actions/upload-artifact@v4
         with:
           name: issue-31-context-evidence
