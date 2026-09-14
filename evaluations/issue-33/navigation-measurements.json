@@ -1,0 +1,89 @@
+{
+  "results": [
+    {
+      "run": "n1",
+      "variant": "baseline",
+      "phases": {
+        "outline": {
+          "readerCalls": 2,
+          "sourceLinesDisplayed": 307,
+          "uniqueSourceLines": 307,
+          "newlyExposedSourceLines": 307,
+          "indexAndSourceLinesDisplayed": 314
+        },
+        "locator": {
+          "readerCalls": 3,
+          "sourceLinesDisplayed": 331,
+          "uniqueSourceLines": 331,
+          "newlyExposedSourceLines": 24,
+          "indexAndSourceLinesDisplayed": 331
+        }
+      },
+      "totalUniqueSourceLines": 331
+    },
+    {
+      "run": "n2",
+      "variant": "candidate",
+      "phases": {
+        "outline": {
+          "readerCalls": 2,
+          "sourceLinesDisplayed": 283,
+          "uniqueSourceLines": 283,
+          "newlyExposedSourceLines": 283,
+          "indexAndSourceLinesDisplayed": 291
+        },
+        "locator": {
+          "readerCalls": 2,
+          "sourceLinesDisplayed": 48,
+          "uniqueSourceLines": 48,
+          "newlyExposedSourceLines": 48,
+          "indexAndSourceLinesDisplayed": 48
+        }
+      },
+      "totalUniqueSourceLines": 331
+    },
+    {
+      "run": "n3",
+      "variant": "baseline",
+      "phases": {
+        "outline": {
+          "readerCalls": 2,
+          "sourceLinesDisplayed": 307,
+          "uniqueSourceLines": 307,
+          "newlyExposedSourceLines": 307,
+          "indexAndSourceLinesDisplayed": 314
+        },
+        "locator": {
+          "readerCalls": 3,
+          "sourceLinesDisplayed": 331,
+          "uniqueSourceLines": 331,
+          "newlyExposedSourceLines": 24,
+          "indexAndSourceLinesDisplayed": 331
+        }
+      },
+      "totalUniqueSourceLines": 331
+    },
+    {
+      "run": "n4",
+      "variant": "candidate",
+      "phases": {
+        "outline": {
+          "readerCalls": 2,
+          "sourceLinesDisplayed": 283,
+          "uniqueSourceLines": 283,
+          "newlyExposedSourceLines": 283,
+          "indexAndSourceLinesDisplayed": 291
+        },
+        "locator": {
+          "readerCalls": 3,
+          "sourceLinesDisplayed": 57,
+          "uniqueSourceLines": 57,
+          "newlyExposedSourceLines": 57,
+          "indexAndSourceLinesDisplayed": 57
+        }
+      },
+      "totalUniqueSourceLines": 340
+    }
+  ],
+  "limits": "Source exposure is not elapsed time, tokens or comprehension. See full answers and manual factual scoring in README. Source reads were procedurally restricted; not OS isolated."
+}
