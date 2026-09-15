@@ -158,7 +158,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       expect(
         (
           await db.query(
-            "select count(*)::int n from rawsql_transfer.active_black where source_key_json->>'logical_id'='1'",
+            "select count(*)::int n from velvet.active_black where source_key_json->>'logical_id'='1'",
           )
         ).rows[0].n,
       ).toBe(0);
@@ -170,7 +170,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       expect(
         (
           await db.query(
-            "select execution_configuration->>'engine' engine from rawsql_transfer.run",
+            "select execution_configuration->>'engine' engine from velvet.run",
           )
         ).rows.every((r) => r.engine === 'immutable-set-v1'),
       ).toBe(true);
@@ -203,12 +203,12 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       ).toBe(0);
     });
     test('enabling over existing row history preserves exact old keys and retires historical references', async () => {
-      await db.query('update rawsql_transfer.setting set set_phase_definition=null');
+      await db.query('update velvet.setting set set_phase_definition=null');
       await f.dirty(db);
       await executeTransfer(db, [f.definition()], { settingId: '1', arguments: { owner: '1' } });
       const old = (
         await db.query(
-          'select destination_key_json from rawsql_transfer.active_black order by active_black_id',
+          'select destination_key_json from velvet.active_black order by active_black_id',
         )
       ).rows;
       await f.enable(db);
@@ -217,7 +217,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       expect(
         (
           await db.query(
-            'select destination_key_json from rawsql_transfer.active_black order by active_black_id',
+            'select destination_key_json from velvet.active_black order by active_black_id',
           )
         ).rows,
       ).toEqual(old);
@@ -227,7 +227,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       expect(
         (
           await db.query(
-            'select count(*)::int n from rawsql_transfer.work_item where active_black_id is not null',
+            'select count(*)::int n from velvet.work_item where active_black_id is not null',
           )
         ).rows[0].n,
       ).toBe(0);
@@ -242,7 +242,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       await expect(run()).rejects.toThrow();
       expect(await f.snapshot(db)).toEqual(before);
       expect(
-        (await db.query('select run_status from rawsql_transfer.run order by run_id desc limit 1'))
+        (await db.query('select run_status from velvet.run order by run_id desc limit 1'))
           .rows[0].run_status,
       ).toBe('failed');
       await db.query("set velvet.fail_role=''");
@@ -258,7 +258,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
     test('explicit misconfiguration never falls back to row SQL', async () => {
       await f.dirty(db);
       await db.query(
-        'update rawsql_transfer.destination_link set set_phase_definition=null where destination_link_id=10',
+        'update velvet.destination_link set set_phase_definition=null where destination_link_id=10',
       );
       await expect(run()).rejects.toThrow();
       expect((await db.query('select count(*)::int n from product_destination')).rows[0].n).toBe(0);
@@ -268,7 +268,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       async (exclusions) => {
         await f.dirty(db);
         await db.query(
-          'update rawsql_transfer.destination_link set diff_compare_excluded_columns=$1::jsonb',
+          'update velvet.destination_link set diff_compare_excluded_columns=$1::jsonb',
           [JSON.stringify(exclusions)],
         );
         await expect(run()).rejects.toThrow();
@@ -279,10 +279,10 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       async (mode) => {
         await f.dirty(db);
         if (mode === 'hash')
-          await db.query("update rawsql_transfer.setting set source_sql_body=source_sql_body||' '");
+          await db.query("update velvet.setting set source_sql_body=source_sql_body||' '");
         if (mode === 'identity')
           await db.query(
-            "update rawsql_transfer.setting set set_phase_definition=jsonb_set(set_phase_definition,'{dirtyIdentity}',$1::jsonb)",
+            "update velvet.setting set set_phase_definition=jsonb_set(set_phase_definition,'{dirtyIdentity}',$1::jsonb)",
             [
               JSON.stringify(
                 f.reviewed(
@@ -293,7 +293,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
           );
         if (mode === 'numeric')
           await db.query(
-            "update rawsql_transfer.dirty_key set source_key_json=jsonb_build_object('id',1)",
+            "update velvet.dirty_key set source_key_json=jsonb_build_object('id',1)",
           );
         await expect(run()).rejects.toThrow();
         expect((await db.query('select count(*)::int n from product_destination')).rows[0].n).toBe(
@@ -305,7 +305,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       await f.dirty(db);
       await run();
       await db.query(
-        "update rawsql_transfer.active_black set source_key_json=jsonb_build_object('logical_id',1) where source_key_json->>'logical_id'='1'",
+        "update velvet.active_black set source_key_json=jsonb_build_object('logical_id',1) where source_key_json->>'logical_id'='1'",
       );
       await f.dirty(db, '1');
       const before = await f.snapshot(db);
@@ -327,7 +327,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
         executeTransfer(client, [], { settingId: '1', arguments: { owner: '1' } }),
       ).rejects.toThrow();
       expect(
-        (await db.query('select run_status from rawsql_transfer.run order by run_id desc limit 1'))
+        (await db.query('select run_status from velvet.run order by run_id desc limit 1'))
           .rows[0].run_status,
       ).toBe('succeeded');
       expect((await run()).inserted).toBe(0);

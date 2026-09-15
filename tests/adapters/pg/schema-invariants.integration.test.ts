@@ -24,25 +24,25 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       const root = new URL('../../../db/ddl/', import.meta.url);
       for (const file of JSON.parse(await readFile(new URL('order.json', root), 'utf8')).order)
         await db.query(await readFile(new URL(file, root), 'utf8'));
-      await db.query(`insert into rawsql_transfer.setting
+      await db.query(`insert into velvet.setting
       (setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
       values(1,'schema-test','select 1','test','{"keys":[{"column":"id","type":"text"}]}','not_analyzed');
-      insert into rawsql_transfer.destination_definition
+      insert into velvet.destination_definition
       (destination_definition_id,destination_definition_name,destination_table_name,destination_columns,destination_key_columns,transfer_model,sign_inversion_columns)
       values(1,'schema-test','public.destination','{}',array['id'],'immutable',array['amount']);
-      insert into rawsql_transfer.destination_link
+      insert into velvet.destination_link
       (destination_link_id,setting_id,destination_definition_id,destination_link_name,execution_order,destination_key_mapping,mapping_definition)
       values(1,1,1,'schema-test',1,'{}','{}');
-      insert into rawsql_transfer.dirty_key(dirty_key_id,source_schema_name,source_table_name,source_key_json)
+      insert into velvet.dirty_key(dirty_key_id,source_schema_name,source_table_name,source_key_json)
       values(1,'public','source','{"physical_id":"1"}');
-      insert into rawsql_transfer.run(run_id,setting_id,run_status) values(1,1,'running');`);
+      insert into velvet.run(run_id,setting_id,run_status) values(1,1,'running');`);
     });
     afterAll(async () => {
       await db?.end();
       await admin?.query('drop database if exists ' + database + ' with (force)');
       await admin?.end();
     });
-    const work = sql`insert into rawsql_transfer.work_item
+    const work = sql`insert into velvet.work_item
     (run_id,dirty_key_id,setting_id,destination_link_id,source_key_json,source_key_hash,
      transfer_model,route_type,source_exists,requires_red_transfer,requires_black_insert_transfer,
      requires_black_update_transfer,requires_physical_delete_transfer,skip_reason,evaluated_destination_key_json)
@@ -108,7 +108,7 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
           // Current Destination is immutable; historical models are independent snapshots.
           // A retired Active Black is NULL even when Red/UPDATE/DELETE history retains its key.
           expect(
-            (await db.query('select active_black_id from rawsql_transfer.work_item')).rows[0]
+            (await db.query('select active_black_id from velvet.work_item')).rows[0]
               .active_black_id,
           ).toBeNull();
         });
@@ -141,16 +141,16 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
           );
         await query(work, initial);
         await rejected(
-          () => db.query("update rawsql_transfer.work_item set route_type='mutable'"),
+          () => db.query("update velvet.work_item set route_type='mutable'"),
           'chk_work_item_route_model',
         );
         await rejected(
           () =>
-            db.query('update rawsql_transfer.work_item set requires_black_update_transfer=true'),
+            db.query('update velvet.work_item set requires_black_update_transfer=true'),
           'chk_work_item_operation_model',
         );
       }));
-    const processing = sql`insert into rawsql_transfer.dirty_key_processing
+    const processing = sql`insert into velvet.dirty_key_processing
     (dirty_key_id,run_id,work_item_id,setting_id,destination_link_id,source_key_json,source_key_hash,processing_status,processing_result,error_message)
     values(1,1,:work,1,1,'{"id":"1"}','test',:status,:result,:error)`;
     test('protects final Processing meaning without inventing a failed-attempt contract', async () =>
@@ -185,18 +185,18 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
           await rejected(
             () =>
               db.query(
-                "update rawsql_transfer.dirty_key_processing set processing_status=case processing_status when 'skipped' then 'succeeded' else 'skipped' end",
+                "update velvet.dirty_key_processing set processing_status=case processing_status when 'skipped' then 'succeeded' else 'skipped' end",
               ),
             'chk_dirty_key_processing_final_result',
           );
-          await db.query('delete from rawsql_transfer.dirty_key_processing');
+          await db.query('delete from velvet.dirty_key_processing');
           // Failed attempts are not finalized, and can carry a nullable diagnostic.
           await query(processing, { work: w, result, status: 'failed', error: null });
           await query(processing, { work: w, result, status: 'failed', error: 'diagnostic' });
-          await db.query('delete from rawsql_transfer.dirty_key_processing');
+          await db.query('delete from velvet.dirty_key_processing');
         }
       }));
-    const lineage = sql`insert into rawsql_transfer.lineage
+    const lineage = sql`insert into velvet.lineage
     (run_id,setting_id,destination_link_id,work_item_id,transfer_operation,source_kind,source_key_json,source_key_hash,destination_table_name,destination_key_json,destination_key_hash)
     values(1,1,1,null,:operation,:kind,'{"id":"old"}','test','public.destination','{"id":"new"}','test')`;
     test('protects Black and Red provenance with optional Work references', async () =>
@@ -211,22 +211,22 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
           );
           await query(lineage, { operation, kind });
           await rejected(
-            () => query(sql`update rawsql_transfer.lineage set source_kind=:wrong`, { wrong }),
+            () => query(sql`update velvet.lineage set source_kind=:wrong`, { wrong }),
             'chk_lineage_operation_source_kind',
           );
-          await db.query('delete from rawsql_transfer.lineage');
+          await db.query('delete from velvet.lineage');
         }
       }));
     test('upgrade validates existing rows atomically and matches canonical CHECKs', async () => {
       const definitions = () =>
         db.query(`select conname,pg_get_constraintdef(oid) definition from pg_constraint
-      where connamespace='rawsql_transfer'::regnamespace and conname in
+      where connamespace='velvet'::regnamespace and conname in
       ('chk_work_item_route_model','chk_work_item_operation_model','chk_dirty_key_processing_final_result','chk_lineage_operation_source_kind') order by conname`);
       const canonical = (await definitions()).rows;
       expect(canonical).toHaveLength(4);
-      await db.query(`alter table rawsql_transfer.work_item drop constraint chk_work_item_route_model, drop constraint chk_work_item_operation_model;
-      alter table rawsql_transfer.dirty_key_processing drop constraint chk_dirty_key_processing_final_result;
-      alter table rawsql_transfer.lineage drop constraint chk_lineage_operation_source_kind;`);
+      await db.query(`alter table velvet.work_item drop constraint chk_work_item_route_model, drop constraint chk_work_item_operation_model;
+      alter table velvet.dirty_key_processing drop constraint chk_dirty_key_processing_final_result;
+      alter table velvet.lineage drop constraint chk_lineage_operation_source_kind;`);
       await query(work, initial);
       await query(lineage, { operation: 'red_insert', kind: 'transfer_source' });
       const migration = await readFile(
@@ -236,25 +236,25 @@ describe.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       await expect(db.query(migration)).rejects.toThrow(/chk_lineage_operation_source_kind/);
       await db.query('rollback');
       expect((await definitions()).rows).toEqual([]);
-      expect((await db.query('select source_kind from rawsql_transfer.lineage')).rows).toEqual([
+      expect((await db.query('select source_kind from velvet.lineage')).rows).toEqual([
         { source_kind: 'transfer_source' },
       ]);
       // Test-owned legacy row is corrected explicitly; the migration never rewrites evidence.
-      await db.query("update rawsql_transfer.lineage set source_kind='reversed_destination_row'");
-      const before = (await db.query('select to_jsonb(w) value from rawsql_transfer.work_item w'))
+      await db.query("update velvet.lineage set source_kind='reversed_destination_row'");
+      const before = (await db.query('select to_jsonb(w) value from velvet.work_item w'))
         .rows;
       await db.query(migration);
       expect((await definitions()).rows).toEqual(canonical);
       expect(
-        (await db.query('select to_jsonb(w) value from rawsql_transfer.work_item w')).rows,
+        (await db.query('select to_jsonb(w) value from velvet.work_item w')).rows,
       ).toEqual(before);
       await isolated(async () => {
         await rejected(
-          () => db.query('update rawsql_transfer.work_item set source_exists=false'),
+          () => db.query('update velvet.work_item set source_exists=false'),
           'chk_work_item_operation_model',
         );
         await rejected(
-          () => db.query("update rawsql_transfer.lineage set source_kind='transfer_source'"),
+          () => db.query("update velvet.lineage set source_kind='transfer_source'"),
           'chk_lineage_operation_source_kind',
         );
       });

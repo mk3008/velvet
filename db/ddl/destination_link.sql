@@ -1,7 +1,7 @@
-create table rawsql_transfer.destination_link (
+create table velvet.destination_link (
   destination_link_id bigserial primary key,
-  setting_id bigint not null references rawsql_transfer.setting (setting_id),
-  destination_definition_id bigint not null references rawsql_transfer.destination_definition (destination_definition_id),
+  setting_id bigint not null references velvet.setting (setting_id),
+  destination_definition_id bigint not null references velvet.destination_definition (destination_definition_id),
   destination_link_name text not null,
   execution_order integer not null,
   destination_key_mapping jsonb not null,
@@ -36,46 +36,46 @@ create table rawsql_transfer.destination_link (
 
 );
 
-create index idx_destination_link_setting on rawsql_transfer.destination_link (setting_id);
+create index idx_destination_link_setting on velvet.destination_link (setting_id);
 
-create index idx_destination_link_destination on rawsql_transfer.destination_link (destination_definition_id);
+create index idx_destination_link_destination on velvet.destination_link (destination_definition_id);
 
-comment on table rawsql_transfer.destination_link is '転送設定と転送先定義の紐づけ。転送設定の基礎SQLを、どの転送先定義へ、どの役割名、順序、マッピング、差分比較除外設定で転送するかを管理する。';
+comment on table velvet.destination_link is '転送設定と転送先定義の紐づけ。転送設定の基礎SQLを、どの転送先定義へ、どの役割名、順序、マッピング、差分比較除外設定で転送するかを管理する。';
 
-comment on column rawsql_transfer.destination_link.destination_link_id is 'Destination Link ID。サロゲートキー。';
+comment on column velvet.destination_link.destination_link_id is 'Destination Link ID。サロゲートキー。';
 
-comment on column rawsql_transfer.destination_link.setting_id is '転送設定ID。基礎選択SQLを持つ setting を参照する。';
+comment on column velvet.destination_link.setting_id is '転送設定ID。基礎選択SQLを持つ setting を参照する。';
 
-comment on column rawsql_transfer.destination_link.destination_definition_id is '転送先定義ID。転送先テーブル、列、主キー、採番式、転送モデルを持つ destination_definition を参照する。';
+comment on column velvet.destination_link.destination_definition_id is '転送先定義ID。転送先テーブル、列、主キー、採番式、転送モデルを持つ destination_definition を参照する。';
 
-comment on column rawsql_transfer.destination_link.destination_link_name is '転送先リンク名。同一転送設定内で宛先別の役割を識別する人間向け名称。外部キーや安定参照キーとしては使用しない。';
+comment on column velvet.destination_link.destination_link_name is '転送先リンク名。同一転送設定内で宛先別の役割を識別する人間向け名称。外部キーや安定参照キーとしては使用しない。';
 
-comment on column rawsql_transfer.destination_link.execution_order is '実行順。同一転送設定内で複数の転送先定義を処理する順序を表す。1以上の整数とし、同一転送設定内で重複させない。';
+comment on column velvet.destination_link.execution_order is '実行順。同一転送設定内で複数の転送先定義を処理する順序を表す。1以上の整数とし、同一転送設定内で重複させない。';
 
-comment on column rawsql_transfer.destination_link.destination_key_mapping is '転送先キーマッピング。Transfer Settingの転送元キーに対応する、このDestination Link固有の転送先行キーを基礎選択SQLのどの列から取り出すかをJSONBで保持する。';
+comment on column velvet.destination_link.destination_key_mapping is '転送先キーマッピング。Transfer Settingの転送元キーに対応する、このDestination Link固有の転送先行キーを基礎選択SQLのどの列から取り出すかをJSONBで保持する。';
 
-comment on column rawsql_transfer.destination_link.mapping_definition is 'マッピング定義。基礎選択SQLの結果列を転送先列へどう対応させるかをJSONBで保持する。';
+comment on column velvet.destination_link.mapping_definition is 'マッピング定義。基礎選択SQLの結果列を転送先列へどう対応させるかをJSONBで保持する。';
 
-comment on column rawsql_transfer.destination_link.diff_compare_excluded_columns is '差分比較除外列定義。同一転送設定内の転送先定義リンクにおいて、更新判定時に比較対象から除外する転送先列をJSONBで保持する。';
+comment on column velvet.destination_link.diff_compare_excluded_columns is '差分比較除外列定義。同一転送設定内の転送先定義リンクにおいて、更新判定時に比較対象から除外する転送先列をJSONBで保持する。';
 
-comment on column rawsql_transfer.destination_link.generated_insert_transfer_sql_body is '生成追加転送SQL本文。新規またはシンクロ転送で黒を追加するSQLを保持する。';
+comment on column velvet.destination_link.generated_insert_transfer_sql_body is '生成追加転送SQL本文。新規またはシンクロ転送で黒を追加するSQLを保持する。';
 
-comment on column rawsql_transfer.destination_link.generated_update_transfer_sql_body is '生成更新転送SQL本文。mutableモデルで直接UPDATEするSQLを保持する。';
+comment on column velvet.destination_link.generated_update_transfer_sql_body is '生成更新転送SQL本文。mutableモデルで直接UPDATEするSQLを保持する。';
 
-comment on column rawsql_transfer.destination_link.generated_delete_transfer_sql_body is '生成削除転送SQL本文。mutableモデルで物理DELETEするSQLを保持する。';
+comment on column velvet.destination_link.generated_delete_transfer_sql_body is '生成削除転送SQL本文。mutableモデルで物理DELETEするSQLを保持する。';
 
-comment on column rawsql_transfer.destination_link.generated_sql_status is '生成SQL状態。許可値は not_generated, success, failed。';
+comment on column velvet.destination_link.generated_sql_status is '生成SQL状態。許可値は not_generated, success, failed。';
 
-comment on column rawsql_transfer.destination_link.generated_sql_error is '生成SQLエラー。SQL生成失敗時の理由を保持する。';
+comment on column velvet.destination_link.generated_sql_error is '生成SQLエラー。SQL生成失敗時の理由を保持する。';
 
-comment on column rawsql_transfer.destination_link.is_enabled is '有効フラグ。この紐づけを使用可能にするかを表す。';
+comment on column velvet.destination_link.is_enabled is '有効フラグ。この紐づけを使用可能にするかを表す。';
 
-comment on column rawsql_transfer.destination_link.created_at is '作成日時。レコード作成時刻。';
+comment on column velvet.destination_link.created_at is '作成日時。レコード作成時刻。';
 
-comment on column rawsql_transfer.destination_link.updated_at is '更新日時。レコード更新時刻。';
+comment on column velvet.destination_link.updated_at is '更新日時。レコード更新時刻。';
 
-comment on column rawsql_transfer.destination_link.note is '備考。実装・運用上の補足を記録する。';
+comment on column velvet.destination_link.note is '備考。実装・運用上の補足を記録する。';
 
-comment on column rawsql_transfer.destination_link.generated_reassessment_sql_body is '再評価SQL。現在snapshotの補正後転送先値と既存黒伝の保存値を、それぞれcurrent_valuesとactive_valuesのJSON objectを表すtextとして1行返す。既存黒伝キーはvelvet_active_destination_keyで受ける。';
+comment on column velvet.destination_link.generated_reassessment_sql_body is '再評価SQL。現在snapshotの補正後転送先値と既存黒伝の保存値を、それぞれcurrent_valuesとactive_valuesのJSON objectを表すtextとして1行返す。既存黒伝キーはvelvet_active_destination_keyで受ける。';
 
-comment on column rawsql_transfer.destination_link.set_phase_definition is '集合phaseのLink側契約。評価SELECTとBlack INSERTの完成SQL、SHA-256、review revision。';
+comment on column velvet.destination_link.set_phase_definition is '集合phaseのLink側契約。評価SELECTとBlack INSERTの完成SQL、SHA-256、review revision。';

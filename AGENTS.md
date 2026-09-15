@@ -17,7 +17,7 @@ destination、dirty key、transfer setting の意味をIssueやfeature内で再�
 
 Read `docs/scope/SYSTEM_SCOPE.md` before implementation. Follow the concept index into the relevant Process Map and DFD. Human-owned meanings must not be inferred from implementation or changed to make tests pass.
 
-Run `pnpm verify` for changes affecting repository wiring or runtime behavior. A PostgreSQL connection via `ASHIBA_DB_URL`, or Docker for Testcontainers, is required for the complete test suite. Existing `ASHIBA_*` environment names and `rawsql_transfer` schema names remain contracts during this repository-only migration.
+Run `pnpm verify` for changes affecting repository wiring or runtime behavior. A PostgreSQL connection via `ASHIBA_DB_URL`, or Docker for Testcontainers, is required for the complete test suite. Existing `ASHIBA_*` environment names remain contracts. The canonical product schema is `velvet` (Decision 0018); the repository-migration schema holdover has been superseded by Issue #37.
 
 Missing local PostgreSQL or Docker is not a stopping condition. Complete the implementation and available local checks, push the dedicated branch, open a PR, and use the existing PostgreSQL-backed Verify workflow for real database regression testing. Inspect CI results and fix failures before reporting completion. For task-specific performance, memory, RTT, concurrency or recovery measurements, add a reproducible GitHub Actions evaluation following `experiments/issue-20` and its workflow. Report measured evidence separately from assumptions and local skipped checks; do not claim deployment fitness from compilation alone.
 

@@ -39,7 +39,7 @@ export const resolveTransferDestinationDefinitionsSql = sql`select
     destination_definition_id
     , destination_definition_name
 from
-    rawsql_transfer.destination_definition
+    velvet.destination_definition
 where
     destination_definition_name = any(cast(:destination_definition_names as text[]))
 order by

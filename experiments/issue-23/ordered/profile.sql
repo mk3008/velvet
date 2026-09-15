@@ -46,18 +46,18 @@ begin
  -- Explicit profile supports immutable text identity; caller checks the profile configuration.
  create temporary table velvet_ordered_pending on commit drop as
  with admitted as materialized (
-  select dk.dirty_key_id,dk.source_key_json from rawsql_transfer.dirty_key dk
+  select dk.dirty_key_id,dk.source_key_json from velvet.dirty_key dk
   where dk.source_schema_name='public' and dk.source_table_name='scale_source'
-   and exists(select 1 from rawsql_transfer.destination_link l where l.setting_id=owned_setting
-    and l.is_enabled and not exists(select 1 from rawsql_transfer.dirty_key_processing p
+   and exists(select 1 from velvet.destination_link l where l.setting_id=owned_setting
+    and l.is_enabled and not exists(select 1 from velvet.dirty_key_processing p
      where p.dirty_key_id=dk.dirty_key_id and p.destination_link_id=l.destination_link_id
      and p.processing_status in ('succeeded','skipped')))
   order by dk.dirty_key_id limit maximum_keys
  )
  select dk.*,l.destination_link_id,l.execution_order
- from admitted dk cross join rawsql_transfer.destination_link l
+ from admitted dk cross join velvet.destination_link l
  where l.setting_id=owned_setting and l.is_enabled
- and not exists(select 1 from rawsql_transfer.dirty_key_processing p
+ and not exists(select 1 from velvet.dirty_key_processing p
   where p.dirty_key_id=dk.dirty_key_id and p.destination_link_id=l.destination_link_id
   and p.processing_status in ('succeeded','skipped'));
  if not exists(select 1 from pg_temp.velvet_ordered_pending) then return next; return; end if;
@@ -79,7 +79,7 @@ begin
     and link=item.destination_link_id) into is_duplicate;
   select null::bigint as active_black_id,null::jsonb as destination_key_json into active;
   if not is_duplicate then
-   select active_black_id,destination_key_json into active from rawsql_transfer.active_black
+   select active_black_id,destination_key_json into active from velvet.active_black
    where destination_link_id=item.destination_link_id and source_key_json=source_key::jsonb for update;
   end if;
   no_op:=not source_present and active.active_black_id is null;
@@ -104,9 +104,9 @@ begin
    'red',active.active_black_id is not null and skip_reason is null,
    'status',case when skip_reason is null then 'succeeded' else 'skipped' end,'result',result_kind);
   if skip_reason is not null then
-   perform rawsql_transfer.record_skipped(fields); skipped:=skipped+1;
+   perform velvet.record_skipped(fields); skipped:=skipped+1;
   else
-   insert into rawsql_transfer.work_item(run_id,dirty_key_id,setting_id,destination_link_id,source_key_json,source_key_hash,
+   insert into velvet.work_item(run_id,dirty_key_id,setting_id,destination_link_id,source_key_json,source_key_hash,
     source_exists,transfer_model,route_type,requires_black_insert_transfer,skip_reason,active_black_id,
     evaluated_destination_key_json,requires_red_transfer,requires_black_update_transfer,requires_physical_delete_transfer)
    values(owned_run,item.dirty_key_id,owned_setting,item.destination_link_id,source_key::jsonb,source_hash,
@@ -116,7 +116,7 @@ begin
    if active.active_black_id is not null then
     select row_id into strict red_key from public.scale_red(active.destination_key_json->>'row_id');
     if red_key is null or red_key=active.destination_key_json->>'row_id' then raise exception 'Invalid Red key'; end if;
-    perform rawsql_transfer.retire_active(fields||jsonb_build_object(
+    perform velvet.retire_active(fields||jsonb_build_object(
      'key','{"row_id":'||to_jsonb(active.destination_key_json->>'row_id')::text||'}',
      'hash',encode(sha256(convert_to('{"row_id":'||to_jsonb(active.destination_key_json->>'row_id')::text||'}','UTF8')),'hex'),
      'destination','{"row_id":'||to_jsonb(red_key)::text||'}',
@@ -126,11 +126,11 @@ begin
     select row_id into strict red_key from public.scale_insert(destination_key,snapshot.logical_id,snapshot.amount::numeric,
      snapshot.memo,snapshot.allocation,item.execution_order::text);
     if red_key is distinct from destination_key then raise exception 'Inserted destination key does not match mapping'; end if;
-    perform rawsql_transfer.record_black(fields||jsonb_build_object('destination','{"row_id":'||to_jsonb(red_key)::text||'}',
+    perform velvet.record_black(fields||jsonb_build_object('destination','{"row_id":'||to_jsonb(red_key)::text||'}',
      'destinationHash',encode(sha256(convert_to('{"row_id":'||to_jsonb(red_key)::text||'}','UTF8')),'hex')),true);
     inserted:=inserted+1;
    else
-    insert into rawsql_transfer.dirty_key_processing(dirty_key_id,run_id,work_item_id,setting_id,destination_link_id,
+    insert into velvet.dirty_key_processing(dirty_key_id,run_id,work_item_id,setting_id,destination_link_id,
      source_key_json,source_key_hash,processing_status,processing_result)
     values(item.dirty_key_id,owned_run,work_id,owned_setting,item.destination_link_id,source_key::jsonb,source_hash,'succeeded',result_kind);
    end if;
@@ -149,8 +149,8 @@ begin
  if current_setting('velvet.ordered_oracle',true)='on' then
   insert into public.ordered_write_observation(logical_id,role,amount,row_id,work_count,processing_count,active_count,lineage_count)
   select new.logical_id,new.role,new.amount,new.row_id,
-   (select count(*) from rawsql_transfer.work_item),(select count(*) from rawsql_transfer.dirty_key_processing),
-   (select count(*) from rawsql_transfer.active_black),(select count(*) from rawsql_transfer.lineage);
+   (select count(*) from velvet.work_item),(select count(*) from velvet.dirty_key_processing),
+   (select count(*) from velvet.active_black),(select count(*) from velvet.lineage);
  end if;
  return new;
 end $$;

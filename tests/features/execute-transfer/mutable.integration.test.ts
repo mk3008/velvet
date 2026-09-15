@@ -50,7 +50,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
     executeTransfer(client, [definition], { settingId: '1' });
   const dirty = (id = 'a', tenant = 't') =>
     db.query(
-      `insert into rawsql_transfer.dirty_key
+      `insert into velvet.dirty_key
     (source_schema_name, source_table_name, source_key_json)
     values ('public', 'source', jsonb_build_object('tenant', $1::text, 'id', $2::text))`,
       [tenant, id],
@@ -62,25 +62,25 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
       )
     ).rows;
   const active = async () =>
-    (await db.query('select * from rawsql_transfer.active_black order by active_black_id')).rows;
+    (await db.query('select * from velvet.active_black order by active_black_id')).rows;
   const results = async (runId: string) =>
     (
       await db.query(
         `select processing_status, processing_result,
-    destination_link_id from rawsql_transfer.dirty_key_processing where run_id = $1 order by dirty_key_id, destination_link_id`,
+    destination_link_id from velvet.dirty_key_processing where run_id = $1 order by dirty_key_id, destination_link_id`,
         [runId],
       )
     ).rows;
   const state = async () => ({
     rows: await rows(),
     active: await active(),
-    work: (await db.query('select * from rawsql_transfer.work_item order by work_item_id')).rows,
+    work: (await db.query('select * from velvet.work_item order by work_item_id')).rows,
     processing: (
       await db.query(
-        'select * from rawsql_transfer.dirty_key_processing order by dirty_key_processing_id',
+        'select * from velvet.dirty_key_processing order by dirty_key_processing_id',
       )
     ).rows,
-    lineage: (await db.query('select * from rawsql_transfer.lineage order by lineage_id')).rows,
+    lineage: (await db.query('select * from velvet.lineage order by lineage_id')).rows,
   });
   beforeAll(async () => {
     admin = new Client({ connectionString: process.env.ASHIBA_DB_URL });
@@ -124,21 +124,21 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
     await admin?.end();
   });
   beforeEach(async () => {
-    await db.query(`truncate rawsql_transfer.setting, rawsql_transfer.destination_definition,
-      rawsql_transfer.dirty_key, public.source, public.destination, public.history restart identity cascade;
+    await db.query(`truncate velvet.setting, velvet.destination_definition,
+      velvet.dirty_key, public.source, public.destination, public.history restart identity cascade;
       alter sequence public.red_sequence restart with 1; set velvet.reject_mutation = 'off'`);
-    await db.query(`insert into rawsql_transfer.destination_definition(destination_definition_id,
+    await db.query(`insert into velvet.destination_definition(destination_definition_id,
       destination_definition_name, destination_table_name, destination_columns, destination_key_columns, transfer_model)
       values (1, 'mutable', 'public.destination',
       '{"columns":[{"name":"tenant","type":"text"},{"name":"row_id","type":"text"},{"name":"amount","type":"numeric"},{"name":"memo","type":"text"}]}',
       array['tenant','row_id'], 'mutable')`);
     await db.query(
-      `insert into rawsql_transfer.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
+      `insert into velvet.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
       values (1,'source',$1,'trusted',$2,'not_analyzed')`,
       [sourceSql, definition.sourceKeyDefinition],
     );
     await db.query(
-      `insert into rawsql_transfer.destination_link(destination_link_id,setting_id,destination_definition_id,
+      `insert into velvet.destination_link(destination_link_id,setting_id,destination_definition_id,
       destination_link_name,execution_order,destination_key_mapping,mapping_definition,diff_compare_excluded_columns,
       generated_insert_transfer_sql_body,generated_reassessment_sql_body,generated_update_transfer_sql_body,generated_delete_transfer_sql_body)
       values (1,1,1,'mutable',1,
@@ -189,7 +189,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
     expect(await rows()).toEqual([{ tenant: 't', row_id: 'a', amount: '150', memo: 'current' }]);
     expect(await active()).toEqual(first);
     const work = (
-      await db.query('select * from rawsql_transfer.work_item where run_id=$1', [updated.runId])
+      await db.query('select * from velvet.work_item where run_id=$1', [updated.runId])
     ).rows[0];
     expect(work).toMatchObject({
       transfer_model: 'mutable',
@@ -215,7 +215,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
     expect(await rows()).toEqual([]);
     expect(await active()).toEqual([]);
     expect(
-      (await db.query('select * from rawsql_transfer.work_item where run_id=$1', [deleted.runId]))
+      (await db.query('select * from velvet.work_item where run_id=$1', [deleted.runId]))
         .rows[0],
     ).toMatchObject({
       transfer_model: 'mutable',
@@ -228,7 +228,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
       evaluated_destination_key_json: { tenant: 't', row_id: 'a' },
     });
     expect(
-      (await db.query('select active_black_id from rawsql_transfer.work_item')).rows.every(
+      (await db.query('select active_black_id from velvet.work_item')).rows.every(
         (w) => w.active_black_id === null,
       ),
     ).toBe(true);
@@ -243,7 +243,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
     await dirty();
     expect(await run()).toMatchObject({ inserted: 1, skipped: 0 });
     expect(await rows()).toEqual([{ tenant: 't', row_id: 'a', amount: '200', memo: null }]);
-    expect((await db.query('select * from rawsql_transfer.lineage')).rows).toEqual([]);
+    expect((await db.query('select * from velvet.lineage')).rows).toEqual([]);
   });
   test('source identity change is deletion plus insertion; composite locator does not touch another tenant', async () => {
     await db.query("insert into public.source(tenant,id,amount) values ('other','a',900)");
@@ -266,7 +266,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
     await run();
     await db.query('update public.source set visible = false');
     await db.query(
-      "update rawsql_transfer.destination_link set generated_reassessment_sql_body = ''",
+      "update velvet.destination_link set generated_reassessment_sql_body = ''",
     );
     await dirty();
     expect((await results((await run()).runId))[0].processing_result).toBe('physical_delete');
@@ -314,7 +314,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
       { tenant: 't', row_id: 'new', amount: '70', memo: null },
       { tenant: 't', row_id: 'same', amount: '60', memo: null },
     ]);
-    expect((await db.query('select * from rawsql_transfer.lineage')).rows).toEqual([]);
+    expect((await db.query('select * from velvet.lineage')).rows).toEqual([]);
   });
   test('mutable and immutable links share the snapshot and retain all immutable routes', async () => {
     const historyInsert = `insert into public.history(tenant,row_id,amount,memo) values (:tenant,:row_id,:amount,:memo) returning tenant,row_id`;
@@ -322,12 +322,12 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
       to_jsonb(d)::text active_values from public.history d where d.tenant=(:velvet_active_destination_key::jsonb->>'tenant') and d.row_id=(:velvet_active_destination_key::jsonb->>'row_id')`;
     const red = `insert into public.history(tenant,row_id,amount,memo) select tenant,'red-'||nextval('public.red_sequence'),-amount,memo from public.history where tenant=:tenant and row_id=:row_id returning tenant,row_id`;
     await db.query(
-      `insert into rawsql_transfer.destination_definition(destination_definition_id,destination_definition_name,destination_table_name,destination_columns,destination_key_columns,transfer_model,sign_inversion_columns,generated_red_transfer_sql_body)
-      select 2,'history','public.history',destination_columns,destination_key_columns,'immutable',array['amount'],$1 from rawsql_transfer.destination_definition where destination_definition_id=1`,
+      `insert into velvet.destination_definition(destination_definition_id,destination_definition_name,destination_table_name,destination_columns,destination_key_columns,transfer_model,sign_inversion_columns,generated_red_transfer_sql_body)
+      select 2,'history','public.history',destination_columns,destination_key_columns,'immutable',array['amount'],$1 from velvet.destination_definition where destination_definition_id=1`,
       [red],
     );
     await db.query(
-      `insert into rawsql_transfer.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,execution_order,destination_key_mapping,mapping_definition,diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body)
+      `insert into velvet.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,execution_order,destination_key_mapping,mapping_definition,diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body)
       values(2,1,2,'history',2,'{"sourceKey":["tenant","logical_id"],"destinationKey":[{"name":"tenant","sourceColumn":"tenant"},{"name":"row_id","sourceColumn":"history_id"}]}',
       '{"columns":{"tenant":"tenant","row_id":"history_id","amount":"amount","memo":"memo"}}','{"columns":["row_id","memo"]}',$1,$2)`,
       [historyInsert, historyCompare],
@@ -368,7 +368,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
       { row_id: 'same-1', amount: '60' },
     ]);
     expect(
-      (await db.query('select distinct destination_link_id from rawsql_transfer.lineage')).rows,
+      (await db.query('select distinct destination_link_id from velvet.lineage')).rows,
     ).toEqual([{ destination_link_id: '2' }]);
   });
   test('NULL and exact large numeric values compare in PostgreSQL', async () => {
@@ -388,22 +388,22 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
   });
   test('rejects mutable date lower-bound configuration before any Run or destination write', async () => {
     await db.query(
-      `update rawsql_transfer.destination_definition set date_lower_bound_adjustments='{"posting_date":{"function":"public.correct_date","arguments":["posting_date"]}}'`,
+      `update velvet.destination_definition set date_lower_bound_adjustments='{"posting_date":{"function":"public.correct_date","arguments":["posting_date"]}}'`,
     );
     await expect(run()).rejects.toThrow(
       'Mutable destinations cannot require posting-date lower-bound control',
     );
     expect(await rows()).toEqual([]);
-    expect((await db.query('select * from rawsql_transfer.run')).rows).toEqual([]);
+    expect((await db.query('select * from velvet.run')).rows).toEqual([]);
   });
   test('rejects inconsistent mapped identity even if key columns are excluded', async () => {
     await run();
     await dirty();
-    await db.query('update rawsql_transfer.setting set source_sql_body=$1', [
+    await db.query('update velvet.setting set source_sql_body=$1', [
       sourceSql.replace('id as row_id', "id || '-moved' as row_id"),
     ]);
     await db.query(
-      `update rawsql_transfer.destination_link set diff_compare_excluded_columns='{"columns":["tenant","row_id","memo"]}'`,
+      `update velvet.destination_link set diff_compare_excluded_columns='{"columns":["tenant","row_id","memo"]}'`,
     );
     const before = await state();
     await expect(run()).rejects.toThrow('Mutable destination key does not match Active Black');
@@ -414,7 +414,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
     await db.query('update public.source set amount=200');
     await dirty();
     await db.query(
-      'update rawsql_transfer.destination_link set generated_update_transfer_sql_body=$1',
+      'update velvet.destination_link set generated_update_transfer_sql_body=$1',
       [updateSql.replace('row_id = :row_id,', "row_id = :row_id || '-moved',")],
     );
     const before = await state();
@@ -447,12 +447,12 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
               ? text.startsWith(operation + ' public.destination') ||
                 (text.startsWith('delete from public.destination') && operation === 'delete')
               : point === 'retirement'
-                ? text.startsWith('delete from rawsql_transfer.active_black') ||
-                  text.startsWith('select rawsql_transfer.retire_active')
+                ? text.startsWith('delete from velvet.active_black') ||
+                  text.startsWith('select velvet.retire_active')
                 : point === 'processing'
-                  ? text.startsWith('insert into rawsql_transfer.dirty_key_processing')
+                  ? text.startsWith('insert into velvet.dirty_key_processing')
                   : point === 'finalization'
-                    ? text.startsWith('update rawsql_transfer.run set run_status = $')
+                    ? text.startsWith('update velvet.run set run_status = $')
                     : text === 'commit' && ++workCommit === 2;
           if (matches) {
             if (point === 'statement') await db.query(text, values);
@@ -467,7 +467,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
       expect(await state()).toEqual(before);
       expect(
         (
-          await db.query('select run_status from rawsql_transfer.run where run_id=$1', [
+          await db.query('select run_status from velvet.run where run_id=$1', [
             error.runId,
           ])
         ).rows,
@@ -480,7 +480,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
       const recovery = new Error('failure recording unavailable');
       const client: TransferExecutionClient = {
         async query(text, values) {
-          if (text.startsWith("update rawsql_transfer.run set run_status = 'failed'"))
+          if (text.startsWith("update velvet.run set run_status = 'failed'"))
             throw recovery;
           return db.query(text, values);
         },
@@ -492,7 +492,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
       expect(await state()).toEqual(before);
       expect(
         (
-          await db.query('select run_status from rawsql_transfer.run where run_id=$1', [
+          await db.query('select run_status from velvet.run where run_id=$1', [
             error.runId,
           ])
         ).rows[0].run_status,
@@ -525,12 +525,12 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
                     );
       if (operation === 'update')
         await db.query(
-          'update rawsql_transfer.destination_link set generated_update_transfer_sql_body=$1',
+          'update velvet.destination_link set generated_update_transfer_sql_body=$1',
           [bad],
         );
       else
         await db.query(
-          'update rawsql_transfer.destination_link set generated_delete_transfer_sql_body=$1',
+          'update velvet.destination_link set generated_delete_transfer_sql_body=$1',
           [bad],
         );
       const before = await state();
@@ -539,7 +539,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
       expect(await state()).toEqual(before);
       expect(
         (
-          await db.query('select run_status from rawsql_transfer.run where run_id=$1', [
+          await db.query('select run_status from velvet.run where run_id=$1', [
             error.runId,
           ])
         ).rows[0].run_status,
@@ -560,7 +560,7 @@ modes('mutable snapshot lifecycle (%s)', (metadataMode) => {
       expect(error.cause).toBe(original);
       expect(
         (
-          await db.query('select run_status from rawsql_transfer.run where run_id=$1', [
+          await db.query('select run_status from velvet.run where run_id=$1', [
             error.runId,
           ])
         ).rows[0].run_status,

@@ -5,7 +5,7 @@
     {
       "path": "schema.sql",
       "kind": "ddl-control",
-      "reason": "Creates the rawsql_transfer schema explicitly so transfer package tables do not rely on the user public schema or a generic transfer schema name."
+      "reason": "Creates the velvet schema explicitly so transfer package tables do not rely on the user public schema or a generic transfer schema name."
     },
     {
       "path": "dirty_key.sql",

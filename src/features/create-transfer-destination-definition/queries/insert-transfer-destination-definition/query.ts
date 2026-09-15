@@ -2,7 +2,7 @@ import type { QuerySource } from '#features/_shared/query-executor.js';
 import type { QueryExecutor } from '#features/_shared/query-executor.js';
 import { sql } from '@mk3008/serene';
 
-export const insertTransferDestinationDefinitionSql = sql`insert into rawsql_transfer.destination_definition(
+export const insertTransferDestinationDefinitionSql = sql`insert into velvet.destination_definition(
     destination_definition_name
     , description
     , destination_table_name

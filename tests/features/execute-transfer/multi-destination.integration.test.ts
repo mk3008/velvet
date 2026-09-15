@@ -61,15 +61,15 @@ modes('three correlated destination links (%s)', (metadataMode) => {
   const run = (client: TransferExecutionClient = db) =>
     executeTransfer(client, [definition], { settingId: '1' });
   const dirty = () =>
-    db.query(`insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json)
+    db.query(`insert into velvet.dirty_key(source_schema_name,source_table_name,source_key_json)
     values ('public','source','{"id":"J100"}')`);
   const results = async (runId: string) =>
     (
       await db.query(
         `select p.destination_link_id, p.processing_result,
     p.processing_status, p.dirty_key_id, w.source_key_json
-    from rawsql_transfer.dirty_key_processing p join rawsql_transfer.work_item w using(work_item_id)
-    join rawsql_transfer.destination_link l on l.destination_link_id=p.destination_link_id
+    from velvet.dirty_key_processing p join velvet.work_item w using(work_item_id)
+    join velvet.destination_link l on l.destination_link_id=p.destination_link_id
     where p.run_id=$1 order by l.execution_order`,
         [runId],
       )
@@ -80,12 +80,12 @@ modes('three correlated destination links (%s)', (metadataMode) => {
       'select * from public.journal order by row_id',
       'select * from public.general_ledger order by row_id',
       'select * from public.write_log order by position',
-      'select * from rawsql_transfer.active_black order by active_black_id',
-      'select * from rawsql_transfer.lineage order by lineage_id',
-      'select * from rawsql_transfer.work_item order by work_item_id',
-      'select * from rawsql_transfer.dirty_key_processing order by dirty_key_processing_id',
-      'select * from rawsql_transfer.dirty_key order by dirty_key_id',
-      "select * from rawsql_transfer.run where run_status='succeeded' order by run_id",
+      'select * from velvet.active_black order by active_black_id',
+      'select * from velvet.lineage order by lineage_id',
+      'select * from velvet.work_item order by work_item_id',
+      'select * from velvet.dirty_key_processing order by dirty_key_processing_id',
+      'select * from velvet.dirty_key order by dirty_key_id',
+      "select * from velvet.run where run_status='succeeded' order by run_id",
     ];
     const rows = [];
     for (const query of queries) rows.push((await db.query(query)).rows);
@@ -142,7 +142,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
     await admin?.end();
   });
   beforeEach(async () => {
-    await db.query(`truncate rawsql_transfer.setting,rawsql_transfer.destination_definition,rawsql_transfer.dirty_key,
+    await db.query(`truncate velvet.setting,velvet.destination_definition,velvet.dirty_key,
       public.source,public.journal,public.general_ledger,public.write_log restart identity cascade;
       alter sequence public.allocation_sequence restart with 1;
       alter sequence public.row_sequence restart with 1;
@@ -168,7 +168,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
       [2, 'general_ledger', ledgerRed],
     ] as const) {
       await db.query(
-        `insert into rawsql_transfer.destination_definition(destination_definition_id,destination_definition_name,
+        `insert into velvet.destination_definition(destination_definition_id,destination_definition_name,
         destination_table_name,destination_columns,destination_key_columns,transfer_model,sign_inversion_columns,
         generated_red_transfer_sql_body,sequence_expression_definition)
         values ($1,$2,$3,$4,array['row_id'],'immutable',array['amount'],$5,$6)`,
@@ -183,7 +183,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
       );
     }
     await db.query(
-      `insert into rawsql_transfer.setting(setting_id,setting_name,source_sql_body,source_sql_hash,
+      `insert into velvet.setting(setting_id,setting_name,source_sql_body,source_sql_hash,
       source_key_definition,source_sql_analysis_status) values(1,'journal source',$1,'trusted',$2,'not_analyzed')`,
       [sourceSql, definition.sourceKeyDefinition],
     );
@@ -205,7 +205,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
         memo: role === 'journal' ? 'journal_memo' : 'ledger_memo',
       };
       await db.query(
-        `insert into rawsql_transfer.destination_link(destination_link_id,setting_id,destination_definition_id,
+        `insert into velvet.destination_link(destination_link_id,setting_id,destination_definition_id,
         destination_link_name,execution_order,destination_key_mapping,mapping_definition,diff_compare_excluded_columns,
         generated_insert_transfer_sql_body,generated_reassessment_sql_body)
         values($1,1,$2,$3,$4,$5,$6,'{"columns":["row_id","allocation"]}',$7,$8)`,
@@ -232,7 +232,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
       "insert into public.source select 'J200',version,debit_account,credit_account,amount,posting_date,journal_memo from public.source where id='J100'",
     );
     await db.query(
-      "insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json) values('public','source','{\"id\":\"J200\"}')",
+      "insert into velvet.dirty_key(source_schema_name,source_table_name,source_key_json) values('public','source','{\"id\":\"J200\"}')",
     );
     let evaluations = 0;
     const client: TransferExecutionClient = {
@@ -262,7 +262,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
     ).toMatchObject({ inserted: 0, skipped: 0 });
     expect(evaluations).toBe(3);
     expect(
-      (await db.query('select count(*) from rawsql_transfer.dirty_key_processing')).rows[0].count,
+      (await db.query('select count(*) from velvet.dirty_key_processing')).rows[0].count,
     ).toBe('9');
   });
   test('bounded admission does not lose a lower ID committed after eligibility was frozen', async () => {
@@ -273,7 +273,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
     try {
       await intake.query('begin');
       await intake.query(
-        "insert into rawsql_transfer.dirty_key(dirty_key_id,source_schema_name,source_table_name,source_key_json) values(0,'public','source','{\"id\":\"J100\"}')",
+        "insert into velvet.dirty_key(dirty_key_id,source_schema_name,source_table_name,source_key_json) values(0,'public','source','{\"id\":\"J100\"}')",
       );
       expect(
         await executeTransfer(db, [definition], { settingId: '1', maxDirtyKeys: 1 }),
@@ -296,7 +296,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
     ).rejects.toThrow(/rejected credit/);
     expect(await state()).toEqual(before);
     expect(
-      (await db.query("select run_status from rawsql_transfer.run where run_status='failed'"))
+      (await db.query("select run_status from velvet.run where run_status='failed'"))
         .rowCount,
     ).toBe(1);
     await db.query("set velvet.fail_role=''");
@@ -313,7 +313,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
       await expect(
         executeTransfer(db, [definition], { settingId: '1', maxDirtyKeys }),
       ).rejects.toThrow(/positive safe integer/);
-      expect((await db.query('select count(*) from rawsql_transfer.run')).rows[0].count).toBe('0');
+      expect((await db.query('select count(*) from velvet.run')).rows[0].count).toBe('0');
     },
   );
   test('one evaluated source snapshot shares allocation, mappings and write order across all three links', async () => {
@@ -412,7 +412,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
     const lineage = (
       await db.query(
         `select destination_link_id,source_kind,source_key_json,destination_key_json
-      from rawsql_transfer.lineage where run_id=$1 order by lineage_id`,
+      from velvet.lineage where run_id=$1 order by lineage_id`,
         [corrected.runId],
       )
     ).rows;
@@ -494,7 +494,7 @@ modes('three correlated destination links (%s)', (metadataMode) => {
         expect(
           (
             await db.query(
-              'select active_black_id from rawsql_transfer.work_item where run_id=$1',
+              'select active_black_id from velvet.work_item where run_id=$1',
               [unchanged.runId],
             )
           ).rows.every((w) => w.active_black_id !== null),
@@ -525,13 +525,13 @@ modes('three correlated destination links (%s)', (metadataMode) => {
       expect(
         (
           await db.query(
-            'select run_status,error_message from rawsql_transfer.run where run_id=$1',
+            'select run_status,error_message from velvet.run where run_id=$1',
             [error.runId],
           )
         ).rows,
       ).toEqual([{ run_status: 'failed', error_message: 'rejected ' + role + ' write' }]);
       expect(
-        (await db.query('select run_status from rawsql_transfer.run order by run_id')).rows,
+        (await db.query('select run_status from velvet.run order by run_id')).rows,
       ).toEqual(
         phase === 'correction'
           ? [{ run_status: 'succeeded' }, { run_status: 'succeeded' }, { run_status: 'failed' }]

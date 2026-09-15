@@ -21,6 +21,8 @@ The one-time import workflow fetched the pinned public source, applied the filte
 
 ## Repository-only changes
 
+This section records the original import. Issue #37 subsequently replaced the retained schema name with `velvet`; see [Decision 0018](../decisions/0018-velvet-schema.md) for the current contract.
+
 The product is named Velvet (`@mk3008/velvet`); its development documentation tool is `@mk3008/velvet-ddl-docs`. Transfer remains the domain vocabulary. The runtime source, runtime tests, reviewed SQL, generated query snapshots, and DDL are unchanged. Documentation and tool references are relocated; root-path review signals retain regression coverage.
 
 The workspace, lockfile, verification commands, license, lint parser configuration, and CI now live here. The old CLI lint command had no ESLint configuration in Ashiba; the migrated configuration enables TypeScript syntax checking without introducing new stylistic rules. Type checking and tests remain separate mandatory gates.
