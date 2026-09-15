@@ -1,0 +1,12 @@
+{
+  "freezeCommit": "1605b5f2c647910fbcb4006fece660235c3b9004",
+  "localFreezeCommit": "87ec0eb",
+  "freezeTree": "8663248e9fbe819a9576c1939908d55c68cdfbce",
+  "agent": "/root/guidance_intake",
+  "response": "response.md",
+  "additionalGenerationRuns": 1,
+  "forwarderRemovalGenerated": false,
+  "otherRuntimeSubtractionMention": "Repeated parse pass noted but not justified as a maintenance improvement; mapping inlining rejected to retain isolated verification.",
+  "guidanceDisposition": "Retain conditional ownership cue; effectiveness unestablished.",
+  "stop": "One authorized follow-up complete; no further runs or tuning."
+}

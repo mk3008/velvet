@@ -1,0 +1,14 @@
+{
+  "baseline": "fcda11bebbb8cf88dc317f79e55f83c77bdee980",
+  "promptSha256": "1a3752cd177a165c69f3b2dd0b183ddffbbb00754e2a9c3f87ba4c51ebbe3773",
+  "baselineDecisionSha256": "e1c8e5d47a5472d28c737cb80bb0c63ff77ee8b60da1bb9d9d0dd9da747f8d9e",
+  "treatedDecisionSha256": "d80cbcadc31dd4e6fde552371a8fc62fc88a7ea07e55f8343674b3143c1feb32",
+  "patchSha256": "022fa238ee444b2d41e6e942fa8a87e0a2d235c2d65e23152247ea0f755ffde4",
+  "inputDiffPaths": [
+    "docs/decisions/0016-proportional-refactoring-decisions.md"
+  ],
+  "agent": "/root/guidance_intake",
+  "context": "fresh; fork_turns=none; inherited model; no override",
+  "deliveryPrefix": "Work read-only in /workspace/scratch/5154a189bbf6/velvet-intake-guidance at fcda11b. Task: ",
+  "deliverySuffix": " Return your assessment as your final response; do not write files."
+}

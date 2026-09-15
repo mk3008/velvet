@@ -23,3 +23,4 @@ A record of an implementation choice is not approval of unresolved business poli
 - [Current transfer schema sufficiency](0014-schema-invariant-review.md)
 - [Observable refactoring boundaries](0015-observable-refactoring-boundaries.md)
 - [Proportional refactoring decisions](0016-proportional-refactoring-decisions.md)
+- [Bidirectional boundary assessment](0017-bidirectional-boundary-assessment.md)

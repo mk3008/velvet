@@ -32,8 +32,15 @@ cost clues, not the objective. Necessary complexity stays explicit.
   context first; state the claim to settle, necessary pre/postconditions, effects,
   invariant/recovery owner and applicable evidence. Stop when these support that
   claim; disclose unresolved dependencies rather than implying uninspected guarantees.
-- Compare keep with a plausible change. Explain what no longer needs to be considered
-  together, which check becomes local, or which ambiguous search becomes direct.
+- Compare keep with a plausible change. Prior adoption does not exempt a boundary
+  from reassessment. For a reopened structural concern, ask whether it still owns
+  an independent policy, invariant, change responsibility or verification obligation
+  (including validation, transaction, retry or error ownership). If it owns none
+  and the same facts must be rechecked across it, consider inline, consolidation,
+  removal or redrawing alongside extraction when they could reduce that concrete
+  maintenance cost. Do not enumerate every direction on every task.
+  Explain what no longer needs to be considered together, which check becomes local,
+  or which ambiguous search becomes direct.
   Moving text, naming alone or shorter appearance is insufficient. Count remaining
   caller facts, hidden dependencies, new interfaces/hops, duplicated meaning and
   verification/maintenance costs. Use current Astra tooling and an actual walkthrough;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-import type { QueryExecutor } from '#features/_shared/query-executor.js';
-import { executeInsertTransferSettingDestinationDefinitionQuery } from './query.js';
+import type { QueryExecutor, QueryParams } from '#features/_shared/query-executor.js';
+import { insertTransferSettingDestinationDefinitionQuery } from './query.js';
 
 const JsonObjectSchema = z.record(z.string(), z.unknown());
 
@@ -53,9 +53,12 @@ function parseRow(raw: unknown): InsertTransferSettingDestinationDefinitionRow {
 
 async function loadInsertedRow(
   executor: QueryExecutor,
-  params: Record<string, unknown>
+  params: InsertTransferSettingDestinationDefinitionQueryParams
 ): Promise<InsertTransferSettingDestinationDefinitionRow> {
-  const rows = await executeInsertTransferSettingDestinationDefinitionQuery(executor, params as never);
+  const rows = await executor.query(
+    insertTransferSettingDestinationDefinitionQuery,
+    params satisfies QueryParams<typeof insertTransferSettingDestinationDefinitionQuery>,
+  );
   if (rows.length !== 1) {
     throw new Error('Expected exactly one inserted transfer setting destination definition row.');
   }
