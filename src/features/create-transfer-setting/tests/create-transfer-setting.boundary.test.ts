@@ -237,3 +237,39 @@ function classifyQuery(query: QuerySource): string {
   }
   return 'unknown';
 }
+
+// These receipts are checked inside the transaction, before subsequent writes/output.
+for (const target of ['insert-transfer-setting', 'insert-transfer-setting-destination'] as const) {
+  test.each(['empty', 'multiple', 'malformed', 'rejected', 'thrown'] as const)(
+    `${target} preserves receipt/error rejection: %s`,
+    async (failure) => {
+      const seen: Array<{ query: QuerySource; params: Record<string, unknown> }> = [];
+      const executor = createMockTransactionalExecutor(seen);
+      const query = executor.query;
+      const driverError = new Error('driver failure');
+      executor.query = function (source, params) {
+        expect(this).toBe(executor);
+        if (classifyQuery(source) !== target) return query.call(this, source, params);
+        if (failure === 'thrown') throw driverError;
+        return query.call(this, source, params).then((rows) => {
+          if (failure === 'rejected') throw driverError;
+          if (failure === 'empty') return [];
+          if (failure === 'multiple') return [...rows, ...rows];
+          return [{ ...rows[0], created_at: 'invalid timestamp' }];
+        });
+      };
+      const result = execute(executor, validInput);
+      if (failure === 'rejected' || failure === 'thrown') {
+        await expect(result).rejects.toBe(driverError);
+      } else if (failure === 'malformed') {
+        await expect(result).rejects.toMatchObject({ name: 'ZodError' });
+      } else {
+        await expect(result).rejects.toThrow('Expected exactly one inserted');
+      }
+      if (target === 'insert-transfer-setting') {
+        expect(seen.some(({ query: source }) =>
+          classifyQuery(source) === 'insert-transfer-setting-destination')).toBe(false);
+      }
+    },
+  );
+}

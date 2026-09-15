@@ -1,5 +1,4 @@
 import type { QuerySource } from '#features/_shared/query-executor.js';
-import type { QueryExecutor } from '#features/_shared/query-executor.js';
 import { sql } from '@mk3008/serene';
 
 export const insertTransferSettingDestinationDefinitionSql = sql`insert into rawsql_transfer.destination_link(
@@ -73,11 +72,4 @@ export interface InsertTransferSettingDestinationDefinitionQueryResult {
   note: string | null;
   setting_id: string;
   updated_at: string;
-}
-
-export async function executeInsertTransferSettingDestinationDefinitionQuery(
-  executor: QueryExecutor,
-  params: InsertTransferSettingDestinationDefinitionQueryParams
-): Promise<InsertTransferSettingDestinationDefinitionQueryResult[]> {
-  return executor.query(insertTransferSettingDestinationDefinitionQuery, params);
 }

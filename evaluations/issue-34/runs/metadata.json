@@ -1,0 +1,14 @@
+{
+  "agent": "/root/ordinary_intake",
+  "context": "fresh; fork_turns=none; inherited model; no model override",
+  "baseline": "fcda11b",
+  "worktree": "detached baseline, read-only",
+  "taskPrompt": "../intake-prompt.md",
+  "deliveryPrefix": "Work read-only in /workspace/scratch/5154a189bbf6/velvet-intake at fcda11b. Task: ",
+  "deliverySuffix": " Return your assessment as your final response; do not write files.",
+  "rawFinalResponse": "intake.md",
+  "protocolCommit": "14284ba",
+  "authorAssessmentCommit": "15ea093",
+  "candidateGenerationResult": "No runtime seam removal/consolidation/redraw proposed. Cast removal and typed handoff proposed; useful mapping seam retained.",
+  "limits": "Final response and cited source/history are retained; no complete tool transcript or attention/timing measurement. Existing repository guidance and history are available to the agent."
+}
