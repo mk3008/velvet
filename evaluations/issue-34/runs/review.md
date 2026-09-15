@@ -1,0 +1,10 @@
+No blocking findings for `fcda11b..7ded0fd`.
+
+- Both removed functions are internal, single-purpose forwarders. Direct calls preserve executor receiver, query selection, parameters, awaiting, cardinality checks, parsing and rejection propagation. Public exports, SQL, DDL and transaction ordering are unchanged.
+- Schema-inferred parameters plus `satisfies QueryParams<typeof query>` preserve an explicit compile-time compatibility check despite the broad executor type. This correctly avoids claiming SQL or receipt validation from TypeScript.
+- The ten negative cases meaningfully cover empty, multiple and malformed receipts, synchronous throws and rejected promises. They verify error identity and stop link writes after setting failure. They do not prove database rollback; the evidence record says so.
+- Applying Alder Q1–Q3 through registration success/failure and registration-to-execution handoffs found no changed business meaning or guarantee. Receipt validation remains inside the transaction; registration still reports ungenerated SQL rather than execution readiness. Mapping validation retains its value-only responsibility while the coordinator owns pre-Run timing and recovery.
+- Decision 0016 supports this narrow source-based justification: removing a no-policy contract is a modest maintenance benefit, with SQL/validation ownership retained. The record does not claim fewer semantic obligations, general speed gains or identical async scheduling.
+- Issue 34 honestly distinguishes the independent typed-handoff proposal from the author’s runtime removal. The raw response supports the reported negative candidate-generation observation. This review supplies safety/evidence assessment of a known diff, not another blind generation result.
+
+Limits: read-only source/history/test review; I ran no verification or external-service checks. PostgreSQL, full verification and SQL-audit readiness remain with the parent’s checks. Recorded agent provenance lacks a complete transcript, appropriately disclosed.

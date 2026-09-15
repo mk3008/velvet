@@ -13,8 +13,36 @@ cover empty/multiple/malformed receipts and rejected/synchronously thrown driver
 errors for both affected INSERTs, preserving receiver identity and preventing
 link writes after a failed setting receipt. They do not simulate DB rollback.
 
-The full local non-DB verification and final PostgreSQL CI result are pending.
-Independent Alder review is pending. Neither pending gate is a passing result.
+Local `ASHIBA_SKIP_DB_BACKED_TESTS=1 corepack pnpm verify` passed: tooling 52/52;
+application 65 passed, 231 DB tests explicitly skipped. Typecheck/build, tooling
+lint, documentation metadata/drift and unfiltered SQL audit completed. The 17
+registration cases pass both before and after; new negative tests are ten of them.
+
+[PostgreSQL 18 Verify](https://github.com/mk3008/velvet/actions/runs/34915218093)
+passed on published runtime head `eed00920f08e6a0aa1297887393c95d2fc21df50`
+(tree-identical to locally reviewed `7ded0fd`): tooling 52/52 and application
+296/296, no skipped DB tests. Existing materialization checks also passed.
+The final documentation-only head is checked again by the existing PR CI; its
+status is available on PR #36 rather than recursively committing each CI result.
+
+Fresh [Alder review](runs/review.md) by `/root/alder_review` found no blocking
+runtime or evidence issue for the same tree. It read the relevant Business Design,
+Decisions and full pinned review knowledge; it did not run tests or review a
+blind task. See [metadata](runs/metadata.json) for local/published commit mapping.
+
+Unfiltered Serene audit: 52 ordinary findings before/after, review-required
+80 -> 81, zero violations. The two existing UNRESOLVED query-execution findings
+move from `query.ts` forwards to `boundary.ts` direct calls; the extra finding
+is the new test's `execute(executor, validInput)` call. No finding is suppressed.
+The two runtime paths were inspected through their unchanged named QuerySource
+and Serene SQL to the adapter and validated receipts; the test call uses the
+existing mock executor. Audit still labels these paths UNRESOLVED: source review
+is not a change to the tool's classification or proof of all business semantics.
+
+The two SQL template bodies compare byte-identically against `fcda11b`; DB,
+workflow, mapping, root exports and authority documents have no diff. Eight
+relative links in the report/Decision were checked before adding the final
+verification links; final document links and `git diff --check` are also checked.
 
 ## Scope of evidence
 

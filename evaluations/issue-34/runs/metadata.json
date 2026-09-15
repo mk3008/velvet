@@ -7,8 +7,18 @@
   "deliveryPrefix": "Work read-only in /workspace/scratch/5154a189bbf6/velvet-intake at fcda11b. Task: ",
   "deliverySuffix": " Return your assessment as your final response; do not write files.",
   "rawFinalResponse": "intake.md",
-  "protocolCommit": "14284ba",
-  "authorAssessmentCommit": "15ea093",
+  "protocolCommit": "045cd80baaed5f5b7bbe1ae3e95360634c489440",
+  "authorAssessmentCommit": "f88a469d42fb68c6616e7f014b8849feaf767683",
   "candidateGenerationResult": "No runtime seam removal/consolidation/redraw proposed. Cast removal and typed handoff proposed; useful mapping seam retained.",
-  "limits": "Final response and cited source/history are retained; no complete tool transcript or attention/timing measurement. Existing repository guidance and history are available to the agent."
+  "limits": "Final response and cited source/history are retained; no complete tool transcript or attention/timing measurement. Existing repository guidance and history are available to the agent.",
+  "review": {
+    "agent": "/root/alder_review",
+    "context": "fresh; fork_turns=none; inherited model; no model override",
+    "localReviewedHead": "7ded0fd",
+    "publishedEquivalentHead": "eed00920f08e6a0aa1297887393c95d2fc21df50",
+    "tree": "60b11a1b7a3c1a04c7efc33d1cb19b86101f0f22",
+    "rawFinalResponse": "review.md",
+    "purpose": "Alder safety and evidence review of known diff, not blind generation"
+  },
+  "publication": "Local commits were published through GitHub connector with identical trees. Local 14284ba maps to protocolCommit; 15ea093 maps to authorAssessmentCommit; 7ded0fd maps to review.publishedEquivalentHead."
 }
