@@ -1,10 +1,14 @@
-# Issue 34: a removable seam, but no autonomous runtime-removal proposal
+# Issue 34: boundary judgment and candidate-generation evidence
 
 Baseline `fcda11b` (merged #33); [frozen protocol](protocol.md),
 [ordinary prompt](intake-prompt.md), [author assessment](author-assessment.md),
 [raw independent response](runs/intake.md), [run metadata](runs/metadata.json).
 
-## Result and scope
+The [guidance follow-up](guidance/README.md), authorized after the first result,
+tests one small ownership cue on the same frozen source and ordinary task.
+The original result and pre-result artifacts below remain evidence of the first run.
+
+## First result and scope
 
 One fresh ordinary-intake application proposed removing unsafe parameter casts,
 not removing/consolidating/redrawing a runtime boundary. It retained the useful
@@ -18,8 +22,10 @@ intake reliably generates both. It also does not establish directional bias:
 choosing the smaller typed-handoff change could be a proportional choice. The
 agent was not asked to enumerate every alternative, and its omission is not an
 explicit rejection of the author's candidate. Stop after this bounded negative
-observation rather than repeat until a removal appears. No new rule, mandatory
-candidate list, recurring audit or Alder change is justified by one omission.
+observation rather than repeat until a removal appears. At this initial stopping point no guidance change was adopted. The subsequent
+owner-requested follow-up tests a small cue against this concrete omission; it
+does not diagnose general bias or introduce a mandatory list, recurring audit
+or Alder change.
 
 ## Historical subjects
 
@@ -85,8 +91,8 @@ A2 stays DEFER, B2 stays adopted, and #33's rejected overview layout is not retr
 
 No supported value-only candidate is waiting for timing; no new DEFER label is
 used to conceal the observed generation result. Generalizing generator performance
-is unestablished. A future naturally arising task that requires challenging a
-previously introduced seam could supply new evidence; it is not a scheduled audit.
+is unestablished. The authorized one-run guidance extension below adds bounded
+evidence; it is not a scheduled audit or an open-ended retry.
 
 ## Verification
 

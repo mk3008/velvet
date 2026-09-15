@@ -52,3 +52,14 @@ receiver/invocation behavior are tested; async stack shape and microtask count
 are intentionally not claimed identical after deleting an async forwarder.
 Existing PostgreSQL registration integration remains the actual driver/binding
 round-trip test. Full Verify covers the broader transfer behavior.
+
+
+## Owner-requested guidance follow-up
+
+The [one-run extension](guidance/README.md) changes only Decision 0016 and evidence
+records. Runtime, tests, DB, AGENTS and workflows match pre-follow-up `7fff25a`.
+The first protocol/answer and reviewed implementation are preserved. The isolated
+input was verified against its hashes and baseline refs, with only the frozen
+Decision patch applied and no Issue 34 answer files. No new local runtime suite
+was needed for this documentation-only follow-up; final PR CI still runs full
+PostgreSQL Verify. No new candidate-generation runs beyond the one extension.
