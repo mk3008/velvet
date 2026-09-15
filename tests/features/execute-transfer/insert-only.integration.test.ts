@@ -47,7 +47,7 @@ modes('insert-only transfer (%s)', (metadataMode) => {
     executeTransfer(client, [definition], { settingId: '1' });
   const dirty = (system = 'consumer', id = 'C-001') =>
     db.query(
-      `insert into rawsql_transfer.dirty_key(source_schema_name, source_table_name, source_key_json)
+      `insert into velvet.dirty_key(source_schema_name, source_table_name, source_key_json)
        values ('public', 'customer_source', jsonb_build_object('system', $1::text, 'id', $2::text))`,
       [system, id],
     );
@@ -59,12 +59,12 @@ modes('insert-only transfer (%s)', (metadataMode) => {
       )
     ).rows;
   const active = async () =>
-    (await db.query('select * from rawsql_transfer.active_black order by active_black_id')).rows;
+    (await db.query('select * from velvet.active_black order by active_black_id')).rows;
   const processing = async (runId: string) =>
     (
       await db.query(
         `select processing_status, processing_result
-         from rawsql_transfer.dirty_key_processing where run_id = $1 order by dirty_key_id`,
+         from velvet.dirty_key_processing where run_id = $1 order by dirty_key_id`,
         [runId],
       )
     ).rows;
@@ -115,10 +115,10 @@ modes('insert-only transfer (%s)', (metadataMode) => {
 
   beforeEach(async () => {
     await db.query(`
-      truncate rawsql_transfer.setting, rawsql_transfer.destination_definition,
-        rawsql_transfer.dirty_key, public.customer_source, public.customer_map restart identity cascade;
+      truncate velvet.setting, velvet.destination_definition,
+        velvet.dirty_key, public.customer_source, public.customer_map restart identity cascade;
       alter sequence public.accounting_customer_id_seq restart with 1;
-      insert into rawsql_transfer.destination_definition(
+      insert into velvet.destination_definition(
         destination_definition_id, destination_definition_name, destination_table_name,
         destination_columns, destination_key_columns, sequence_expression_definition, transfer_model)
       values (
@@ -128,14 +128,14 @@ modes('insert-only transfer (%s)', (metadataMode) => {
       );
     `);
     await db.query(
-      `insert into rawsql_transfer.setting(
+      `insert into velvet.setting(
         setting_id, setting_name, source_sql_body, source_sql_hash,
         source_key_definition, source_sql_analysis_status)
        values (1, 'customers', $1, 'trusted', $2, 'not_analyzed')`,
       [sourceSql, definition.sourceKeyDefinition],
     );
     await db.query(
-      `insert into rawsql_transfer.destination_link(
+      `insert into velvet.destination_link(
         destination_link_id, setting_id, destination_definition_id, destination_link_name,
         execution_order, destination_key_mapping, mapping_definition,
         generated_insert_transfer_sql_body)
@@ -164,7 +164,7 @@ modes('insert-only transfer (%s)', (metadataMode) => {
       external_id: 'C-001',
     });
     expect(initialActive[0].destination_key_json).toEqual({ accounting_id: '1' });
-    const lineage = (await db.query('select * from rawsql_transfer.lineage')).rows;
+    const lineage = (await db.query('select * from velvet.lineage')).rows;
     expect(lineage).toHaveLength(1);
     expect(lineage[0].destination_key_json).toEqual({ accounting_id: '1' });
     expect(await processing(first.runId)).toEqual([
@@ -204,7 +204,7 @@ modes('insert-only transfer (%s)', (metadataMode) => {
     ]);
     expect(await mappings()).toHaveLength(1);
     expect(await active()).toEqual(initialActive);
-    expect((await db.query('select count(*)::int n from rawsql_transfer.lineage')).rows[0].n).toBe(
+    expect((await db.query('select count(*)::int n from velvet.lineage')).rows[0].n).toBe(
       1,
     );
   });
@@ -258,8 +258,8 @@ modes('insert-only transfer (%s)', (metadataMode) => {
     const client: TransferExecutionClient = {
       async query(text, values) {
         if (
-          text.startsWith('insert into rawsql_transfer.dirty_key_processing') ||
-          text.startsWith('select rawsql_transfer.record_black')
+          text.startsWith('insert into velvet.dirty_key_processing') ||
+          text.startsWith('select velvet.record_black')
         )
           throw cause;
         return db.query(text, values);
@@ -270,10 +270,10 @@ modes('insert-only transfer (%s)', (metadataMode) => {
     expect(error.cause).toBe(cause);
     expect(await mappings()).toEqual([]);
     expect(await active()).toEqual([]);
-    expect((await db.query('select * from rawsql_transfer.lineage')).rows).toEqual([]);
+    expect((await db.query('select * from velvet.lineage')).rows).toEqual([]);
     expect(
       (
-        await db.query('select run_status from rawsql_transfer.run where run_id = $1', [
+        await db.query('select run_status from velvet.run where run_id = $1', [
           error.runId,
         ])
       ).rows[0].run_status,
@@ -291,7 +291,7 @@ modes('insert-only transfer (%s)', (metadataMode) => {
         primary key(source_system, external_id)
       );
       truncate public.mutable_target, public.immutable_target;
-      insert into rawsql_transfer.destination_definition(
+      insert into velvet.destination_definition(
         destination_definition_id, destination_definition_name, destination_table_name,
         destination_columns, destination_key_columns, transfer_model, sign_inversion_columns)
       values
@@ -307,7 +307,7 @@ modes('insert-only transfer (%s)', (metadataMode) => {
     const valueMapping =
       '{"columns":{"source_system":"source_system","external_id":"external_id","amount":"amount"}}';
     await db.query(
-      `insert into rawsql_transfer.destination_link(
+      `insert into velvet.destination_link(
         destination_link_id, setting_id, destination_definition_id, destination_link_name,
         execution_order, destination_key_mapping, mapping_definition, generated_insert_transfer_sql_body)
        values
@@ -324,23 +324,23 @@ modes('insert-only transfer (%s)', (metadataMode) => {
     expect((await db.query('select count(*)::int n from public.immutable_target')).rows[0].n).toBe(
       1,
     );
-    expect((await db.query('select count(*)::int n from rawsql_transfer.lineage')).rows[0].n).toBe(
+    expect((await db.query('select count(*)::int n from velvet.lineage')).rows[0].n).toBe(
       2,
     );
   });
 
   test('Phase 5 upgrade widens only the transfer-model route constraints', async () => {
     await db.query(`
-      truncate rawsql_transfer.setting, rawsql_transfer.destination_definition,
-        rawsql_transfer.dirty_key restart identity cascade;
-      alter table rawsql_transfer.destination_definition drop constraint chk_transfer_destination_transfer_model;
-      alter table rawsql_transfer.destination_definition add constraint chk_transfer_destination_transfer_model
+      truncate velvet.setting, velvet.destination_definition,
+        velvet.dirty_key restart identity cascade;
+      alter table velvet.destination_definition drop constraint chk_transfer_destination_transfer_model;
+      alter table velvet.destination_definition add constraint chk_transfer_destination_transfer_model
         check (transfer_model in ('immutable','mutable'));
-      alter table rawsql_transfer.work_item drop constraint chk_work_item_transfer_model;
-      alter table rawsql_transfer.work_item add constraint chk_work_item_transfer_model
+      alter table velvet.work_item drop constraint chk_work_item_transfer_model;
+      alter table velvet.work_item add constraint chk_work_item_transfer_model
         check (transfer_model in ('immutable','mutable'));
-      alter table rawsql_transfer.work_item drop constraint chk_work_item_route_type;
-      alter table rawsql_transfer.work_item add constraint chk_work_item_route_type
+      alter table velvet.work_item drop constraint chk_work_item_route_type;
+      alter table velvet.work_item add constraint chk_work_item_route_type
         check (route_type in ('immutable','mutable','skipped'));
     `);
     const upgrade = await readFile(

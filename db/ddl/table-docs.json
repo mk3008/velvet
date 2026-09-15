@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "metadataLanguagePolicy": "Human-facing summary, designNotes, decision, tradeoff, alternativesRejected, and review notes may use the language of the product documentation. For @mk3008/velvet table review metadata, Japanese is allowed so generated review pages can be read by the product reviewers.",
   "schemas": {
-    "rawsql_transfer": {
+    "velvet": {
       "language": "ja",
       "summary": "Transfer package のマスタ、実行、作業状態、監査用テーブルをまとめるスキーマ。"
     }
   },
   "tables": {
-    "rawsql_transfer.destination_definition": {
+    "velvet.destination_definition": {
       "designNotes": [
         "destination_definition は転送先テーブル側の定義を保持するマスタである。",
         "transfer_model、転送先キー、採番式、赤伝生成に必要な定義は Destination 側の責務として保持する。",
@@ -123,7 +123,7 @@
         }
       }
     },
-    "rawsql_transfer.setting": {
+    "velvet.setting": {
       "designNotes": [
         "setting は転送元データソース定義であり、転送実行指示や処理結果ではない。",
         "source_key_definition は転送元データソースの論理行を識別する正本キー定義として保持する。"
@@ -197,7 +197,7 @@
         }
       }
     },
-    "rawsql_transfer.destination_link": {
+    "velvet.destination_link": {
       "designNotes": [
         "destination_link は Transfer Setting と Destination の接続単位であり、同じ Destination に対して複数の役割を持つことを許可する。",
         "destination_link_name は同一 setting 内の人間向け役割名であり、安定参照キーは destination_link_id である。",
@@ -310,7 +310,7 @@
         }
       }
     },
-    "rawsql_transfer.active_black": {
+    "velvet.active_black": {
       "decision": "active_black は転送プロセス用の current-state table とし、履歴や転送先行からの逆引きは持たせない。",
       "reviewRisk": "identity-boundary",
       "conceptRefs": ["active-black"],
@@ -383,7 +383,7 @@
         }
       }
     },
-    "rawsql_transfer.dirty_key": {
+    "velvet.dirty_key": {
       "designNotes": [
         "dirty_key は外部から登録しやすい変更検知履歴であるため、source_key_hash は持たせない。",
         "大規模検索が必要な runtime table では hash を持つが、Dirty Key 登録時点では手動登録容易性を優先する。"
@@ -401,7 +401,7 @@
         }
       }
     },
-    "rawsql_transfer.run": {
+    "velvet.run": {
       "designNotes": [
         "run は転送実行の引数記録兼プロセスヘッダーであり、Work Item や Lineage の実行文脈になる。",
         "setting_id は、この実行が対象にする Transfer Setting を固定する。"
@@ -439,7 +439,7 @@
         }
       }
     },
-    "rawsql_transfer.work_item": {
+    "velvet.work_item": {
       "designNotes": [
         "work_item は Dirty Key を Transfer Run と Destination Link の文脈で固定化した作業対象である。",
         "source_key_hash は大規模な作業対象検索の補助値であり、source_key_json が正本である。",
@@ -529,7 +529,7 @@
         }
       }
     },
-    "rawsql_transfer.lineage": {
+    "velvet.lineage": {
       "designNotes": [
         "lineage は immutable transfer model の転送先行由来を追跡する監査・デバッグ用テーブルである。",
         "destination_key_hash と source_key_hash はlookup補助値であり、destination_key_json と source_key_json が正本である。",
@@ -603,7 +603,7 @@
         }
       }
     },
-    "rawsql_transfer.dirty_key_processing": {
+    "velvet.dirty_key_processing": {
       "designNotes": [
         "dirty_key_processing は Dirty Key を Destination Link 文脈で処理済みにする記録であり、二重転送防止の正本である。",
         "source_key_hash は処理済み記録の検索補助値であり、source_key_json が正本である。",

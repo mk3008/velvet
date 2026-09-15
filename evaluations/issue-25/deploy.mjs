@@ -125,7 +125,7 @@ for (const links of [1, 3]) {
       if (current.seconds > 45) throw new Error('45s bounded work envelope exceeded');
       const remaining = (
         await db.query(
-          'select count(*)::int n from rawsql_transfer.dirty_key d where exists(select 1 from rawsql_transfer.destination_link l where not exists(select 1 from rawsql_transfer.dirty_key_processing p where p.dirty_key_id=d.dirty_key_id and p.destination_link_id=l.destination_link_id))',
+          'select count(*)::int n from velvet.dirty_key d where exists(select 1 from velvet.destination_link l where not exists(select 1 from velvet.dirty_key_processing p where p.dirty_key_id=d.dirty_key_id and p.destination_link_id=l.destination_link_id))',
         )
       ).rows[0].n;
       remainingTail = remaining;
@@ -133,7 +133,7 @@ for (const links of [1, 3]) {
       // backlog is complete and only one invocation's new intake remains.
       const originalRemaining = (
         await db.query(
-          'select count(*)::int n from rawsql_transfer.dirty_key d where d.dirty_key_id<=10000 and exists(select 1 from rawsql_transfer.destination_link l where not exists(select 1 from rawsql_transfer.dirty_key_processing p where p.dirty_key_id=d.dirty_key_id and p.destination_link_id=l.destination_link_id))',
+          'select count(*)::int n from velvet.dirty_key d where d.dirty_key_id<=10000 and exists(select 1 from velvet.destination_link l where not exists(select 1 from velvet.dirty_key_processing p where p.dirty_key_id=d.dirty_key_id and p.destination_link_id=l.destination_link_id))',
         )
       ).rows[0].n;
       if (!originalRemaining && remaining <= Math.ceil(current.seconds * 2) + 1) break;

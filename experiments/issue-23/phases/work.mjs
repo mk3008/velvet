@@ -6,18 +6,18 @@ import {materializeSource} from './materialize.mjs';
 export const sourceStatement = sql`select * from public.scale_snapshot()`;
 const pending = sql`create temporary table pg_temp.velvet_phase_pending on commit drop as
  with admitted as materialized (
-  select dk.dirty_key_id,dk.source_key_json from rawsql_transfer.dirty_key dk
+  select dk.dirty_key_id,dk.source_key_json from velvet.dirty_key dk
   where dk.source_schema_name='public' and dk.source_table_name='scale_source'
-  and exists(select 1 from rawsql_transfer.destination_link l where l.setting_id=:setting and l.is_enabled
-   and not exists(select 1 from rawsql_transfer.dirty_key_processing p
+  and exists(select 1 from velvet.destination_link l where l.setting_id=:setting and l.is_enabled
+   and not exists(select 1 from velvet.dirty_key_processing p
     where p.dirty_key_id=dk.dirty_key_id and p.destination_link_id=l.destination_link_id
     and p.processing_status in ('succeeded','skipped')))
   order by dk.dirty_key_id limit :maximum
  ) select dk.*,l.destination_link_id,l.execution_order,
  row_number() over(partition by dk.source_key_json->>'id',l.destination_link_id order by dk.dirty_key_id) occurrence
- from admitted dk cross join rawsql_transfer.destination_link l
+ from admitted dk cross join velvet.destination_link l
  where l.setting_id=:setting and l.is_enabled
- and not exists(select 1 from rawsql_transfer.dirty_key_processing p
+ and not exists(select 1 from velvet.dirty_key_processing p
   where p.dirty_key_id=dk.dirty_key_id and p.destination_link_id=l.destination_link_id
   and p.processing_status in ('succeeded','skipped'))`;
 
@@ -33,7 +33,7 @@ const decide = sql`create temporary table pg_temp.velvet_phase_decision on commi
    d.row_id old_key,d.logical_id old_logical_id,d.amount old_amount,d.memo old_memo,d.allocation old_allocation,d.role old_role
   from pg_temp.velvet_phase_pending p
   left join pg_temp.velvet_source_snapshot s on s.logical_id=p.source_key_json->>'id'
-  left join rawsql_transfer.active_black a on p.occurrence=1
+  left join velvet.active_black a on p.occurrence=1
    and a.destination_link_id=p.destination_link_id
    and a.source_key_json=jsonb_build_object('logical_id',p.source_key_json->>'id')
   left join public.scale_destination d on d.row_id=a.destination_key_json->>'row_id'
@@ -48,7 +48,7 @@ const decide = sql`create temporary table pg_temp.velvet_phase_decision on commi
  ) select *,encode(sha256(convert_to(source_key,'UTF8')),'hex') source_hash,
   case when skip is null and active_black_id is not null then nextval('public.scale_row')::text end red_key
  from classified`;
-const prepareWork = sql`insert into rawsql_transfer.work_item(
+const prepareWork = sql`insert into velvet.work_item(
  run_id,dirty_key_id,setting_id,destination_link_id,source_key_json,source_key_hash,
  source_exists,transfer_model,route_type,requires_black_insert_transfer,skip_reason,
  active_black_id,evaluated_destination_key_json,requires_red_transfer,
@@ -61,12 +61,12 @@ const prepareWork = sql`insert into rawsql_transfer.work_item(
 const red = sql`insert into public.scale_destination(row_id,logical_id,amount,memo,allocation,role)
  select red_key,old_logical_id,-old_amount,old_memo,old_allocation,old_role
  from pg_temp.velvet_phase_decision where red_key is not null`;
-const release = sql`update rawsql_transfer.work_item w set active_black_id=null
+const release = sql`update velvet.work_item w set active_black_id=null
  from pg_temp.velvet_phase_decision d where d.red_key is not null
  and w.active_black_id=d.active_black_id and w.destination_link_id=d.destination_link_id`;
-const retire = sql`delete from rawsql_transfer.active_black a using pg_temp.velvet_phase_decision d
+const retire = sql`delete from velvet.active_black a using pg_temp.velvet_phase_decision d
  where d.red_key is not null and a.active_black_id=d.active_black_id and a.destination_link_id=d.destination_link_id`;
-const redLineage = sql`insert into rawsql_transfer.lineage(
+const redLineage = sql`insert into velvet.lineage(
  run_id,setting_id,destination_link_id,work_item_id,transfer_operation,source_kind,
  source_key_json,source_key_hash,destination_table_name,destination_key_json,destination_key_hash)
  select w.run_id,w.setting_id,w.destination_link_id,w.work_item_id,'red_insert','reversed_destination_row',
@@ -74,7 +74,7 @@ const redLineage = sql`insert into rawsql_transfer.lineage(
  encode(sha256(convert_to('{"row_id":'||to_jsonb(d.old_key)::text||'}','UTF8')),'hex'),
  'public.scale_destination',jsonb_build_object('row_id',d.red_key),
  encode(sha256(convert_to('{"row_id":'||to_jsonb(d.red_key)::text||'}','UTF8')),'hex')
- from pg_temp.velvet_phase_decision d join rawsql_transfer.work_item w
+ from pg_temp.velvet_phase_decision d join velvet.work_item w
  on w.run_id=:run and w.dirty_key_id=d.dirty_key_id and w.destination_link_id=d.destination_link_id
  where d.red_key is not null`;
 const black = sql`insert into public.scale_destination(row_id,logical_id,amount,memo,allocation,role)
@@ -90,26 +90,26 @@ const black = sql`insert into public.scale_destination(row_id,logical_id,amount,
  where d.source_exists and d.skip is null
  and (d.execution_order=1 or exists(select 1 from public.scale_destination j
   where j.logical_id=d.logical_id and j.role='1' and j.amount is not distinct from d.amount))`;
-const active = sql`insert into rawsql_transfer.active_black(
+const active = sql`insert into velvet.active_black(
  destination_link_id,source_key_json,source_key_hash,destination_key_json)
  select destination_link_id,source_key::jsonb,source_hash,jsonb_build_object('row_id',black_key)
  from pg_temp.velvet_phase_decision where source_exists and skip is null`;
-const blackLineage = sql`insert into rawsql_transfer.lineage(
+const blackLineage = sql`insert into velvet.lineage(
  run_id,setting_id,destination_link_id,work_item_id,transfer_operation,source_kind,
  source_key_json,source_key_hash,destination_table_name,destination_key_json,destination_key_hash)
  select w.run_id,w.setting_id,w.destination_link_id,w.work_item_id,'black_insert','transfer_source',
  d.source_key::jsonb,d.source_hash,'public.scale_destination',jsonb_build_object('row_id',d.black_key),
  encode(sha256(convert_to('{"row_id":'||to_jsonb(d.black_key)::text||'}','UTF8')),'hex')
- from pg_temp.velvet_phase_decision d join rawsql_transfer.work_item w
+ from pg_temp.velvet_phase_decision d join velvet.work_item w
  on w.run_id=:run and w.dirty_key_id=d.dirty_key_id and w.destination_link_id=d.destination_link_id
  where d.source_exists and d.skip is null`;
-const processing = sql`insert into rawsql_transfer.dirty_key_processing(
+const processing = sql`insert into velvet.dirty_key_processing(
  dirty_key_id,run_id,work_item_id,setting_id,destination_link_id,source_key_json,source_key_hash,processing_status,processing_result)
  select d.dirty_key_id,w.run_id,w.work_item_id,w.setting_id,d.destination_link_id,d.source_key::jsonb,d.source_hash,
  case when d.skip is null then 'succeeded' else 'skipped' end,
  coalesce(d.skip,case when d.active_black_id is not null then
   case when d.source_exists then 'red_then_black_insert' else 'red' end else 'black_insert' end)
- from pg_temp.velvet_phase_decision d join rawsql_transfer.work_item w
+ from pg_temp.velvet_phase_decision d join velvet.work_item w
  on w.run_id=:run and w.dirty_key_id=d.dirty_key_id and w.destination_link_id=d.destination_link_id`;
 
 export async function phaseWork(client,run,setting,maximum,links) {

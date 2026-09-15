@@ -24,3 +24,4 @@ A record of an implementation choice is not approval of unresolved business poli
 - [Observable refactoring boundaries](0015-observable-refactoring-boundaries.md)
 - [Proportional refactoring decisions](0016-proportional-refactoring-decisions.md)
 - [Bidirectional boundary assessment](0017-bidirectional-boundary-assessment.md)
+- [Canonical Velvet PostgreSQL schema](0018-velvet-schema.md)

@@ -21,9 +21,9 @@ const compare=`select * from public.scale_compare(:row_id::text,:logical_id::tex
 let db;
 async function query(client,statement,params={}){const b=bind(statement,params,'indexed');return (await client.query(b.text,b.values)).rows;}
 async function configure(){
- await query(db,sql`update rawsql_transfer.setting set source_sql_body=:source where setting_id=1`,{source});
- await query(db,sql`update rawsql_transfer.destination_link set generated_insert_transfer_sql_body=:insert,generated_reassessment_sql_body=:compare where setting_id=1`,{insert,compare});
- await query(db,sql`update rawsql_transfer.destination_definition set generated_red_transfer_sql_body=:red where destination_definition_id=1`,{red});
+ await query(db,sql`update velvet.setting set source_sql_body=:source where setting_id=1`,{source});
+ await query(db,sql`update velvet.destination_link set generated_insert_transfer_sql_body=:insert,generated_reassessment_sql_body=:compare where setting_id=1`,{insert,compare});
+ await query(db,sql`update velvet.destination_definition set generated_red_transfer_sql_body=:red where destination_definition_id=1`,{red});
 }
 async function ordered(client,maximum,settingId='1'){
  let runId, persisted=false;
@@ -65,10 +65,10 @@ async function ordered(client,maximum,settingId='1'){
 const snapshot=async()=> (await db.query(`select jsonb_build_object(
  'observations',(select jsonb_agg(to_jsonb(d) order by position) from public.ordered_write_observation d),
  'destination',(select jsonb_agg(to_jsonb(d) order by row_id) from public.scale_destination d),
- 'active',(select jsonb_agg(to_jsonb(d) order by active_black_id) from rawsql_transfer.active_black d),
- 'work',(select jsonb_agg(to_jsonb(d) order by work_item_id) from rawsql_transfer.work_item d),
- 'lineage',(select jsonb_agg(to_jsonb(d) order by lineage_id) from rawsql_transfer.lineage d),
- 'processing',(select jsonb_agg(to_jsonb(d) order by dirty_key_processing_id) from rawsql_transfer.dirty_key_processing d))::text value`)).rows[0].value;
+ 'active',(select jsonb_agg(to_jsonb(d) order by active_black_id) from velvet.active_black d),
+ 'work',(select jsonb_agg(to_jsonb(d) order by work_item_id) from velvet.work_item d),
+ 'lineage',(select jsonb_agg(to_jsonb(d) order by lineage_id) from velvet.lineage d),
+ 'processing',(select jsonb_agg(to_jsonb(d) order by dirty_key_processing_id) from velvet.dirty_key_processing d))::text value`)).rows[0].value;
 async function measured(scenario,{maximum,expected,fail=false,latency=rtt,loseCommit=false,database=db}={}){
  const db=database;
  await db.query('select pg_stat_force_next_flush()');await db.query('select pg_stat_clear_snapshot()');
@@ -90,7 +90,7 @@ async function measured(scenario,{maximum,expected,fail=false,latency=rtt,loseCo
  const walBytes=Number((await query(db,sql`select pg_wal_lsn_diff(pg_current_wal_insert_lsn(),:before) n`,{before:walBefore}))[0].n);
  if(fail||loseCommit){assert(error instanceof TransferExecutionError);assert.equal(error.recoveryErrors.length,0);
   assert.match(error.message,loseCommit?/lost COMMIT/:/scale downstream failure/);result={runId:error.runId};
-  assert.equal((await query(db,sql`select run_status from rawsql_transfer.run where run_id=:run`,{run:result.runId}))[0].run_status,loseCommit?'succeeded':'failed');
+  assert.equal((await query(db,sql`select run_status from velvet.run where run_id=:run`,{run:result.runId}))[0].run_status,loseCommit?'succeeded':'failed');
  }else{if(error)throw error;if(expected!==undefined)assert.equal(result.inserted,expected);}
  const row={scenario,elapsedMs,calls,parameterBytes:bytes,peak,cpu:process.cpuUsage(cpu),databaseDelta,walBytes,result};report.trials.push(row);console.log(JSON.stringify(row));
  if(mode==='ordered'){
@@ -133,7 +133,7 @@ await withFixture(async()=>{
   // Small correctness checks avoid the large whole-state oracle contaminating capacity samples.
   await setup(5,links);await configure();await dirty();await measured('small_initial',{expected:5*links,latency:0});
   await dirty();await dirty();await measured('duplicates',{expected:0,latency:0});
-  const outcomes=(await db.query("select processing_result,count(*)::int n from rawsql_transfer.dirty_key_processing where run_id=(select max(run_id) from rawsql_transfer.run) group by processing_result")).rows;
+  const outcomes=(await db.query("select processing_result,count(*)::int n from velvet.dirty_key_processing where run_id=(select max(run_id) from velvet.run) group by processing_result")).rows;
   assert.deepEqual(Object.fromEntries(outcomes.map(r=>[r.processing_result,r.n])),{no_op:5*links,duplicate_ignore:5*links});
   await db.query('update public.scale_source set amount=180');await dirty();const before=await snapshot();
   await query(db,sql`select set_config('velvet.scale_fail',:role,false),set_config('velvet.scale_fail_id','3',false)`,{role:String(links)});await measured('failure',{fail:true,latency:0});assert.equal(await snapshot(),before);
@@ -142,7 +142,7 @@ await withFixture(async()=>{
   await measured('retry_after_lost_commit',{expected:0,latency:0});
   await dirty();await db.query('delete from public.scale_source where id=1');
   await measured('source_absent',{expected:0,latency:0});
-  assert.equal((await query(db,sql`select count(*)::int n from rawsql_transfer.active_black where source_key_json=:key::jsonb`,{key:'{"logical_id":"1"}'}))[0].n,0);
+  assert.equal((await query(db,sql`select count(*)::int n from velvet.active_black where source_key_json=:key::jsonb`,{key:'{"logical_id":"1"}'}))[0].n,0);
   if(mode==='ordered'&&size===10000&&links===3){
    await setup(size,links);await configure();
    const {recover}=await import('./recovery.mjs');

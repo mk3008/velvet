@@ -11,9 +11,9 @@ export async function recover({db,ordered,measured,dirty,rtt}){
  let stopped=false,error,phase='idle',arrivals=0;const tasks=[];
  const background=fn=>{const p=fn().catch(e=>{error??=e;stopped=true;});tasks.push(p);};
  const query=async(client,statement,params={})=>{const b=bind(statement,params,'indexed');return (await client.query(b.text,b.values)).rows;};
- const pending=async(setting='1')=>(await query(producer,sql`select count(*)::int n from rawsql_transfer.dirty_key k
-  where exists(select 1 from rawsql_transfer.destination_link l where l.setting_id=:setting and l.is_enabled
-   and not exists(select 1 from rawsql_transfer.dirty_key_processing p where p.dirty_key_id=k.dirty_key_id
+ const pending=async(setting='1')=>(await query(producer,sql`select count(*)::int n from velvet.dirty_key k
+  where exists(select 1 from velvet.destination_link l where l.setting_id=:setting and l.is_enabled
+   and not exists(select 1 from velvet.dirty_key_processing p where p.dirty_key_id=k.dirty_key_id
     and p.destination_link_id=l.destination_link_id and p.processing_status in ('succeeded','skipped')))`,{setting}))[0].n;
  const otherClient={async query(text,values){if(rtt)await delay(rtt);return other.query(text,values);}};
  try{
@@ -29,15 +29,15 @@ export async function recover({db,ordered,measured,dirty,rtt}){
   await delay(1000);await dirty();phase='outage';
   await primary.query("set velvet.scale_fail='3'");assert((await measured('outage',{maximum:1000,fail:true,latency:rtt,database:primary})).elapsedMs<45000);
   assert.equal(await pending(),10000);await primary.query("set velvet.scale_fail=''");
-  await db.query(`insert into rawsql_transfer.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
-   select 2,'independent',source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status from rawsql_transfer.setting where setting_id=1;
-   insert into rawsql_transfer.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,execution_order,
+  await db.query(`insert into velvet.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
+   select 2,'independent',source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status from velvet.setting where setting_id=1;
+   insert into velvet.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,execution_order,
     destination_key_mapping,mapping_definition,diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body)
    select destination_link_id+3,2,destination_definition_id,destination_link_name,execution_order,destination_key_mapping,mapping_definition,
-    diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body from rawsql_transfer.destination_link where setting_id=1`);
+    diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body from velvet.destination_link where setting_id=1`);
   phase='recovery';const start=performance.now();
   background(async()=>{while(!stopped){await delay(500);if(stopped)break;
-   await query(producer,sql`insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json)
+   await query(producer,sql`insert into velvet.dirty_key(source_schema_name,source_table_name,source_key_json)
     values('public','scale_source',jsonb_build_object('id',:id::text))`,{id:String(arrivals%10000+1)});arrivals++;}});
   while(await pending()>5){
    if(error)throw error;assert(performance.now()-start<180000,'Recovery evaluation ceiling exceeded');

@@ -27,12 +27,12 @@ await withFixture(async()=>{
   const neighborSamples=[], activity=[];
   let arrivals=0, arrivalId=backlog;
   const enqueue=async(count)=>{
-    await execute(sql`insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json)
+    await execute(sql`insert into velvet.dirty_key(source_schema_name,source_table_name,source_key_json)
       select 'public','scale_source',jsonb_build_object('id',id::text) from public.scale_source where id<=:count`,{count});
   };
-  const pending=async(setting='1')=>Number((await producer.query(`select count(*) n from rawsql_transfer.dirty_key k
-    where exists(select 1 from rawsql_transfer.destination_link l where l.setting_id=$1 and l.is_enabled
-      and not exists(select 1 from rawsql_transfer.dirty_key_processing p where p.dirty_key_id=k.dirty_key_id
+  const pending=async(setting='1')=>Number((await producer.query(`select count(*) n from velvet.dirty_key k
+    where exists(select 1 from velvet.destination_link l where l.setting_id=$1 and l.is_enabled
+      and not exists(select 1 from velvet.dirty_key_processing p where p.dirty_key_id=k.dirty_key_id
         and p.destination_link_id=l.destination_link_id and p.processing_status in ('succeeded','skipped')))`,[setting])).rows[0].n);
   const neighbors=async()=>{
     while(!stop){
@@ -64,17 +64,17 @@ await withFixture(async()=>{
     assert(failed.elapsedMs<safetyMs);
     await db.query("set velvet.scale_fail=''");
     // Second Setting uses distinct links and the same physical Destination/DB/source.
-    await db.query(`insert into rawsql_transfer.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
-      select 2,'independent',source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status from rawsql_transfer.setting where setting_id=1;
-      insert into rawsql_transfer.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,execution_order,
+    await db.query(`insert into velvet.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
+      select 2,'independent',source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status from velvet.setting where setting_id=1;
+      insert into velvet.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,execution_order,
         destination_key_mapping,mapping_definition,diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body)
       select destination_link_id+3,2,destination_definition_id,destination_link_name,execution_order,destination_key_mapping,mapping_definition,
-        diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body from rawsql_transfer.destination_link where setting_id=1`);
+        diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body from velvet.destination_link where setting_id=1`);
     phase='recovery';
     producerTask=background(async()=>{
       while(!stop){await delay(1000/arrivalPerSecond);if(stop)break;
         arrivalId=arrivalId%sourceRows+1;
-        await producer.query(`insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json)
+        await producer.query(`insert into velvet.dirty_key(source_schema_name,source_table_name,source_key_json)
           values('public','scale_source',jsonb_build_object('id',$1::text))`,[String(arrivalId)]);arrivals++;
       }
     });

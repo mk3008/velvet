@@ -1,7 +1,7 @@
 import type { QuerySource } from '#features/_shared/query-executor.js';
 import { sql } from '@mk3008/serene';
 
-export const insertTransferSettingSql = sql`insert into rawsql_transfer.setting(
+export const insertTransferSettingSql = sql`insert into velvet.setting(
     setting_name
     , description
     , source_sql_body

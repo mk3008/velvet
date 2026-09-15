@@ -61,7 +61,7 @@ test.skipIf(process.env.ASHIBA_SKIP_DB_BACKED_TESTS === '1')(
       // Exercise the DDL directly: application validation must not mask CHECK behavior.
       const updateDefinition = {
         id: 'verify-source-key-definition', path: 'tests/adapters/pg/features.integration.test.ts',
-        sql: sql`update rawsql_transfer.setting
+        sql: sql`update velvet.setting
           set source_key_definition = cast(:definition as jsonb)
           where setting_id = :id returning source_key_definition`,
       };
