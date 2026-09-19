@@ -1,10 +1,10 @@
 # execute-transfer：責務と検査証拠の対応（Issue 39）
 
-**人間レビュー前のたたき台。** 実装の変更提案ではなく、既存プロダクトに対する小規模な適用記録。まず「責務カード」、次に **C12 / G1 / G2 / G3** を確認してほしい。`mapped` は表に記した条件・アサーションの対応を意味し、契約全体の証明やテスト実行成功を意味しない。
+**人間レビュー結果を反映した固定版記録。** 実装の変更提案ではなく、既存プロダクトに対する小規模な適用記録。責務粒度とG1/G2の分類は承認済み。G3は要求なしを正しく除外できた例として確定した。検査項目の提示粒度には上流への改善知見が残る。`mapped` は表に記した条件・アサーションの対応を意味し、契約全体の証明やテスト実行成功を意味しない。
 
 ## 入力版・適用条件
 
-- VelvetのBusiness Design・Decision・実装・テストはすべて `ecd2152c7502247c156a63bea2ca837e4b230b41` に固定。本書のInterface/Check版は `v1`（このPR）。将来のmainへ無条件に持ち越さない。
+- VelvetのBusiness Design・Decision・実装・テストはすべて `ecd2152c7502247c156a63bea2ca837e4b230b41` に固定。本書のInterface/Check版は `v1`（初稿の対応を保持し、人間レビュー結果を追記）。将来のmainへ無条件に持ち越さない。
 - 手法はAlder [f1](https://github.com/mk3008/alder/blob/f1e642fb3f23629bda9f3a548100918d68254513/docs/functional-interface/prompt.md) と同版の [c3](https://github.com/mk3008/alder/blob/f1e642fb3f23629bda9f3a548100918d68254513/docs/behavior-derivation/candidate-c3.md)。Business Designを先に読み、既存実装へ対応付けた回顧的試行。c3単独の盲検比較・精度評価ではない。
 - 意味の入口：[Business Design](../../business-design/README.md) → [Scope](../../scope/SYSTEM_SCOPE.md) → [Concept一覧](../../concepts/README.md) → [DFD](../../dfd/change-detection-dirty-key-registration.md)・[Process Map](../../processes/transfer-execution-process.md)。関連ConceptはTransfer Execution / Run / Setting、Work Item、Transfer Target Decision、Dirty Key / Processing、Destination / Link、Active Black、Black / Red / Physical Delete Transfer、Lineage（参照した各Conceptは `defined`）。本書は意味の正本を増やさない。
 - 技術上の具体化は [Decision 0002](../../decisions/0002-phase1-trusted-execution.md)〜[0006](../../decisions/0006-phase5-insert-only-identity-mapping.md)、[0008](../../decisions/0008-multi-destination-verification.md)、[0012](../../decisions/0012-reviewable-set-phases.md)、[0013](../../decisions/0013-product-set-phases.md) を参照。Decisionの実装条件をBusiness Designの直接記述と混同しない。
@@ -22,11 +22,11 @@
 | F4 選択した転送と結果追跡を成立させる | Process Map、Black / Red / Physical Delete、Lineage、Processing。実行がF3の結果を適用 | 宛先行・Active・条件付きLineage・処理結果が対応し、次Linkと次回評価で利用できる。no-opは新しい転送行を作らず処理済みにする。取消後も既存履歴・評価済みキーを保持 | C07、C08、C09、C10、C12 |
 | F5 実行結果を確定し再試行へつなぐ | Run、Processing、Decision 0002/0008/0013。実行全体の成功／失敗 | 成功はRunと結果を確定。work失敗は途中結果を戻し、別途失敗Runを残す。未処理通知は再試行可能。COMMIT応答喪失だけで成功を失敗へ上書きしない | C11、C13 |
 
-分割理由：F2は対象の同一性、F3は判断、F4は転送事実と追跡、F5は実行全体の結果という異なる観測対象を持つ。一方Active/Lineage/Processingを独立操作にすると原子性・順序を見失いやすいため、F4にまとめた。F1とF5の統合可否は人間レビューで判断する。
+分割理由：F2は対象の同一性、F3は判断、F4は転送事実と追跡、F5は実行全体の結果という異なる観測対象を持つ。一方Active/Lineage/Processingを独立操作にすると原子性・順序を見失いやすいため、F4にまとめた。人間レビューでF1〜F5の粒度を承認した。F1は実行文脈の成立、F5はwork後の結果確定と再試行可能性という障害境界・観測対象の違いから統合しない。F4も原子性・順序を一体で追うため現状を維持する。
 
 ## Check → アサーション → 実装
 
-各行の期待結果はその行の条件に限定する。C01〜C10・C12の意味根拠は原則 **明示・確度高・通常レビュー**。具体的な拒否時点、件数上限、rollback、COMMIT回復は併記Decisionによる技術的具体化。C11/C13もその範囲では高・通常であり、新しい業務承認を意味しない。C12の証拠不足、G1〜G3は優先レビュー。
+各行の期待結果はその行の条件に限定する。C01〜C10・C12の意味根拠は原則 **明示・確度高・通常レビュー**。具体的な拒否時点、件数上限、rollback、COMMIT回復は併記Decisionによる技術的具体化。C11/C13もその範囲では高・通常であり、新しい業務承認を意味しない。C12/G1・G2の証拠不足の分類は人間レビューで承認済み。以下の複合的な行は初稿の対応記録として保持し、新しい検査項目フォーマットの完成形とはしない。
 
 テスト略号（以下の引用はファイル内のtest名を検索）：
 [E](../../../tests/features/execute-transfer/execution.integration.test.ts)、[R](../../../tests/features/execute-transfer/reevaluation.integration.test.ts)、[M](../../../tests/features/execute-transfer/mutable.integration.test.ts)、[I](../../../tests/features/execute-transfer/insert-only.integration.test.ts)、[D](../../../tests/features/execute-transfer/multi-destination.integration.test.ts)、[S](../../../tests/features/execute-transfer/set-phase.integration.test.ts)。
@@ -48,15 +48,15 @@
 | C12 / F4（関連F2）：Processingへ結果を書くが、元Dirty Keyの内容を変更しない | Dirty Key `dirty-key-transfer`、Processing `not-dirty-key-processing-change-detection-history-management` | E初回testはDirty Key **件数1** とProcessingを確認。件数だけでは内容不変の保証にならない。D/Sの失敗snapshotはDirty Key全行も比較するが、成功・no-op前後の全内容一致とは別（G1） | Q/SQ/metadata routineのengine-owned書込先はWork/Processing等でDirty Key更新なし。**partial test evidence**。実装欠陥とは未判定 |
 | C13 / F5：work COMMIT成功後に応答だけ失う → APIはerrorでも保存済みsuccessをfailedにしない | Run lifecycle＋Decision 0002/0013のcommit ambiguity | E `a lost work COMMIT response cannot relabel committed success as failed` は元cause、success Run、宛先とProcessingを照合。S `lost successful COMMIT response remains durable and retry does no work` は再実行0件も確認 | B recovery、Q `failSql` の `run_status = 'running'`。**mapped**。Run作成commit応答喪失は別場面 |
 
-## 優先して人間が判断する点
+## 人間レビューで確定した判断
 
-| ID・分類 | 判明したこと／未確定範囲 | 次に判断できること |
+| ID・分類 | 判明したこと／未確定範囲 | 判断・後続対応 |
 | --- | --- | --- |
-| G1 / partial test evidence（C12） | Dirty Key不変は明示要件。engine-owned SQLに更新は見つからないが、件数アサーションを全内容不変へ拡張できない。Dの`state()`とS supportの`snapshot()`はDirty Key全行を含み、C11の失敗rollbackでは前後一致を確認する。検索範囲は上記6統合suite、supportのsnapshot、Q/SQとmetadata routine | 成功・no-op前後のDirty Key全列比較を別タスクにするか。任意のtrusted SQL／triggerまでエンジンが無害化する保証は追加しない |
-| G2 / missing direct test evidence（F2/F3） | B `executeRowTransfer` の `current.has(key)` はsource SQLの重複logical keyを拒否。setもSQ `sourceConstraint` のPKと `identityCheck` で一意性を検査する。C02は通知の重複で、同じ証拠にはできない。`tests/features/execute-transfer` 内でsource重複行を与える直接テストを特定できなかった | 実装あり・直接証拠不足として、重複sourceを与えた拒否・work rollback・failed Run保持の検査追加を別タスクにするか。期待する障害境界はDecision 0002/0013を使う。業務上の重複行採用policyを新設せず、バグとは判定しない |
-| G3 / ambiguous mapping（F5） | Run Conceptのcreated/running/succeeded/failed/cancelledは**例**で、最終集合は実装Issueに委ねている。Qはrunning→succeeded/failed。cancel操作やschedulerはこの実行責務の要求として導けない | 「cancelled経路がない＝実装漏れ」としない。キャンセル／クラッシュ復旧を求めるなら別途要件化。現在の文書に新policyを足す必要はない |
+| G1 / partial test evidence（C12） | Dirty Key不変は明示要件。engine-owned SQLに更新は見つからないが、件数アサーションを全内容不変へ拡張できない。Dの`state()`とS supportの`snapshot()`はDirty Key全行を含み、C11の失敗rollbackでは前後一致を確認する。検索範囲は上記6統合suite、supportのsnapshot、Q/SQとmetadata routine | 分類承認。[G1後続タスク #42](https://github.com/mk3008/velvet/issues/42)で成功・no-opの代表ケースを全列比較する。対象はengine-owned execute-transferによる既存行の保持。DDLによるUPDATE禁止やtrusted SQL／外部triggerの無害化へ広げない |
+| G2 / missing direct test evidence（F2/F3） | B `executeRowTransfer` の `current.has(key)` はsource SQLの重複logical keyを拒否。setもSQ `sourceConstraint` のPKと `identityCheck` で一意性を検査する。C02は通知の重複で、同じ証拠にはできない。`tests/features/execute-transfer` 内でsource重複行を与える直接テストを特定できなかった | 分類承認。[G2後続タスク #41](https://github.com/mk3008/velvet/issues/41)をG1より優先する。同一logical keyのsource2行を拒否し、failed Run、destination/Work/Processing/Lineageに成功結果なし、Dirty Keyの再試行可能性を検査。setは既存証拠に意味上の穴がある場合だけ追加する |
+| G3 / 要求なしの正しい除外（F5） | Run Conceptのcreated/running/succeeded/failed/cancelledは**例**で、最終集合は実装Issueに委ねている。Qはrunning→succeeded/failed。cancel操作やschedulerはこの実行責務の要求として導けない | 現状維持・追加タスク不要。「cancelled経路がない＝実装漏れ」としない。将来キャンセル要求が生じた時点でBusiness Designへ追加してから扱う |
 
-今回の限定照合で、確定したimplementation gap（経路なし）・conflicting behavior（意味矛盾）は報告しない。これは全実装の無欠陥宣言ではない。候補対応を確定に昇格させず、まず上記の証拠範囲と期待結果をレビューする。
+今回の限定照合で、確定したimplementation gap（経路なし）・conflicting behavior（意味矛盾）は報告しない。これは全実装の無欠陥宣言ではない。人間承認は上記の責務粒度・証拠分類・後続方針に限定し、全Checkや全実装の包括的な正しさへ拡張しない。
 
 ## 方式差と逆方向の照合
 
@@ -68,17 +68,28 @@
 
 ## この中間索引を残す価値・維持負担
 
-**得られた追加情報：** READMEからは具体的な障害・実装へすぐ入れる。本書からは「同じ通知を再び処理しない」「Lineageが必要なモデルだけ記録する」などの業務責務から複数suiteへ入れる。C12では、件数確認と内容保持の証拠差が見えた。G3では、状態名の例を実装漏れに誤分類することを避けられた。これらはAIによる今回の観察であり、人間のレビュー時間短縮が実証されたわけではない。
+**得られた追加情報：** READMEからは具体的な障害・実装へすぐ入れる。本書からは「同じ通知を再び処理しない」「Lineageが必要なモデルだけ記録する」などの業務責務から複数suiteへ入れる。C12では、件数確認と内容保持の証拠差が見えた。G3では、状態名の例を実装漏れに誤分類することを避けられた。人間レビューでも、C12の証拠範囲の区別、G2の直接証拠不足の発見、G3の偽陽性防止を実用的と評価した。特に要求のない機能を欠陥にしない点が評価された。レビュー時間短縮や他プロダクトへの一般的優位性は未測定。
 
 **重複する部分：** C01/C08/C11/C13の具体的な入口はREADMEにもある。別途全test名の台帳を保守すると二重更新になるため、本書はIssue 39の固定版記録として扱う。継続採用する場合も、意味根拠・該当Check・変わった証拠だけ更新し、READMEに同じ表を複製しない。Interfaceを常設せず既存READMEへの短い意味リンクだけで足りる、という判断も可能。
 
-人間レビューで確認してほしいのは次の3点。
+## 人間レビューの出典と維持方針
 
-1. F1〜F5から責務とその証拠を追えるか。特にF1/F5の統合、F4の粒度を変える必要があるか。
-2. C12/G1〜G3の分類・期待結果を認めるか。テスト追加、対応修正、要件の別タスク化、現状維持のどれにするか。
-3. READMEへの直結よりこの索引が有用か。常設・簡略化・今回限りのどれにするか。
+[責務・G1〜G3・実用性のレビュー](https://github.com/mk3008/velvet/pull/40#issuecomment-5739545711)で上記判断を受けた。本資料は固定版レビュー記録として残し、同じ表をREADMEへ複製しない。継続利用は必要時のmapping再生成・レビュー、または既存READMEへの短い責務索引で足りる。全Check・全test名の永続台帳にはしない。今回READMEは変更しない。
 
-回答はこのPRで受け、必要な変更だけ後続タスクへ分ける。**人間レビュー結果は未取得。** Alderへの改善候補は「技術Decisionの具体化とBusiness由来の期待を区別する」「テスト名一致ではなくアサーションの範囲を書く」の2点に留める。今回はAlder本文を変更しない。
+## 実プロダクトの人間レビューからAlderへ返す知見
+
+[追加レビュー](https://github.com/mk3008/velvet/pull/40#issuecomment-5739950954)の結論は、**導出する観点は有用だが、人間への提示粒度が大きすぎる**というもの。Alderの会議室ケースMR-01は、0/1/複数件、利用不可・予約済みの除外、予約を作らない禁止、予約への引継ぎ、0件時の終了・再確認を1項目に束ねている。この形では、何を検査し、どこまで承認したかを個別に判断しにくい。
+
+上流の `candidate-c3` / 検査項目初稿フォーマットへ返す改善方針：
+
+- 原則、1 Check Itemは1つの観測可能な期待結果を持つ。複数の検査ケース・禁止・接続を束ねず、個別に承認可能な項目へ分ける。
+- 主表示は短い「検査条件 → 期待結果」。例えば「該当0件 → 0件を取得」「該当1件 → その1件を取得」「利用不可 → 結果に含めない」「空き確認 → 予約を作成しない」を別項目にする。
+- 各項目について、人間が必要／不要／期待結果修正／ケース追加／根拠確認を独立に判断できるようにする。
+- Business Designの根拠、明示／強い導出／考慮候補、Confidence、人間レビュー優先度、前後Interfaceとの接続、禁止事項は各項目の補足として保持する。情報を削る改善ではない。
+
+本書のC01〜C13にも複数条件・結果を束ねた行がある。初稿の観測記録を残し、このPRではVelvet独自のフォーマットへ分岐させない。F1〜F5の責務粒度の承認と、Check Itemの提示粒度改善を区別する。Alder本文の変更・上流フォーマットでの再導出は別作業とし、今回はこの知見を記録する。
+
+初稿で挙げた「技術Decisionの具体化とBusiness由来の期待の区別」「アサーションが保証する範囲の明記」も維持するが、今回人間が明示した主要改善点は検査項目の独立性である。
 
 ## 検証記録
 
