@@ -74,14 +74,14 @@
 | A22 | 現行型データを同じ転送先キーで更新できる | 既存の転送先行を更新し、現在対象のidentityを維持する | 未レビュー |
 | A23 | 現行型データを物理削除した後はActiveとして扱わない | 転送先行を削除し、対応するActive Blackを退役させる | 未レビュー |
 | A24 | 現行型の更新・削除ではimmutable用Lineageを作らない | mutable操作に不要なLineageを新規作成しない | 未レビュー |
-| A25 | sourceとDestinationのidentityが一致しない転送を拒否できる | mapped identityが不整合な場合、転送を成立させない | 未レビュー |
-| A26 | mutable更新でDestination keyを別identityへ移動できない | UPDATE結果が別Destination keyへ変わる場合、転送を成立させない | 未レビュー |
-| A27 | 複数Destination Linkを同じsource snapshotで評価できる | 同じRun内の各Linkが同じ時点のsource評価結果を共有できる | 未レビュー |
-| A28 | 複数Destination Linkを定義された順序で処理できる | execution_orderに従ってLinkごとの転送を実行できる | 未レビュー |
-| A29 | Destination Linkごとに転送要否を独立して判定できる | あるLinkだけ変更し、他Linkはno-opという結果を持てる | 未レビュー |
-| A30 | BlackのLineageから元の転送対象を追跡できる | Blackがどのsource logical keyから作られたかを追跡できる | 未レビュー |
-| A31 | RedのLineageから取り消した転送結果を追跡できる | Redがどの既存Destinationを取り消したかを追跡できる | 未レビュー |
-| A32 | Dirty Keyの変更検知履歴は転送処理で書き換わらない | 元Dirty Keyの内容を維持し、処理結果は別のProcessing記録へ残す | 未レビュー |
+| A25 | sourceとDestinationのidentityが一致しない転送を拒否できる | mapped identityが不整合な場合、転送を成立させない | 要修正 |
+| A26 | mutable更新でDestination keyを別identityへ移動できない | UPDATE結果が別Destination keyへ変わる場合、転送を成立させない | 要修正 |
+| A27 | 複数Destination Linkを同じsource snapshotで評価できる | 同じRun内の各Linkが同じ時点のsource評価結果を共有できる | 要修正 |
+| A28 | 複数Destination Linkを定義された順序で処理できる | execution_orderに従ってLinkごとの転送を実行できる | 要修正 |
+| A29 | Destination Linkごとに転送要否を独立して判定できる | あるLinkだけ変更し、他Linkはno-opという結果を持てる | 要確認 |
+| A30 | BlackのLineageから元の転送対象を追跡できる | Blackがどのsource logical keyから作られたかを追跡できる | 要修正 |
+| A31 | RedのLineageから取り消した転送結果を追跡できる | Redがどの既存Destinationを取り消したかを追跡できる | 要修正 |
+| A32 | Dirty Keyの変更検知履歴は転送処理で書き換わらない | 元Dirty Keyの内容を維持し、処理結果は別のProcessing記録へ残す | 要修正 |
 
 ## F5 — 実行結果を確定し再試行へつなぐ
 **責務粒度: 確認済み**
@@ -141,6 +141,8 @@
 | A20 | row source SQLが同一logical keyを2行以上返す | row実装の一意性契約 / Decision 0002,0013 | 強い導出 / 高 | code: `current.has(key)`でreject。直接回帰テスト不足 → #41 |
 
 ## F4 詳細
+> 人間レビュー: A25以降はタイトル/期待結果が理解しづらく要修正。A29はさらに意味確認が必要。現行Decision 0008では、同じsource snapshotを全Linkで評価しつつ、Linkごとの差分判定は独立してよい。journal memoだけ変わるfixtureではjournalのみRed+Black、debit/creditはno-opとなる。一方、いずれかのLink書込が失敗した場合は全Linkのworkをrollbackする。仕訳・借方・貸方を常に一体の業務単位として再転送する要求があるなら、現行仕様とは別のBusiness Design判断が必要。
+
 
 | ID | 条件 | 根拠 | 導出 / 確度 | 検証証拠 |
 | --- | --- | --- | --- | --- |
