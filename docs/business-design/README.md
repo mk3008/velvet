@@ -18,3 +18,5 @@ After Business Design, read [Decision Records](../decisions/README.md), then the
 For an Alder review, use the pinned [review knowledge](../alder/review-knowledge.md) and record the compared product/design commit and working-tree scope. This index establishes access, not a finding that all design questions have been resolved.
 
 PostgreSQL is the current target database and execution environment. Alder, Raw SQL Rules and Serene are the implementation/review contracts described in [adoption](../adoption.md); implementation structure and surface choices do not add business requirements.
+
+Current derived [execute-transfer Check Items](../alder/execute-transfer-check-items.md) support human review and representative test traceability under Alder v0.5. They are not Business Design or evidence of blanket human approval.

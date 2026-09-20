@@ -29,7 +29,7 @@ Prefer structures that make ordinary operations correct even when users forget, 
 
 ## Evaluation decisions
 
-Apply [Alder v0.2 reasoning-led validation](https://github.com/mk3008/alder/blob/b51c63ea830d6e5a53c63ebed4dc3c5d45879e25/docs/adoption.md#prioritize-and-bound-technical-evaluation) (provenance in `docs/adoption.md`). The following routes those upstream principles to Velvet transfer recovery; it is not a separate review-knowledge customization.
+Apply [Alder v0.5 reasoning-led validation](https://github.com/mk3008/alder/blob/90dd8985cc8f4e0391b772bbba570ac8110bf04e/docs/adoption.md#prioritize-and-bound-technical-evaluation) (provenance in `docs/adoption.md`). The following routes those upstream principles to Velvet transfer recovery; it is not a separate review-knowledge customization.
 
 Rank implementation candidates using requirements, cardinality, resource costs and timeout/backlog/retry dynamics before choosing experiments. A smaller change is not automatically the highest-value first experiment. Test uncertainties that can change the decision; do not deeply measure a coefficient improvement when reasoning already shows it leaves the main failure mode. Distinguish bounded work per Run from aggregate recovery cost. State the evaluation envelope and stopping condition; stop when a sufficiently good candidate is supported rather than searching indefinitely for an optimum. Ask the owner only when an unclear requirement level materially changes the work; record assumptions separately from production acceptance.
 
@@ -46,7 +46,9 @@ For DB-managed immutable phases, also follow Decision 0013: stored SQL hashes an
 
 Start at `docs/business-design/README.md` for current Business Design. Preserve existing source formats and follow their lifecycle and authority rules. Record material implementation assumptions and choices in `docs/decisions/`; do not treat records as human approval of unresolved business meaning.
 
-For an Alder review, read Business Design, Decision Records, then implementation / DDL / tests. Use `docs/alder/review-knowledge.md` (Alder v0.2, knowledge v0.3; provenance in `docs/adoption.md`) in a separate agent or fresh context. Apply the full knowledge only during review.
+For Check Item maintenance, start at `docs/alder/execute-transfer-check-items.md` and the v0.5 workflow in `docs/adoption.md`. Keep permanent traceability through Tests only. Business meaning changes require Business Design correction and human confirmation first; preserve Check IDs, review states and meanings when regenerating.
+
+For an Alder review, read Business Design, Decision Records, then implementation / DDL / tests. Use `docs/alder/review-knowledge.md` (Alder v0.5, knowledge v0.3; provenance in `docs/adoption.md`) in a separate agent or fresh context. Apply the full knowledge only during review.
 
 ## Raw SQL
 
