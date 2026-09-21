@@ -134,7 +134,7 @@ ddl-docs check \
   --relationship db/ddl/relationship.json \
   --order db/ddl/order.json \
   --concept-relationship docs/concepts/concept-relationship.json \
-  --default-schema rawsql_transfer
+  --default-schema velvet
 ```
 
 Errors are intended for CI failure, such as missing files, stale table/column/index/constraint references, invalid JSON shape, or DDL files missing from `order.json`.

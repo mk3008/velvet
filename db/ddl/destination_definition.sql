@@ -1,4 +1,4 @@
-create table rawsql_transfer.destination_definition (
+create table velvet.destination_definition (
   destination_definition_id bigserial primary key
 
   , destination_definition_name text not null unique
@@ -94,55 +94,55 @@ create table rawsql_transfer.destination_definition (
 
 );
 
-comment on table rawsql_transfer.destination_definition is
+comment on table velvet.destination_definition is
   '転送先定義。完全修飾された転送先テーブル名、列、主キー、採番式、転送モデル、赤伝生成に必要な列情報を管理する。';
 
-comment on column rawsql_transfer.destination_definition.destination_definition_id is
+comment on column velvet.destination_definition.destination_definition_id is
   '転送先定義ID。サロゲートキー。';
 
-comment on column rawsql_transfer.destination_definition.destination_definition_name is
+comment on column velvet.destination_definition.destination_definition_name is
   '転送先定義名。アプリケーションや他の転送定義から名前で参照するため一意にする。';
 
-comment on column rawsql_transfer.destination_definition.description is
+comment on column velvet.destination_definition.description is
   '説明。転送先定義の目的や業務上の意味を記録する。';
 
-comment on column rawsql_transfer.destination_definition.destination_table_name is
+comment on column velvet.destination_definition.destination_table_name is
   '転送先テーブル名。実際に転送先として書き込むテーブルをスキーマ名などを含む完全修飾名で保持し、一意にする。';
 
-comment on column rawsql_transfer.destination_definition.destination_columns is
+comment on column velvet.destination_definition.destination_columns is
   '転送先列定義。転送先テーブルへ書き込む列名と型情報をJSONBで保持する。';
 
-comment on column rawsql_transfer.destination_definition.destination_key_columns is
+comment on column velvet.destination_definition.destination_key_columns is
   '転送先キー列。転送先行を一意に特定する主キーまたは一意キーの列名を配列で保持する。赤伝生成時に元黒行を参照するためにも使用する。';
 
-comment on column rawsql_transfer.destination_definition.sequence_expression_definition is
+comment on column velvet.destination_definition.sequence_expression_definition is
   '採番式定義。採番列と採番式をJSONBで保持する。';
 
-comment on column rawsql_transfer.destination_definition.transfer_model is
+comment on column velvet.destination_definition.transfer_model is
   '転送モデル。immutable は訂正・取消を赤伝で履歴化し、mutable は現在snapshotへUPDATE/DELETE同期し、insert_only は初回追加後のsource変更・削除を同期しない。';
 
-comment on column rawsql_transfer.destination_definition.sign_inversion_columns is
+comment on column velvet.destination_definition.sign_inversion_columns is
   '符号反転列。赤伝生成時に符号を反転する数値列名を配列で保持する。';
 
-comment on column rawsql_transfer.destination_definition.date_lower_bound_adjustments is
+comment on column velvet.destination_definition.date_lower_bound_adjustments is
   '日付下限制御定義。転送先行の日付補正対象列、補正関数名、引数列、任意の補正通知列をJSONBで保持する。締め管理テーブルや締め判定ロジックそのものは保持しない。';
 
-comment on column rawsql_transfer.destination_definition.generated_red_transfer_sql_body is
+comment on column velvet.destination_definition.generated_red_transfer_sql_body is
   '生成赤伝転送SQL本文。転送先定義に基づき、元黒を読み、符号反転した赤伝を追加するSQLを保持する。';
 
-comment on column rawsql_transfer.destination_definition.generated_red_transfer_sql_status is
+comment on column velvet.destination_definition.generated_red_transfer_sql_status is
   '生成赤伝転送SQL状態。許可値は not_generated, success, failed。';
 
-comment on column rawsql_transfer.destination_definition.generated_red_transfer_sql_error is
+comment on column velvet.destination_definition.generated_red_transfer_sql_error is
   '生成赤伝転送SQLエラー。赤伝転送SQL生成失敗時の理由を保持する。';
 
-comment on column rawsql_transfer.destination_definition.created_at is
+comment on column velvet.destination_definition.created_at is
   '作成日時。レコード作成時刻。';
 
-comment on column rawsql_transfer.destination_definition.updated_at is
+comment on column velvet.destination_definition.updated_at is
   '更新日時。レコード更新時刻。';
 
-comment on column rawsql_transfer.destination_definition.note is
+comment on column velvet.destination_definition.note is
   '備考。実装・運用上の補足を記録する。';
 
-comment on column rawsql_transfer.destination_definition.set_phase_definition is '集合phaseの転送先側契約。Red採番・投影、Red INSERT、書込検証の完成SQL、SHA-256、review revision。';
+comment on column velvet.destination_definition.set_phase_definition is '集合phaseの転送先側契約。Red採番・投影、Red INSERT、書込検証の完成SQL、SHA-256、review revision。';

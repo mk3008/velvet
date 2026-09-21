@@ -67,8 +67,8 @@ export async function install(db: Client) {
  create function public.product_values(k text,id text,a numeric,m text,alloc text,r text,o text)
  returns table(row_id text,logical_id text,amount numeric,memo text,allocation text,role text,owner text,journal_key text)
  language sql stable as $$ select k,id,a,m,alloc,r,o,
- case when r='1' then k else (select d.row_id from rawsql_transfer.destination_link l
- join rawsql_transfer.active_black b on b.destination_link_id=l.destination_link_id
+ case when r='1' then k else (select d.row_id from velvet.destination_link l
+ join velvet.active_black b on b.destination_link_id=l.destination_link_id
   and b.source_key_json=jsonb_build_object('logical_id',id)
  join public.product_destination d on d.row_id=b.destination_key_json->>'row_id'
  where l.setting_id=o::bigint and l.execution_order=1 and d.owner=o and d.logical_id=id and d.role='1') end $$;
@@ -79,19 +79,19 @@ export async function install(db: Client) {
  if current_setting('velvet.drop_write',true)='on' then return null; end if;
  if current_setting('velvet.rewrite_key',true)='on' then new.row_id:='rewritten'; end if;
  if current_setting('velvet.observe',true)='on' then
-  select wi.* into strict w from rawsql_transfer.work_item wi
-  join rawsql_transfer.destination_link l using(destination_link_id)
-  where wi.run_id=(select max(run_id) from rawsql_transfer.run where setting_id=new.owner::bigint)
+  select wi.* into strict w from velvet.work_item wi
+  join velvet.destination_link l using(destination_link_id)
+  where wi.run_id=(select max(run_id) from velvet.run where setting_id=new.owner::bigint)
    and wi.source_key_json=jsonb_build_object('logical_id',new.logical_id)
    and wi.skip_reason is null and l.execution_order=new.role::int;
   if new.amount>=0 and w.requires_red_transfer then
-   if exists(select 1 from rawsql_transfer.active_black where destination_link_id=w.destination_link_id and source_key_json=w.source_key_json)
+   if exists(select 1 from velvet.active_black where destination_link_id=w.destination_link_id and source_key_json=w.source_key_json)
     then raise exception 'Active not retired'; end if;
-   if not exists(select 1 from rawsql_transfer.lineage where work_item_id=w.work_item_id and transfer_operation='red_insert')
+   if not exists(select 1 from velvet.lineage where work_item_id=w.work_item_id and transfer_operation='red_insert')
     then raise exception 'Red Lineage missing'; end if;
   end if;
-  if new.role::int>1 and not exists(select 1 from rawsql_transfer.dirty_key_processing p
-   join rawsql_transfer.destination_link l using(destination_link_id)
+  if new.role::int>1 and not exists(select 1 from velvet.dirty_key_processing p
+   join velvet.destination_link l using(destination_link_id)
    where p.run_id=w.run_id and p.dirty_key_id=w.dirty_key_id and l.execution_order=new.role::int-1)
    then raise exception 'Prior Processing missing'; end if;
  end if;
@@ -101,7 +101,7 @@ export async function install(db: Client) {
 }
 
 export async function setup(db: Client, n = 5, links = 3) {
-  await db.query(`truncate rawsql_transfer.setting,rawsql_transfer.destination_definition,rawsql_transfer.dirty_key,
+  await db.query(`truncate velvet.setting,velvet.destination_definition,velvet.dirty_key,
  public.product_source,public.product_destination restart identity cascade;
  alter sequence public.product_key restart with 1;alter sequence public.product_allocation restart with 1;
  set velvet.fail_role='';set velvet.drop_write='';set velvet.rewrite_key=''`);
@@ -114,7 +114,7 @@ export async function setup(db: Client, n = 5, links = 3) {
     { n },
   );
   await exec(
-    sql`insert into rawsql_transfer.destination_definition(destination_definition_id,destination_definition_name,
+    sql`insert into velvet.destination_definition(destination_definition_id,destination_definition_name,
  destination_table_name,destination_columns,destination_key_columns,transfer_model,sign_inversion_columns,generated_red_transfer_sql_body)
  values(1,'product','public.product_destination',:columns::jsonb,array['row_id'],'immutable',array['amount'],:red)`,
     {
@@ -134,7 +134,7 @@ export async function setup(db: Client, n = 5, links = 3) {
     },
   );
   await exec(
-    sql`insert into rawsql_transfer.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
+    sql`insert into velvet.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
  values(1,'product',:source,:hash,:keys::jsonb,'not_analyzed')`,
     {
       source: sourceSql,
@@ -154,7 +154,7 @@ export async function setup(db: Client, n = 5, links = 3) {
       journal_key: 'key1',
     };
     await exec(
-      sql`insert into rawsql_transfer.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,
+      sql`insert into velvet.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,
    execution_order,destination_key_mapping,mapping_definition,diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body)
    values(:id,1,1,:name,:role,:keys::jsonb,:mapping::jsonb,:excluded::jsonb,:insert,:compare)`,
       {
@@ -202,9 +202,9 @@ export async function enable(db: Client, cap = 1000) {
     verify: reviewed(verify),
   };
   for (const [statement, value] of [
-    [sql`update rawsql_transfer.setting set set_phase_definition=:value::jsonb`, s],
-    [sql`update rawsql_transfer.destination_link set set_phase_definition=:value::jsonb`, l],
-    [sql`update rawsql_transfer.destination_definition set set_phase_definition=:value::jsonb`, d],
+    [sql`update velvet.setting set set_phase_definition=:value::jsonb`, s],
+    [sql`update velvet.destination_link set set_phase_definition=:value::jsonb`, l],
+    [sql`update velvet.destination_definition set set_phase_definition=:value::jsonb`, d],
   ] as const) {
     const b = bind(statement, { value: JSON.stringify(value) }, 'indexed');
     await db.query(b.text, b.values);
@@ -212,7 +212,7 @@ export async function enable(db: Client, cap = 1000) {
 }
 export async function dirty(db: Client, id?: string) {
   const b = bind(
-    sql`insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json)
+    sql`insert into velvet.dirty_key(source_schema_name,source_table_name,source_key_json)
  select 'public','product_source',jsonb_build_object('id',id) from public.product_source where :id::text is null or id=:id`,
     { id: id ?? null },
     'indexed',
@@ -223,10 +223,10 @@ export async function dirty(db: Client, id?: string) {
 export async function snapshot(db: Client) {
   const result = await db.query(`select jsonb_build_object(
  'destination',(select jsonb_agg(to_jsonb(d)||jsonb_build_object('amount',d.amount::text) order by row_id) from public.product_destination d),
- 'active',(select jsonb_agg(to_jsonb(d) order by active_black_id) from rawsql_transfer.active_black d),
- 'work',(select jsonb_agg(to_jsonb(d) order by work_item_id) from rawsql_transfer.work_item d),
- 'lineage',(select jsonb_agg(to_jsonb(d) order by lineage_id) from rawsql_transfer.lineage d),
- 'processing',(select jsonb_agg(to_jsonb(d) order by dirty_key_processing_id) from rawsql_transfer.dirty_key_processing d),
- 'dirty',(select jsonb_agg(to_jsonb(d) order by dirty_key_id) from rawsql_transfer.dirty_key d)) state`);
+ 'active',(select jsonb_agg(to_jsonb(d) order by active_black_id) from velvet.active_black d),
+ 'work',(select jsonb_agg(to_jsonb(d) order by work_item_id) from velvet.work_item d),
+ 'lineage',(select jsonb_agg(to_jsonb(d) order by lineage_id) from velvet.lineage d),
+ 'processing',(select jsonb_agg(to_jsonb(d) order by dirty_key_processing_id) from velvet.dirty_key_processing d),
+ 'dirty',(select jsonb_agg(to_jsonb(d) order by dirty_key_id) from velvet.dirty_key d)) state`);
   return result.rows[0].state;
 }

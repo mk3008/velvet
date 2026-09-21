@@ -24,31 +24,31 @@ create function public.phase_causality() returns trigger language plpgsql as $$
 declare current_work record;
 begin
  if current_setting('velvet.phase_causality',true)='on' and not exists(
-  select 1 from rawsql_transfer.work_item w
-  join rawsql_transfer.destination_link l using(destination_link_id)
-  where w.run_id=(select max(run_id) from rawsql_transfer.run)
+  select 1 from velvet.work_item w
+  join velvet.destination_link l using(destination_link_id)
+  where w.run_id=(select max(run_id) from velvet.run)
    and w.source_key_json=jsonb_build_object('logical_id',new.logical_id)
    and l.execution_order=new.role::int and w.route_type='immutable'
  ) then raise exception 'Work must precede destination'; end if;
  if current_setting('velvet.phase_causality',true)='on' then
-  select w.* into strict current_work from rawsql_transfer.work_item w
-  join rawsql_transfer.destination_link l using(destination_link_id)
-  where w.run_id=(select max(run_id) from rawsql_transfer.run)
+  select w.* into strict current_work from velvet.work_item w
+  join velvet.destination_link l using(destination_link_id)
+  where w.run_id=(select max(run_id) from velvet.run)
    and w.source_key_json=jsonb_build_object('logical_id',new.logical_id)
    and l.execution_order=new.role::int and w.route_type='immutable';
   -- These fixture amounts are positive; negative rows are reversals.
   if new.amount>=0 and current_work.requires_red_transfer then
-   if exists(select 1 from rawsql_transfer.active_black a
+   if exists(select 1 from velvet.active_black a
     where a.destination_link_id=current_work.destination_link_id
      and a.source_key_json=current_work.source_key_json) then
     raise exception 'Old Active must retire before replacement Black'; end if;
-   if not exists(select 1 from rawsql_transfer.lineage l
+   if not exists(select 1 from velvet.lineage l
     where l.work_item_id=current_work.work_item_id and l.transfer_operation='red_insert') then
     raise exception 'Red Lineage must precede replacement Black'; end if;
   end if;
   if new.role::int>1 and not exists(
-   select 1 from rawsql_transfer.dirty_key_processing p
-   join rawsql_transfer.destination_link l using(destination_link_id)
+   select 1 from velvet.dirty_key_processing p
+   join velvet.destination_link l using(destination_link_id)
    where p.run_id=current_work.run_id and p.dirty_key_id=current_work.dirty_key_id
     and l.execution_order=new.role::int-1
   ) then raise exception 'Prior Link Processing must precede next Link write'; end if;

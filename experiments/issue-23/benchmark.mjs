@@ -46,22 +46,22 @@ const compare = `select jsonb_build_object('row_id',:row_id::text,'logical_id',:
 const red = `insert into public.scale_destination
  select nextval('public.scale_row')::text,logical_id,-amount,memo,allocation,role
  from public.scale_destination where row_id=:row_id returning row_id`;
-const dirty = () => execute(sql`insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json)
+const dirty = () => execute(sql`insert into velvet.dirty_key(source_schema_name,source_table_name,source_key_json)
  select 'public','scale_source',jsonb_build_object('id',id::text) from public.scale_source`);
 async function setup(n, links) {
-  await db.query(`truncate rawsql_transfer.setting,rawsql_transfer.destination_definition,
-    rawsql_transfer.dirty_key,public.scale_source,public.scale_destination restart identity cascade;
+  await db.query(`truncate velvet.setting,velvet.destination_definition,
+    velvet.dirty_key,public.scale_source,public.scale_destination restart identity cascade;
     alter sequence public.scale_allocation restart with 1; alter sequence public.scale_row restart with 1;
     set velvet.scale_fail = ''`);
   await execute(sql`insert into public.scale_source select i,100,repeat('m',128) from generate_series(1,:n::int) i`, { n });
-  await execute(sql`insert into rawsql_transfer.destination_definition(destination_definition_id,destination_definition_name,
+  await execute(sql`insert into velvet.destination_definition(destination_definition_id,destination_definition_name,
     destination_table_name,destination_columns,destination_key_columns,transfer_model,sign_inversion_columns,generated_red_transfer_sql_body)
     values(1,'scale','public.scale_destination',:columns::jsonb,array['row_id'],'immutable',array['amount'],:red)`,
     { columns: JSON.stringify({columns:['row_id','logical_id','amount','memo','allocation','role'].map(name=>({name,type:name==='amount'?'numeric':'text'}))}), red });
-  await execute(sql`insert into rawsql_transfer.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
+  await execute(sql`insert into velvet.setting(setting_id,setting_name,source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status)
     values(1,'scale',:source,'trusted',:keys::jsonb,'not_analyzed')`, {source,keys:JSON.stringify(definition.sourceKeyDefinition)});
   for (let role=1; role<=links; role++) {
-    await execute(sql`insert into rawsql_transfer.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,
+    await execute(sql`insert into velvet.destination_link(destination_link_id,setting_id,destination_definition_id,destination_link_name,
       execution_order,destination_key_mapping,mapping_definition,diff_compare_excluded_columns,generated_insert_transfer_sql_body,generated_reassessment_sql_body)
       values(:role::int,1,1,:name,:role::int,:keys::jsonb,:mapping::jsonb,'{"columns":["row_id","allocation"]}',:insert,:compare)`,
       { role, name:'role'+role, keys:JSON.stringify({sourceKey:['logical_id'],destinationKey:[{name:'row_id',sourceColumn:'key'+role}]}),
@@ -70,12 +70,12 @@ async function setup(n, links) {
 }
 const state = async () => (await db.query(`select jsonb_build_object(
  'destination',(select jsonb_agg(to_jsonb(d) order by row_id) from public.scale_destination d),
- 'active',(select jsonb_agg(to_jsonb(a) order by active_black_id) from rawsql_transfer.active_black a),
- 'lineage',(select jsonb_agg(to_jsonb(l) order by lineage_id) from rawsql_transfer.lineage l),
- 'work',(select jsonb_agg(to_jsonb(w) order by work_item_id) from rawsql_transfer.work_item w),
- 'processing',(select jsonb_agg(to_jsonb(p) order by dirty_key_processing_id) from rawsql_transfer.dirty_key_processing p),
- 'dirty',(select jsonb_agg(to_jsonb(k) order by dirty_key_id) from rawsql_transfer.dirty_key k),
- 'success',(select jsonb_agg(to_jsonb(r) order by run_id) from rawsql_transfer.run r where run_status='succeeded'))::text snapshot`)).rows[0].snapshot;
+ 'active',(select jsonb_agg(to_jsonb(a) order by active_black_id) from velvet.active_black a),
+ 'lineage',(select jsonb_agg(to_jsonb(l) order by lineage_id) from velvet.lineage l),
+ 'work',(select jsonb_agg(to_jsonb(w) order by work_item_id) from velvet.work_item w),
+ 'processing',(select jsonb_agg(to_jsonb(p) order by dirty_key_processing_id) from velvet.dirty_key_processing p),
+ 'dirty',(select jsonb_agg(to_jsonb(k) order by dirty_key_id) from velvet.dirty_key k),
+ 'success',(select jsonb_agg(to_jsonb(r) order by run_id) from velvet.run r where run_status='succeeded'))::text snapshot`)).rows[0].snapshot;
 async function measure(n, links, scenario, expectedChanged, fail = false, settingId = '1') {
   const counts = {}, timings = {};
   let calls=0, sqlBytes=0, parameterBytes=0, resultBytes=0, sourceEvaluations=0, maxParameterBytes=0;
@@ -124,11 +124,11 @@ async function measure(n, links, scenario, expectedChanged, fail = false, settin
   assert.equal(sourceEvaluations,1);
   if(fail) {
     assert.equal(await state(),before);
-    assert.equal((await execute(sql`select run_status from rawsql_transfer.run where run_id=:run`,{run:result.runId})).rows[0].run_status,'failed');
+    assert.equal((await execute(sql`select run_status from velvet.run where run_id=:run`,{run:result.runId})).rows[0].run_status,'failed');
   } else {
     if(expectedChanged!==null) assert.equal(result.inserted,expectedChanged);
     if(n!==null && expectedChanged!==null) assert.equal(result.skipped,n*links-expectedChanged);
-    const outcomes=(await execute(sql`select processing_result,count(*)::int n from rawsql_transfer.dirty_key_processing where run_id=:run group by processing_result`,{run:result.runId})).rows;
+    const outcomes=(await execute(sql`select processing_result,count(*)::int n from velvet.dirty_key_processing where run_id=:run group by processing_result`,{run:result.runId})).rows;
     assert.equal(outcomes.reduce((s,r)=>s+r.n,0),result.inserted+result.skipped);
     if(n!==null) assert.equal(result.inserted+result.skipped,n*links);
     result.outcomes=outcomes;

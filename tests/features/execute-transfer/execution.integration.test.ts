@@ -64,23 +64,23 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
   });
   beforeEach(async () => {
     await db.query(
-      'truncate rawsql_transfer.setting, rawsql_transfer.destination_definition, rawsql_transfer.dirty_key, public.phase1_source, public.phase1_destination, public.phase1_other restart identity cascade',
+      'truncate velvet.setting, velvet.destination_definition, velvet.dirty_key, public.phase1_source, public.phase1_destination, public.phase1_other restart identity cascade',
     );
-    await db.query(`insert into rawsql_transfer.destination_definition(destination_definition_id, destination_definition_name, destination_table_name, destination_columns, destination_key_columns, transfer_model, sign_inversion_columns)
+    await db.query(`insert into velvet.destination_definition(destination_definition_id, destination_definition_name, destination_table_name, destination_columns, destination_key_columns, transfer_model, sign_inversion_columns)
       values (1, 'target', 'public.phase1_destination', '{"columns":[{"name":"row_id","type":"text"},{"name":"amount","type":"integer"}]}', array['row_id'], 'immutable', array['amount'])`);
     await db.query(
-      `insert into rawsql_transfer.setting(setting_id, setting_name, source_sql_body, source_sql_hash, source_key_definition, source_sql_analysis_status)
+      `insert into velvet.setting(setting_id, setting_name, source_sql_body, source_sql_hash, source_key_definition, source_sql_analysis_status)
       values (1, 'setting', $1, 'not-an-approval', $2, 'not_analyzed')`,
       [sourceSql, definition.sourceKeyDefinition],
     );
     await db.query(
-      `insert into rawsql_transfer.destination_link(destination_link_id, setting_id, destination_definition_id, destination_link_name, execution_order, destination_key_mapping, mapping_definition, generated_insert_transfer_sql_body)
+      `insert into velvet.destination_link(destination_link_id, setting_id, destination_definition_id, destination_link_name, execution_order, destination_key_mapping, mapping_definition, generated_insert_transfer_sql_body)
       values (1, 1, 1, 'target', 1, '{"sourceKey":["logical_id"],"destinationKey":[{"name":"row_id","sourceColumn":"row_id"}]}', '{"columns":{"row_id":"row_id","amount":"amount"}}', $1)`,
       [insertSql],
     );
     await db.query("insert into public.phase1_source values ('a', 100, 'north')");
     await db.query(
-      "insert into rawsql_transfer.dirty_key(source_schema_name, source_table_name, source_key_json) values ('public','phase1_source','{\"id\":\"a\"}')",
+      "insert into velvet.dirty_key(source_schema_name, source_table_name, source_key_json) values ('public','phase1_source','{\"id\":\"a\"}')",
     );
   });
   const run = () =>
@@ -95,10 +95,10 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
       await db.query(`select r.run_arguments, r.run_status, w.source_key_json, w.setting_id, w.destination_link_id,
       w.requires_black_insert_transfer, p.processing_status, p.processing_result, a.destination_key_json,
       l.transfer_operation, l.source_kind, l.destination_table_name
-      from rawsql_transfer.run r join rawsql_transfer.work_item w using (run_id)
-      join rawsql_transfer.dirty_key_processing p using (work_item_id)
-      join rawsql_transfer.lineage l using (work_item_id)
-      join rawsql_transfer.active_black a on a.destination_link_id = w.destination_link_id`)
+      from velvet.run r join velvet.work_item w using (run_id)
+      join velvet.dirty_key_processing p using (work_item_id)
+      join velvet.lineage l using (work_item_id)
+      join velvet.active_black a on a.destination_link_id = w.destination_link_id`)
     ).rows[0];
     expect(record).toMatchObject({
       run_arguments: { branch: 'north' },
@@ -115,10 +115,10 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
       destination_table_name: 'public.phase1_destination',
     });
     expect(await run()).toMatchObject({ inserted: 0, skipped: 0 });
-    expect((await db.query('select count(*) from rawsql_transfer.lineage')).rows[0].count).toBe(
+    expect((await db.query('select count(*) from velvet.lineage')).rows[0].count).toBe(
       '1',
     );
-    expect((await db.query('select count(*) from rawsql_transfer.dirty_key')).rows[0].count).toBe(
+    expect((await db.query('select count(*) from velvet.dirty_key')).rows[0].count).toBe(
       '1',
     );
   });
@@ -133,7 +133,7 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
         executeTransfer(other, [definition], { settingId: '1', arguments: { branch: 'north' } }),
       ]);
       expect(results.map((result) => result.inserted).sort()).toEqual([0, 1]);
-      expect((await db.query('select count(*) from rawsql_transfer.lineage')).rows[0].count).toBe(
+      expect((await db.query('select count(*) from velvet.lineage')).rows[0].count).toBe(
         '1',
       );
     } finally {
@@ -141,7 +141,7 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
     }
   });
   test('executes the current stored source SQL without a code-side copy or approval status', async () => {
-    await db.query('update rawsql_transfer.setting set source_sql_body = $1 where setting_id = 1', [
+    await db.query('update velvet.setting set source_sql_body = $1 where setting_id = 1', [
       'select id as logical_id, id as row_id, amount * 2 as amount from public.phase1_source where branch = :branch',
     ]);
     await run();
@@ -151,13 +151,13 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
   });
   test('coalesces repeated dirty keys in one snapshot without duplicate insertion', async () => {
     await db.query(
-      "insert into rawsql_transfer.dirty_key(source_schema_name, source_table_name, source_key_json) values ('public','phase1_source','{\"id\":\"a\"}')",
+      "insert into velvet.dirty_key(source_schema_name, source_table_name, source_key_json) values ('public','phase1_source','{\"id\":\"a\"}')",
     );
     expect(await run()).toMatchObject({ inserted: 1, skipped: 1 });
     expect(
       (
         await db.query(
-          'select processing_result from rawsql_transfer.dirty_key_processing order by dirty_key_id',
+          'select processing_result from velvet.dirty_key_processing order by dirty_key_id',
         )
       ).rows,
     ).toEqual([{ processing_result: 'black_insert' }, { processing_result: 'duplicate_ignore' }]);
@@ -171,23 +171,23 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
         { settingId: '1' },
       ),
     ).rejects.toThrow(/does not match/);
-    await db.query('update rawsql_transfer.setting set is_enabled = false');
+    await db.query('update velvet.setting set is_enabled = false');
     await expect(run()).rejects.toThrow(/disabled/);
-    expect((await db.query('select count(*) from rawsql_transfer.run')).rows[0].count).toBe('0');
+    expect((await db.query('select count(*) from velvet.run')).rows[0].count).toBe('0');
   });
   test('isolates schema/table, Setting and Destination Link contexts', async () => {
     await db.query(
-      "insert into rawsql_transfer.dirty_key(source_schema_name, source_table_name, source_key_json) values ('other','phase1_source','{\"id\":\"a\"}'), ('public','other','{\"id\":\"a\"}')",
+      "insert into velvet.dirty_key(source_schema_name, source_table_name, source_key_json) values ('other','phase1_source','{\"id\":\"a\"}'), ('public','other','{\"id\":\"a\"}')",
     );
     await db.query(
-      "insert into rawsql_transfer.destination_definition(destination_definition_id, destination_definition_name, destination_table_name, destination_columns, destination_key_columns, transfer_model, sign_inversion_columns) select 2, 'other', 'public.phase1_other', destination_columns, destination_key_columns, transfer_model, sign_inversion_columns from rawsql_transfer.destination_definition where destination_definition_id=1",
+      "insert into velvet.destination_definition(destination_definition_id, destination_definition_name, destination_table_name, destination_columns, destination_key_columns, transfer_model, sign_inversion_columns) select 2, 'other', 'public.phase1_other', destination_columns, destination_key_columns, transfer_model, sign_inversion_columns from velvet.destination_definition where destination_definition_id=1",
     );
     await db.query(
-      "insert into rawsql_transfer.setting(setting_id, setting_name, source_sql_body, source_sql_hash, source_key_definition, source_sql_analysis_status) select 2,'other',source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status from rawsql_transfer.setting where setting_id=1",
+      "insert into velvet.setting(setting_id, setting_name, source_sql_body, source_sql_hash, source_key_definition, source_sql_analysis_status) select 2,'other',source_sql_body,source_sql_hash,source_key_definition,source_sql_analysis_status from velvet.setting where setting_id=1",
     );
     await db.query(
-      `insert into rawsql_transfer.destination_link(destination_link_id, setting_id, destination_definition_id, destination_link_name, execution_order, destination_key_mapping, mapping_definition, generated_insert_transfer_sql_body)
-      select 2,2,2,'other',1,destination_key_mapping,mapping_definition,$1 from rawsql_transfer.destination_link where destination_link_id=1`,
+      `insert into velvet.destination_link(destination_link_id, setting_id, destination_definition_id, destination_link_name, execution_order, destination_key_mapping, mapping_definition, generated_insert_transfer_sql_body)
+      select 2,2,2,'other',1,destination_key_mapping,mapping_definition,$1 from velvet.destination_link where destination_link_id=1`,
       [
         'insert into public.phase1_other(row_id, amount) values (:row_id, :amount) returning row_id',
       ],
@@ -203,7 +203,7 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
     expect(
       (
         await db.query(
-          'select dirty_key_id, setting_id, destination_link_id from rawsql_transfer.work_item order by setting_id',
+          'select dirty_key_id, setting_id, destination_link_id from velvet.work_item order by setting_id',
         )
       ).rows,
     ).toEqual([
@@ -213,10 +213,10 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
   });
   test('invalid mapping is rejected before a Run or destination write', async () => {
     await db.query(
-      `update rawsql_transfer.destination_link set mapping_definition = '{"columns":{"not_a_column":"amount"}}'`,
+      `update velvet.destination_link set mapping_definition = '{"columns":{"not_a_column":"amount"}}'`,
     );
     await expect(run()).rejects.toThrow(/mapping/);
-    expect((await db.query('select count(*) from rawsql_transfer.run')).rows[0].count).toBe('0');
+    expect((await db.query('select count(*) from velvet.run')).rows[0].count).toBe('0');
   });
   test.each([new Date('2026-01-01T00:00:00Z'), NaN, Infinity, { nested: undefined }, Array(1)])(
     'rejects non-JSON logical identity from the resolver: %s',
@@ -227,20 +227,20 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
           arguments: { branch: 'north' },
         }),
       ).rejects.toThrow(/JSON-compatible/);
-      expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
+      expect((await db.query('select run_status from velvet.run')).rows).toEqual([
         { run_status: 'failed' },
       ]);
     },
   );
   test('rejects a PostgreSQL Date key without successful work or false lineage', async () => {
-    await db.query('update rawsql_transfer.setting set source_sql_body = $1', [
+    await db.query('update velvet.setting set source_sql_body = $1', [
       "select timestamp '2026-01-01' as logical_id, id as row_id, amount from public.phase1_source",
     ]);
     await expect(run()).rejects.toThrow(/JSON-compatible/);
-    expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
+    expect((await db.query('select run_status from velvet.run')).rows).toEqual([
       { run_status: 'failed' },
     ]);
-    expect((await db.query('select count(*) from rawsql_transfer.lineage')).rows[0].count).toBe(
+    expect((await db.query('select count(*) from velvet.lineage')).rows[0].count).toBe(
       '0',
     );
     expect((await db.query('select count(*) from public.phase1_destination')).rows[0].count).toBe(
@@ -252,8 +252,8 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
     const client = {
       async query(text: string, values?: unknown[]) {
         if (
-          text.startsWith('insert into rawsql_transfer.dirty_key_processing') ||
-          text.startsWith('select rawsql_transfer.record_black')
+          text.startsWith('insert into velvet.dirty_key_processing') ||
+          text.startsWith('select velvet.record_black')
         ) {
           expect(
             (await db.query('select count(*) from public.phase1_destination')).rows[0].count,
@@ -269,15 +269,15 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
     }).catch((error) => error);
     expect(error).toBeInstanceOf(TransferExecutionError);
     expect(error.cause).toBe(cause);
-    expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
+    expect((await db.query('select run_status from velvet.run')).rows).toEqual([
       { run_status: 'failed' },
     ]);
     for (const table of [
       'public.phase1_destination',
-      'rawsql_transfer.active_black',
-      'rawsql_transfer.lineage',
-      'rawsql_transfer.work_item',
-      'rawsql_transfer.dirty_key_processing',
+      'velvet.active_black',
+      'velvet.lineage',
+      'velvet.work_item',
+      'velvet.dirty_key_processing',
     ]) {
       expect((await db.query('select count(*) from ' + table)).rows[0].count).toBe('0');
     }
@@ -285,7 +285,7 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
   test('a database failure inside metadata recording rolls back destination and all earlier metadata', async () => {
     await db.query(`create function public.reject_processing() returns trigger language plpgsql as $$
         begin raise exception 'database processing rejected'; end $$;
-        create trigger reject_processing before insert on rawsql_transfer.dirty_key_processing
+        create trigger reject_processing before insert on velvet.dirty_key_processing
         for each row execute function public.reject_processing()`);
     try {
       const error = await run().catch((error) => error);
@@ -293,18 +293,18 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
       expect(error.cause.message).toBe('database processing rejected');
       for (const table of [
         'public.phase1_destination',
-        'rawsql_transfer.active_black',
-        'rawsql_transfer.lineage',
-        'rawsql_transfer.work_item',
-        'rawsql_transfer.dirty_key_processing',
+        'velvet.active_black',
+        'velvet.lineage',
+        'velvet.work_item',
+        'velvet.dirty_key_processing',
       ])
         expect((await db.query('select count(*) from ' + table)).rows[0].count).toBe('0');
-      expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
+      expect((await db.query('select run_status from velvet.run')).rows).toEqual([
         { run_status: 'failed' },
       ]);
     } finally {
       await db.query(
-        'drop trigger reject_processing on rawsql_transfer.dirty_key_processing;drop function public.reject_processing()',
+        'drop trigger reject_processing on velvet.dirty_key_processing;drop function public.reject_processing()',
       );
     }
   });
@@ -322,7 +322,7 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
     const client = {
       async query(text: string, values?: unknown[]) {
         if (text.startsWith('insert into public.phase1_destination')) {
-          expect((await observer.query('select run_status from rawsql_transfer.run')).rows).toEqual(
+          expect((await observer.query('select run_status from velvet.run')).rows).toEqual(
             [{ run_status: 'running' }],
           );
           sawDurableRun = true;
@@ -344,14 +344,14 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
       expect(error.recoveryErrors).toEqual([]);
       expect(sawDurableRun && sawInsertedRow).toBe(true);
       expect(
-        (await db.query('select run_id, run_status, error_message from rawsql_transfer.run')).rows,
+        (await db.query('select run_id, run_status, error_message from velvet.run')).rows,
       ).toEqual([{ run_id: error.runId, run_status: 'failed', error_message: error.message }]);
       for (const table of [
         'public.phase1_destination',
-        'rawsql_transfer.work_item',
-        'rawsql_transfer.active_black',
-        'rawsql_transfer.lineage',
-        'rawsql_transfer.dirty_key_processing',
+        'velvet.work_item',
+        'velvet.active_black',
+        'velvet.lineage',
+        'velvet.dirty_key_processing',
       ])
         expect((await db.query('select count(*) from ' + table)).rows[0].count).toBe('0');
     } finally {
@@ -366,7 +366,7 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
     const client = {
       async query(text: string, values?: unknown[]) {
         if (text.startsWith('select id as logical_id')) throw original;
-        if (text.startsWith('update rawsql_transfer.run') && text.includes("run_status = 'failed'"))
+        if (text.startsWith('update velvet.run') && text.includes("run_status = 'failed'"))
           throw recovery;
         return db.query(text, values);
       },
@@ -379,11 +379,11 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
     expect(error.message).toBe(original.message);
     expect(error.cause).toBe(original);
     expect(error.recoveryErrors).toEqual([recovery]);
-    expect((await db.query('select run_id, run_status from rawsql_transfer.run')).rows).toEqual([
+    expect((await db.query('select run_id, run_status from velvet.run')).rows).toEqual([
       { run_id: error.runId, run_status: 'running' },
     ]);
     expect(
-      (await db.query('select count(*) from rawsql_transfer.dirty_key_processing')).rows[0].count,
+      (await db.query('select count(*) from velvet.dirty_key_processing')).rows[0].count,
     ).toBe('0');
   });
   test('configuration changes between Run creation and work fail closed', async () => {
@@ -393,7 +393,7 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
         const result = await db.query(text, values);
         if (text === 'commit' && !changed) {
           changed = true;
-          await db.query('update rawsql_transfer.setting set is_enabled = false');
+          await db.query('update velvet.setting set is_enabled = false');
         }
         return result;
       },
@@ -401,7 +401,7 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
     await expect(
       executeTransfer(client, [definition], { settingId: '1', arguments: { branch: 'north' } }),
     ).rejects.toThrow(/configuration changed/);
-    expect((await db.query('select run_status from rawsql_transfer.run')).rows).toEqual([
+    expect((await db.query('select run_status from velvet.run')).rows).toEqual([
       { run_status: 'failed' },
     ]);
     expect((await db.query('select count(*) from public.phase1_destination')).rows[0].count).toBe(
@@ -412,10 +412,10 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
     await run();
     await db.query("insert into public.phase1_source values ('b', 200, 'north')");
     await db.query(
-      "insert into rawsql_transfer.dirty_key(source_schema_name,source_table_name,source_key_json) values ('public','phase1_source','{\"id\":\"a\"}'),('public','phase1_source','{\"id\":\"b\"}')",
+      "insert into velvet.dirty_key(source_schema_name,source_table_name,source_key_json) values ('public','phase1_source','{\"id\":\"a\"}'),('public','phase1_source','{\"id\":\"b\"}')",
     );
     await db.query(
-      `update rawsql_transfer.destination_link set generated_reassessment_sql_body = $1`,
+      `update velvet.destination_link set generated_reassessment_sql_body = $1`,
       [
         `select jsonb_build_object('row_id', :row_id::text, 'amount', :amount::integer)::text current_values,
         to_jsonb(d)::text active_values from public.phase1_destination d
@@ -428,7 +428,7 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
       (await db.query('select row_id from public.phase1_destination order by row_id')).rows,
     ).toEqual([{ row_id: 'a' }, { row_id: 'b' }]);
     expect(
-      (await db.query('select count(*) from rawsql_transfer.dirty_key_processing')).rows[0].count,
+      (await db.query('select count(*) from velvet.dirty_key_processing')).rows[0].count,
     ).toBe('3');
   });
   test('a lost work COMMIT response cannot relabel committed success as failed', async () => {
@@ -449,13 +449,13 @@ modes('immutable Black Insert (%s)', (metadataMode) => {
     expect(error.cause).toBe(original);
     expect(error.recoveryErrors).toEqual([]);
     expect(
-      (await db.query('select run_id, run_status, error_message from rawsql_transfer.run')).rows,
+      (await db.query('select run_id, run_status, error_message from velvet.run')).rows,
     ).toEqual([{ run_id: error.runId, run_status: 'succeeded', error_message: null }]);
     expect((await db.query('select row_id from public.phase1_destination')).rows).toEqual([
       { row_id: 'a' },
     ]);
     expect(
-      (await db.query('select processing_status from rawsql_transfer.dirty_key_processing')).rows,
+      (await db.query('select processing_status from velvet.dirty_key_processing')).rows,
     ).toEqual([{ processing_status: 'succeeded' }]);
   });
 });

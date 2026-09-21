@@ -2,12 +2,12 @@
 -- Existing inconsistent history aborts the whole migration; investigate rather than rewrite evidence.
 begin;
 
-alter table rawsql_transfer.work_item add constraint chk_work_item_route_model check (
+alter table velvet.work_item add constraint chk_work_item_route_model check (
   route_type = 'skipped'
   or route_type = transfer_model
 );
 
-alter table rawsql_transfer.work_item add constraint chk_work_item_operation_model check (
+alter table velvet.work_item add constraint chk_work_item_operation_model check (
   (
     not requires_red_transfer
     or transfer_model = 'immutable'
@@ -37,7 +37,7 @@ alter table rawsql_transfer.work_item add constraint chk_work_item_operation_mod
   )
 );
 
-alter table rawsql_transfer.dirty_key_processing add constraint chk_dirty_key_processing_final_result check (
+alter table velvet.dirty_key_processing add constraint chk_dirty_key_processing_final_result check (
   processing_status = 'failed'
   or (
     processing_status = 'skipped'
@@ -49,7 +49,7 @@ alter table rawsql_transfer.dirty_key_processing add constraint chk_dirty_key_pr
   )
 );
 
-alter table rawsql_transfer.lineage add constraint chk_lineage_operation_source_kind check (
+alter table velvet.lineage add constraint chk_lineage_operation_source_kind check (
   (
     transfer_operation = 'black_insert'
     and source_kind = 'transfer_source'

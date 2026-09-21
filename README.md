@@ -4,7 +4,7 @@ Velvet is an experimental SQL-first PostgreSQL transfer-control product.
 
 The initial features register transfer destination definitions and transfer settings for PostgreSQL transfer workflows.
 
-Transfer package tables live under the `rawsql_transfer` schema to avoid collisions with user tables or generic schemas such as `transfer`.
+Transfer package tables live under the `velvet` schema to avoid collisions with user tables or generic schemas such as `transfer`.
 
 ## Development
 
@@ -70,7 +70,7 @@ See the decision for the supported text-key profile, Destination-owned Red SQL, 
 
 ## Transfer Destination Definition
 
-The `rawsql_transfer.destination_definition` table stores:
+The `velvet.destination_definition` table stores:
 
 - the destination table name
 - destination column metadata
@@ -92,7 +92,7 @@ DDL lives in `db/ddl/schema.sql` and `db/ddl/destination_definition.sql`.
 
 ## Transfer Setting
 
-The `rawsql_transfer.setting` table stores the source SQL text, a deterministic source SQL hash, and analysis placeholders.
+The `velvet.setting` table stores the source SQL text, a deterministic source SQL hash, and analysis placeholders.
 Source SQL parsing is intentionally out of scope for the create feature; new rows save `source_sql_analysis_status` as `not_analyzed`.
 
 ## Registration entrypoints

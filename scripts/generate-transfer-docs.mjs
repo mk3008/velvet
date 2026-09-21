@@ -224,7 +224,7 @@ function runTransferMetadataCheck() {
     "--process-dir",
     "docs/processes",
     "--default-schema",
-    "rawsql_transfer",
+    "velvet",
   ]);
   const summary = output.match(/DDL docs metadata check: (\d+) error\(s\), (\d+) warning\(s\)\./);
   const result = {
@@ -586,7 +586,7 @@ run([
   "--dfd-relationship",
   "docs/dfd/relationship.json",
   "--default-schema",
-  "rawsql_transfer",
+  "velvet",
 ]);
 
 writeProductReviewReport(metadataCheck, reviewPlan, aiReviewArtifact);

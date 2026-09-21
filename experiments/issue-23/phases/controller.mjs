@@ -10,9 +10,9 @@ const red=`select row_id from public.scale_red(:row_id::text)`;
 const compare=`select * from public.scale_compare(:row_id::text,:logical_id::text,:amount::numeric,:memo::text,:allocation::text,:role::text,:velvet_active_destination_key::jsonb)`;
 async function query(client,statement,params={}){const b=bind(statement,params,'indexed');return (await client.query(b.text,b.values)).rows;}
 export async function configure(db){
- await query(db,sql`update rawsql_transfer.setting set source_sql_body=:source where setting_id=1`,{source});
- await query(db,sql`update rawsql_transfer.destination_link set generated_insert_transfer_sql_body=:insert,generated_reassessment_sql_body=:compare where setting_id=1`,{insert,compare});
- await query(db,sql`update rawsql_transfer.destination_definition set generated_red_transfer_sql_body=:red where destination_definition_id=1`,{red});
+ await query(db,sql`update velvet.setting set source_sql_body=:source where setting_id=1`,{source});
+ await query(db,sql`update velvet.destination_link set generated_insert_transfer_sql_body=:insert,generated_reassessment_sql_body=:compare where setting_id=1`,{insert,compare});
+ await query(db,sql`update velvet.destination_definition set generated_red_transfer_sql_body=:red where destination_definition_id=1`,{red});
 }
 export async function executeProfile(client,maximum,settingId='1',work){
  let runId, persisted=false;
