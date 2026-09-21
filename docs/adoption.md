@@ -2,13 +2,13 @@
 
 | Dependency                                 | Selected source                                                              | Local use                                                   |
 | ------------------------------------------ | ---------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Alder v0.2, research review knowledge v0.3 | `mk3008/alder` tag `v0.2`, commit `b51c63ea830d6e5a53c63ebed4dc3c5d45879e25` | [Unmodified review knowledge](alder/review-knowledge.md)    |
+| Alder v0.5, research review knowledge v0.3 | `mk3008/alder` tag `v0.5`, commit `90dd8985cc8f4e0391b772bbba570ac8110bf04e` | [Unmodified review knowledge](alder/review-knowledge.md)    |
 | Raw SQL Rules v0.3                         | `mk3008/raw-sql-rules` commit `0804d0e18a5d2aee6c8b9c61265cb632e29e2a6d`     | [Unmodified repository contract](../rules/raw-sql-rules.md) |
 | Serene v0.7.0                              | `github:mk3008/serene#v0.7.0`; resolved commit in `pnpm-lock.yaml`           | Runtime construction/binding and `pnpm audit:sql`           |
 
-Sources: [Alder adoption](https://github.com/mk3008/alder/blob/b51c63ea830d6e5a53c63ebed4dc3c5d45879e25/docs/adoption.md), [review knowledge](https://github.com/mk3008/alder/blob/b51c63ea830d6e5a53c63ebed4dc3c5d45879e25/docs/phase2/review-knowledge-v0.3.md), [Raw SQL Rules](https://github.com/mk3008/raw-sql-rules/blob/0804d0e18a5d2aee6c8b9c61265cb632e29e2a6d/raw-sql-rules.md), [Serene adoption](https://github.com/mk3008/serene/blob/v0.7.0/docs/ai-adoption.md), [security](https://github.com/mk3008/serene/blob/v0.7.0/docs/security.md), [audit coverage](https://github.com/mk3008/serene/blob/v0.7.0/docs/review-coverage.md).
+Sources: [Alder adoption](https://github.com/mk3008/alder/blob/90dd8985cc8f4e0391b772bbba570ac8110bf04e/docs/adoption.md), [review knowledge](https://github.com/mk3008/alder/blob/90dd8985cc8f4e0391b772bbba570ac8110bf04e/docs/phase2/review-knowledge-v0.3.md), [Raw SQL Rules](https://github.com/mk3008/raw-sql-rules/blob/0804d0e18a5d2aee6c8b9c61265cb632e29e2a6d/raw-sql-rules.md), [Serene adoption](https://github.com/mk3008/serene/blob/v0.7.0/docs/ai-adoption.md), [security](https://github.com/mk3008/serene/blob/v0.7.0/docs/security.md), [audit coverage](https://github.com/mk3008/serene/blob/v0.7.0/docs/review-coverage.md).
 
-Alder and Raw SQL Rules are documents, not runtime dependencies. Preserve selected upstream text when updating, and update this provenance record. The final relative evaluation-plan link in the copied Alder knowledge refers to [the upstream evaluation plan](https://github.com/mk3008/alder/blob/b51c63ea830d6e5a53c63ebed4dc3c5d45879e25/docs/evaluation-plan.md#review-knowledge-benchmark-operation-2026-09-11).
+Alder and Raw SQL Rules are documents, not runtime dependencies. Preserve selected upstream text when updating, and update this provenance record. The final relative evaluation-plan link in the copied Alder knowledge refers to [the upstream evaluation plan](https://github.com/mk3008/alder/blob/90dd8985cc8f4e0391b772bbba570ac8110bf04e/docs/evaluation-plan.md#review-knowledge-benchmark-operation-2026-09-11).
 
 Use [Business Design](business-design/README.md) → [Decision Records](decisions/README.md) → implementation / DDL / tests for an Alder review in a separate agent or fresh context. Apply the full knowledge and its stopping conditions; return unresolved business questions to the product owner.
 
@@ -18,6 +18,14 @@ Raw SQL Rules covers executable application SQL. Registration stores SQL as boun
 
 See [verification and the existing DDL blocker](adoption-verification.md) before starting further implementation.
 
-Alder v0.2 includes reasoning-led validation guidance; the local Evaluation decisions section routes it to Velvet recovery and PostgreSQL evaluation. Copied knowledge stays v0.3, byte-identical to the released upstream file (Git blob `1af50d44ce53083ff758b4c9ca7a808bb0568856`). No new local review rules or Business Design authority are introduced.
+Alder v0.5 includes reasoning-led validation guidance; the local Evaluation decisions section routes it to Velvet recovery and PostgreSQL evaluation. Copied knowledge stays v0.3, byte-identical to the released upstream file (Git blob `1af50d44ce53083ff758b4c9ca7a808bb0568856`). No new local review rules or Business Design authority are introduced.
 
 Code-authored identity-backed SQL uses official Serene `materializeTemp` for the historical Issue 23 source snapshot. DB-master stored reviewed SQL remains the explicit [Decision 0013](decisions/0013-product-set-phases.md) boundary: hash/revision proves deployment provenance, not Serene identity or semantic approval. See [the upgrade verification](adoption-v0.2-verification.md) for audit changes and regressions.
+
+## Alder v0.5 Check Item workflow
+
+The current [execute-transfer Check list](alder/execute-transfer-check-items.md) replaces the historical Issue 39/43 views for ongoing review. It preserves IDs, unresolved review states and test-evidence gaps. Historical records remain frozen. The list covers F1–F5 only, not every Velvet feature.
+
+Use [v0.5 adoption](https://github.com/mk3008/alder/blob/90dd8985cc8f4e0391b772bbba570ac8110bf04e/docs/adoption.md), [Check Item traceability](https://github.com/mk3008/alder/blob/90dd8985cc8f4e0391b772bbba570ac8110bf04e/docs/check-item-traceability.md), and [c3](https://github.com/mk3008/alder/blob/90dd8985cc8f4e0391b772bbba570ac8110bf04e/docs/behavior-derivation/candidate-c3.md). v0.5 adoption/release guidance explicitly retires permanent Code/SQL-entry mappings; c3's leftover wording permitting those mappings is not adopted. Maintain Business Design ↔ Check Item ↔ Test; tests verify implementation by execution.
+
+When human review changes meaning, update and human-confirm Business Design first, then regenerate affected Checks and representative test mappings. Keep design revision + list revision + Check ID together. Do not infer human approval from confidence or passing tests. Audit meaning preservation whenever regrouping or regenerating Checks. Optional [functional consideration discovery](https://github.com/mk3008/alder/blob/90dd8985cc8f4e0391b772bbba570ac8110bf04e/docs/behavior-derivation/functional-considerations.md) is available when warranted; it is not a mandatory gate or authority to decide business policy.
