@@ -30,7 +30,7 @@ The product now lives in `mk3008/velvet`. See [repository migration](docs/migrat
 
 ## Review and SQL contracts
 
-Start at [Business Design](docs/business-design/README.md). [Adoption and versions](docs/adoption.md) documents Alder, Raw SQL Rules v0.3 and Serene v0.4.0.
+Start at [Business Design](docs/business-design/README.md). [Adoption and versions](docs/adoption.md) documents Alder, Raw SQL Rules v0.3 and Serene v0.7.0.
 
 Registration SQL uses fixed Serene literals in the INSERT `query.ts` files and `queries/resolve-transfer-destination-definitions.ts`. Names are bound through Serene at `src/adapters/pg`; node-postgres execution and transactions remain application-owned. No generated SQL copy or separately maintained binding map is needed. Current schema remains in `db/ddl/`.
 
@@ -89,6 +89,7 @@ DDL lives in `db/ddl/schema.sql` and `db/ddl/destination_definition.sql`.
 | ----------- | ------------------------------------------------------------------------------------------------------------------- |
 | `immutable` | Add a red-transfer row for the old black row, then add a new black row on update. Add a red-transfer row on delete. |
 | `mutable`   | Directly update an existing transferred row on update. Physically delete the row on delete.                         |
+| `insert_only` | Insert an initial Black when the source row exists and Active Black does not. Once Active Black exists, keep the row unchanged even if the source changes or disappears. |
 
 ## Transfer Setting
 
@@ -117,3 +118,9 @@ Mutable destinations insert an initial Black and keep its Active Black identity 
 A source identity change is old-key disappearance plus new-key appearance (DELETE + INSERT), not a key-moving UPDATE. Mutable and immutable links can run together against the same source snapshot. Date-lower-bound control remains an error for mutable destinations.
 
 Developers supply the link's stored Update/Delete SQL using the [Phase 4 input and return contracts](docs/decisions/0005-phase4-mutable-snapshots.md). Updates and deletes must target the complete Active Black key, affect exactly one row and return its unchanged key. `inserted` still counts Black inserts only; Processing records `black_update` and `physical_delete` separately.
+
+## Insert-only snapshots
+
+`insert_only` uses the ordinary initial Black Insert path, including Active Black, Lineage and `black_insert` Processing. Once Active Black exists, reevaluation completes as `skipped / no_op` before diff comparison; no Red, Update or Delete runs. If neither source nor Active Black exists, it is also no-op; later materialization requires a new Dirty Key.
+
+This supports identity-conversion tables without changing the existing key/mapping or returned-key contracts. See [Phase 5 contracts](docs/decisions/0006-phase5-insert-only-identity-mapping.md) and the [Transfer Execution Process](docs/processes/transfer-execution-process.md).
