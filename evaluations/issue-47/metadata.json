@@ -1,0 +1,57 @@
+{
+  "issue": "https://github.com/mk3008/velvet/issues/47",
+  "targetRevision": "300ba133377cacf2bfd0a475436c3746cc0d3fbf",
+  "protocolCommit": "f48b38477317844953558ead14b1da1ca3508b2a",
+  "protocolTiming": "Committed after evaluator dispatch and before final results; dispatch prompt was fixed at agent creation.",
+  "evaluator": {
+    "agent": "/root/incident_evaluation",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "low",
+    "forkTurns": "none",
+    "prompt": "evaluator-prompt.txt",
+    "promptSha256": "93b0465dfaa830bf3fd181eafff82a62225c3a9bd8b805550d56fd5dbcdb4daf",
+    "promptEncoding": "UTF-8; final LF appended when saved; dispatch message otherwise identical",
+    "scope": "One fresh, explicitly prompted four-case source/history evaluation. Existing repository history and guidance visible. Not a blind or comparative agent-performance run.",
+    "report": "runs/evaluator.md",
+    "navigationLog": "runs/navigation.jsonl",
+    "reportSha256": "d4a6a838792e23f33b9d3917bdf162b3f0962c3789511f72086ea71665c5dbff",
+    "navigationSha256": "08562d19d105da583f37a9119199152853a3e91c11483773d3604e3ada1315df"
+  },
+  "followups": [
+    {
+      "recipient": "/root/incident_evaluation",
+      "message": "Parent committed the exact dispatch prompt + bounded protocol as f48b384 (after your dispatch, before results); product target remains 300ba13. Please ensure report distinguishes configuration captured at Run creation from proof a phase actually ran, and historical master reconstruction from complete replay/root-cause reconstruction. This is an evidence-precision follow-up, not a requested disposition. Record this follow-up in your log for transparency.",
+      "effect": "Evidence-precision steering disclosed; report is not an entirely unassisted one-shot response."
+    }
+  ],
+  "limits": [
+    "No real production incident packet or production runtime evidence supplied.",
+    "No human-time, model-speed, causality, incident-frequency or cross-product effectiveness measurement.",
+    "Navigation log is evaluator-authored, not a platform-exported complete tool transcript.",
+    "Runtime and Business Design changes are outside scope."
+  ],
+  "reviewer": {
+    "agent": "/root/evidence_review",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "low",
+    "forkTurns": "none",
+    "prompt": "reviewer-prompt.txt",
+    "promptSha256": "597237f46ef8ac28f5af329481c4a0774744841a7fff2f0e3443e858bdf89f89",
+    "report": "runs/reviewer.md",
+    "scope": "Independent known-result evidence/scope review, not a second blind evaluation. README/report/navigation SHA-256 values freeze the reviewed inputs.",
+    "reviewedInputs": {
+      "README.md": "d99740839da97c3bb46f17e8283eacfef987b8d21fff707114bc47e925cf0d83",
+      "runs/evaluator.md": "d4a6a838792e23f33b9d3917bdf162b3f0962c3789511f72086ea71665c5dbff",
+      "runs/navigation.jsonl": "08562d19d105da583f37a9119199152853a3e91c11483773d3604e3ada1315df"
+    },
+    "reportSha256": "51aa8207f45c140ba49f3fc7f4ae3333f5b308a76140e3191c7b345855566a61",
+    "result": "No blocking findings; no substantive synthesis correction required."
+  },
+  "publication": {
+    "method": "GitHub connector, because local HTTPS push authentication was unavailable.",
+    "localProtocolCommit": "f48b38477317844953558ead14b1da1ca3508b2a",
+    "publishedProtocolCommit": "4631414a49cd6bdefaa7f9645b3801fe796be165",
+    "protocolTree": "58bfc310608ee66ca3c3989f547ccdb1f882c452",
+    "equivalence": "Local and published protocol trees are identical. Connector publication happened after evaluation; original local protocol timing is reported separately."
+  }
+}
