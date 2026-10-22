@@ -1,17 +1,21 @@
 packages:
   - "packages/*"
 overrides:
-  brace-expansion@^1.1.7: 1.1.18
-  brace-expansion@^2.0.1: 2.1.4
+  brace-expansion@^1.1.7: 1.1.21
+  brace-expansion@^2.0.1: 2.1.7
   esbuild: 0.28.1
-  js-yaml@^3.0.0: 3.15.0
-  js-yaml@^4.0.0: 4.3.0
+  js-yaml@^3.0.0: 3.15.2
+  js-yaml@^4.0.0: 4.3.2
   postcss: 8.5.23
   protobufjs: 7.6.5
-  undici: 7.29.0
+  undici: 7.29.1
   uuid: 11.1.1
-  vite: 6.4.3
-  vitepress>vite: 6.4.3
+  vite: 6.4.4
+  vitepress>vite: 6.4.4
+  brace-expansion@^5.0.0: 5.0.12
+  vitest: 4.1.12
+  source-map-js: 1.2.2
+  '@grpc/grpc-js': 1.14.5
 allowBuilds:
   "@mk3008/serene@https://codeload.github.com/mk3008/serene/tar.gz/284ff8fff0a6170752b22ac9d336a8ee283e48e5": true
   cpu-features: false
